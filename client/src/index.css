@@ -28,6 +28,16 @@ body {
 }
 
 button,
+input {
+  font: inherit;
+}
+
+::selection {
+  background: var(--color-mint);
+  color: var(--color-ink);
+}
+
+button,
 a {
   -webkit-tap-highlight-color: transparent;
 }

@@ -20,7 +20,7 @@ The initial version is a web application focused on universities and undergradua
 * 👨‍🎓 Student admission experiences
 * 🧪 Entry-test preparation resources
 
-> The features above describe the planned product. The current implementation includes the full-stack foundation, domain models, authentication, and student-profile APIs.
+> The features above describe the planned product. The current implementation includes the full-stack foundation, domain models, backend authentication, frontend student authentication, and student-profile onboarding.
 
 ## Tech Stack
 
@@ -51,7 +51,7 @@ The initial version is a web application focused on universities and undergradua
 
 ## Project Status
 
-🚧 **Foundation, domain-model, and authentication/student-profile API milestones complete; core product features are still in development.**
+🚧 **Foundation, domain-model, backend authentication, and frontend student-onboarding milestones are implemented; core admission features are still in development.**
 
 This project is being developed as a **DAE CIT Final Year Project**.
 
@@ -68,10 +68,13 @@ The foundation currently includes:
 * Student registration, login, JWT authentication, and role authorization
 * Owner-only student-profile read and partial-update APIs
 * Centralized request and Mongoose validation errors
+* Responsive registration, login, student dashboard, and profile-onboarding pages
+* Session restoration through `GET /api/auth/me` with access tokens kept in `sessionStorage`
+* Public-only and role-aware protected frontend routes
 
 Refresh tokens, email verification, password recovery, management APIs, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
 
-The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), and the authentication/profile endpoints are documented in [docs/authentication-api.md](docs/authentication-api.md).
+The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), the authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), and the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md).
 
 ## Project Structure
 
@@ -80,11 +83,11 @@ DAE2UNI-Pathway/
 ├── client/                 React and Vite frontend
 │   └── src/
 │       ├── components/     Reusable interface components
-│       ├── context/        React context providers (future)
+│       ├── context/        Authentication state and session restoration
 │       ├── layouts/        Shared page layouts
 │       ├── pages/          Route-level pages
 │       ├── services/       API client modules
-│       └── utils/          Frontend utilities (future)
+│       └── utils/          Validation, navigation, errors, and profile payloads
 ├── docs/                   Project documentation
 ├── server/                 Express and Mongoose backend
 │   └── src/
@@ -198,12 +201,15 @@ Authorization: Bearer <access-token>
 
 See [docs/authentication-api.md](docs/authentication-api.md) for endpoint details, request/response examples, security behavior, and manual testing commands.
 
+The React client provides `/register`, `/login`, `/dashboard`, and `/profile`. Access tokens are kept in `sessionStorage` for this access-token-only milestone; passwords and complete user objects are never stored. Refreshing the same browser tab restores the current user by calling `GET /api/auth/me`. See [docs/frontend-authentication.md](docs/frontend-authentication.md) for route behavior, the security tradeoff, profile onboarding, and browser testing steps.
+
 ## Quality Checks
 
 Run the frontend checks before sharing changes:
 
 ```powershell
 cd client
+npm run check:frontend
 npm run lint
 npm run build
 

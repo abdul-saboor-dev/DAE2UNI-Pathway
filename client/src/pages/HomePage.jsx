@@ -1,4 +1,6 @@
 import HealthStatus from '../components/HealthStatus.jsx'
+import { Link } from 'react-router-dom'
+import useAuth from '../context/useAuth.js'
 
 const pathwaySteps = [
   ['01', 'Discover', 'Explore relevant universities and degree programs.'],
@@ -7,6 +9,8 @@ const pathwaySteps = [
 ]
 
 function HomePage() {
+  const { user } = useAuth()
+
   return (
     <>
       <section className="relative mx-auto grid max-w-7xl gap-14 px-6 pb-20 pt-14 lg:grid-cols-[1.12fr_0.88fr] lg:px-10 lg:pb-28 lg:pt-24">
@@ -26,9 +30,9 @@ function HomePage() {
             DAE2UNI Pathway will help DAE CIT students discover suitable programs, understand admission rules, and plan a confident route into undergraduate study across Punjab.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-4">
-            <span className="rounded-xl bg-forest px-5 py-3 text-sm font-bold text-white shadow-xl shadow-forest/20">
-              Punjab, Pakistan
-            </span>
+            <Link to={user?.role === 'student' ? '/dashboard' : '/register'} className="rounded-xl bg-forest px-5 py-3 text-sm font-bold text-white shadow-xl shadow-forest/20 transition hover:bg-ink focus:outline-none focus-visible:ring-4 focus-visible:ring-leaf/35">
+              {user?.role === 'student' ? 'Open dashboard' : 'Create your pathway'}
+            </Link>
             <span className="text-sm font-medium text-ink/60">Web application · Final Year Project</span>
           </div>
         </div>
@@ -39,13 +43,13 @@ function HomePage() {
             <div className="mb-8 flex items-start justify-between gap-6">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-leaf">Development status</p>
-                <h2 className="mt-2 text-2xl font-bold tracking-tight">Foundation connected</h2>
+                <h2 className="mt-2 text-2xl font-bold tracking-tight">Student access is ready</h2>
               </div>
               <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-mint text-xl" aria-hidden="true">↗</span>
             </div>
             <HealthStatus />
             <p className="mt-6 border-t border-ink/10 pt-5 text-sm leading-6 text-ink/55">
-              Product features such as accounts, eligibility, merit calculations, and university management will arrive in later milestones.
+              Student accounts and profile onboarding are available. Eligibility, merit calculations, and university management remain later milestones.
             </p>
           </div>
         </div>
