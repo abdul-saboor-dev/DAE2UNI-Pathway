@@ -1,5 +1,9 @@
 # Project Documentation
 
-This directory is reserved for DAE2UNI Pathway architecture notes, data-source guidance, API documentation, and final-year-project documentation.
+This directory contains DAE2UNI Pathway architecture notes, data-source guidance, API documentation, and final-year-project documentation.
 
-The current milestone intentionally covers only the full-stack foundation. Product specifications for authentication, university data, eligibility rules, merit formulas, and administrator workflows will be added as those milestones begin.
+## Current Documents
+
+* [Domain model](./domain-model.md) — MongoDB/Mongoose entities, relationships, eligibility rules, merit formulas, admission cycles, and source verification
+
+Authentication, API endpoints, calculation services, administrator workflows, and deployment remain future milestones.

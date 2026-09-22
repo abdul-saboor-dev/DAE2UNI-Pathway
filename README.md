@@ -49,7 +49,7 @@ The initial version is a web application focused on universities and undergradua
 
 ## Project Status
 
-🚧 **Foundation milestone complete; core product features are still in development.**
+🚧 **Foundation and initial domain-model milestones complete; core product features are still in development.**
 
 This project is being developed as a **DAE CIT Final Year Project**.
 
@@ -62,8 +62,11 @@ The foundation currently includes:
 * A database-aware `GET /api/health` endpoint
 * Centralized API not-found and error handling
 * Graceful application startup and shutdown
+* Mongoose domain models for student, university, admission-rule, merit, deadline, and source-verification data
 
-Registration, login, roles, university/program management, eligibility rules, merit calculations, application tracking, and deployment are intentionally not implemented yet.
+Registration, login, role enforcement, management APIs, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
+
+The database relationships and rule structures are documented in [docs/domain-model.md](docs/domain-model.md). Authentication remains a later milestone.
 
 ## Project Structure
 
