@@ -7,5 +7,6 @@ This directory contains DAE2UNI Pathway architecture notes, data-source guidance
 * [Domain model](./domain-model.md) — MongoDB/Mongoose entities, relationships, eligibility rules, merit formulas, admission cycles, and source verification
 * [Authentication and student-profile API](./authentication-api.md) — endpoints, JWT usage, validation, security behavior, examples, and testing
 * [Frontend authentication and student onboarding](./frontend-authentication.md) — browser session behavior, route guards, forms, profile flow, and manual testing
+* [University and program catalogue API](./catalogue-api.md) — administrator CRUD, public browsing, queries, source visibility, integrity safeguards, and testing
 
-University/program management, calculation services, administrator workflows, and deployment remain future milestones.
+Catalogue frontend pages, calculation services, broader administrator workflows, and deployment remain future milestones.

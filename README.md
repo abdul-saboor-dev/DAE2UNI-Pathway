@@ -20,7 +20,7 @@ The initial version is a web application focused on universities and undergradua
 * 👨‍🎓 Student admission experiences
 * 🧪 Entry-test preparation resources
 
-> The features above describe the planned product. The current implementation includes the full-stack foundation, domain models, backend authentication, frontend student authentication, and student-profile onboarding.
+> The features above describe the planned product. The current implementation includes the full-stack foundation, domain models, student authentication/profile onboarding, and backend university/program catalogue APIs.
 
 ## Tech Stack
 
@@ -51,7 +51,7 @@ The initial version is a web application focused on universities and undergradua
 
 ## Project Status
 
-🚧 **Foundation, domain-model, backend authentication, and frontend student-onboarding milestones are implemented; core admission features are still in development.**
+🚧 **Foundation, domain-model, student authentication/onboarding, and backend catalogue milestones are implemented; core admission features are still in development.**
 
 This project is being developed as a **DAE CIT Final Year Project**.
 
@@ -71,10 +71,13 @@ The foundation currently includes:
 * Responsive registration, login, student dashboard, and profile-onboarding pages
 * Session restoration through `GET /api/auth/me` with access tokens kept in `sessionStorage`
 * Public-only and role-aware protected frontend routes
+* Administrator-protected university and undergraduate-program CRUD APIs
+* Public verified/published catalogue browsing with safe search, filters, sorting, and bounded pagination
+* Source-verification visibility rules and relationship-safe catalogue deletion
 
-Refresh tokens, email verification, password recovery, management APIs, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
+Refresh tokens, email verification, password recovery, catalogue frontend pages, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
 
-The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), the authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), and the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md).
+The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md), and catalogue endpoints in [docs/catalogue-api.md](docs/catalogue-api.md).
 
 ## Project Structure
 
@@ -96,7 +99,7 @@ DAE2UNI-Pathway/
 │       ├── middleware/     Express middleware
 │       ├── models/         Mongoose domain models
 │       ├── routes/         API routes
-│       ├── services/       Authentication and profile business logic
+│       ├── services/       Authentication, profile, and catalogue business logic
 │       ├── utils/          Backend utilities
 │       └── validation/     Zod request schemas
 ├── .gitignore
@@ -203,6 +206,10 @@ See [docs/authentication-api.md](docs/authentication-api.md) for endpoint detail
 
 The React client provides `/register`, `/login`, `/dashboard`, and `/profile`. Access tokens are kept in `sessionStorage` for this access-token-only milestone; passwords and complete user objects are never stored. Refreshing the same browser tab restores the current user by calling `GET /api/auth/me`. See [docs/frontend-authentication.md](docs/frontend-authentication.md) for route behavior, the security tradeoff, profile onboarding, and browser testing steps.
 
+## University and Program Catalogue
+
+Administrators can manage universities and programs under `/api/admin/universities` and `/api/admin/programs`. Public, read-only browsing is available at `/api/universities` and `/api/programs`; public results are limited to verified, published records. Lists provide allowlisted filters and sorting plus bounded pagination. See [docs/catalogue-api.md](docs/catalogue-api.md) for field contracts, visibility rules, safe deletion behavior, and PowerShell examples.
+
 ## Quality Checks
 
 Run the frontend checks before sharing changes:
@@ -215,6 +222,7 @@ npm run build
 
 cd ..\server
 npm run check:models
+npm run check:catalogue
 ```
 
 ## Git Workflow
