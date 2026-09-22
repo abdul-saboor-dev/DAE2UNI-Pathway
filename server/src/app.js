@@ -1,6 +1,9 @@
 import cors from 'cors'
 import express from 'express'
+import adminRoutes from './routes/adminRoutes.js'
+import authRoutes from './routes/authRoutes.js'
 import healthRoutes from './routes/healthRoutes.js'
+import studentRoutes from './routes/studentRoutes.js'
 import { errorHandler, notFoundHandler } from './middleware/errorMiddleware.js'
 
 const app = express()
@@ -14,6 +17,9 @@ app.use(
 app.use(express.json({ limit: '10kb' }))
 
 app.use('/api/health', healthRoutes)
+app.use('/api/auth', authRoutes)
+app.use('/api/student', studentRoutes)
+app.use('/api/admin', adminRoutes)
 
 app.use(notFoundHandler)
 app.use(errorHandler)

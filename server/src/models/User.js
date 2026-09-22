@@ -1,9 +1,14 @@
 import mongoose, { Schema } from 'mongoose'
 import { baseSchemaOptions } from './schemas/schemaOptions.js'
 
+function removeSensitiveFields(_document, returnedObject) {
+  delete returnedObject.passwordHash
+  return returnedObject
+}
+
 const userSchema = new Schema(
   {
-    fullName: {
+    name: {
       type: String,
       required: true,
       trim: true,
@@ -18,9 +23,16 @@ const userSchema = new Schema(
       maxlength: 254,
       match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Enter a valid email address.'],
     },
+    passwordHash: {
+      type: String,
+      required: true,
+      select: false,
+      minlength: 60,
+      maxlength: 60,
+    },
     role: {
       type: String,
-      enum: ['student', 'administrator'],
+      enum: ['student', 'admin'],
       default: 'student',
       required: true,
     },
@@ -32,7 +44,11 @@ const userSchema = new Schema(
     },
     lastLoginAt: Date,
   },
-  baseSchemaOptions,
+  {
+    ...baseSchemaOptions,
+    toJSON: { virtuals: true, transform: removeSensitiveFields },
+    toObject: { virtuals: true, transform: removeSensitiveFields },
+  },
 )
 
 userSchema.index({ email: 1 }, { unique: true })

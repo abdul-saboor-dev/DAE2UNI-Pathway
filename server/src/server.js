@@ -2,15 +2,14 @@ import 'dotenv/config'
 import mongoose from 'mongoose'
 import app from './app.js'
 import connectDatabase from './config/database.js'
+import validateEnvironment from './config/environment.js'
 
 const port = Number(process.env.PORT) || 5000
 let httpServer
 let isShuttingDown = false
 
 async function startServer() {
-  if (!process.env.MONGODB_URI) {
-    throw new Error('MONGODB_URI is not configured. Copy .env.example to .env.')
-  }
+  validateEnvironment()
 
   await connectDatabase(process.env.MONGODB_URI)
 

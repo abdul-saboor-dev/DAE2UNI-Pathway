@@ -3,10 +3,9 @@ import { baseSchemaOptions } from './schemas/schemaOptions.js'
 
 const marksSchema = new Schema(
   {
-    totalMarks: { type: Number, required: true, min: 1 },
+    totalMarks: { type: Number, min: 1 },
     obtainedMarks: {
       type: Number,
-      required: true,
       min: 0,
       validate: {
         validator(value) {

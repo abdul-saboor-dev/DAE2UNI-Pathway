@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import bcrypt from 'bcryptjs'
 import mongoose from 'mongoose'
 import {
   AdmissionCycle,
@@ -25,11 +26,14 @@ const source = {
   verificationStatus: 'pending_review',
 }
 
+const validationPasswordHash = await bcrypt.hash('ValidationPass1', 4)
+
 const documents = [
   new User({
     _id: ids.user,
-    fullName: 'Model Validation Student',
+    name: 'Model Validation Student',
     email: 'student@example.com',
+    passwordHash: validationPasswordHash,
   }),
   new StudentProfile({
     user: ids.user,
@@ -210,6 +214,7 @@ await assert.rejects(invalidCompleteProfile.validate(), /matric\.boardName is re
 const draftProfile = new StudentProfile({
   user: new mongoose.Types.ObjectId(),
   profileStatus: 'draft',
+  dae: { marks: { totalMarks: 3450 } },
 })
 
 await draftProfile.validate()

@@ -20,7 +20,7 @@ The initial version is a web application focused on universities and undergradua
 * 👨‍🎓 Student admission experiences
 * 🧪 Entry-test preparation resources
 
-> The features above describe the planned product. The current milestone provides only the full-stack foundation and health-check workflow.
+> The features above describe the planned product. The current implementation includes the full-stack foundation, domain models, authentication, and student-profile APIs.
 
 ## Tech Stack
 
@@ -39,7 +39,9 @@ The initial version is a web application focused on universities and undergradua
 * Node.js
 * Express.js
 * REST API
-* JWT and bcryptjs (planned)
+* JWT authentication
+* bcryptjs password hashing
+* Zod request validation
 
 ### Database
 
@@ -49,7 +51,7 @@ The initial version is a web application focused on universities and undergradua
 
 ## Project Status
 
-🚧 **Foundation and initial domain-model milestones complete; core product features are still in development.**
+🚧 **Foundation, domain-model, and authentication/student-profile API milestones complete; core product features are still in development.**
 
 This project is being developed as a **DAE CIT Final Year Project**.
 
@@ -63,10 +65,13 @@ The foundation currently includes:
 * Centralized API not-found and error handling
 * Graceful application startup and shutdown
 * Mongoose domain models for student, university, admission-rule, merit, deadline, and source-verification data
+* Student registration, login, JWT authentication, and role authorization
+* Owner-only student-profile read and partial-update APIs
+* Centralized request and Mongoose validation errors
 
-Registration, login, role enforcement, management APIs, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
+Refresh tokens, email verification, password recovery, management APIs, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
 
-The database relationships and rule structures are documented in [docs/domain-model.md](docs/domain-model.md). Authentication remains a later milestone.
+The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), and the authentication/profile endpoints are documented in [docs/authentication-api.md](docs/authentication-api.md).
 
 ## Project Structure
 
@@ -86,9 +91,11 @@ DAE2UNI-Pathway/
 │       ├── config/         Database and application configuration
 │       ├── controllers/    Request handlers
 │       ├── middleware/     Express middleware
-│       ├── models/         Mongoose models (future)
+│       ├── models/         Mongoose domain models
 │       ├── routes/         API routes
-│       └── utils/          Backend utilities (future)
+│       ├── services/       Authentication and profile business logic
+│       ├── utils/          Backend utilities
+│       └── validation/     Zod request schemas
 ├── .gitignore
 ├── LICENSE
 └── README.md
@@ -129,9 +136,11 @@ The development defaults are:
 PORT=5000
 MONGODB_URI=mongodb://127.0.0.1:27017/dae2uni
 CLIENT_URL=http://localhost:5173
+JWT_SECRET=replace-with-a-long-random-secret-at-least-32-characters
+JWT_EXPIRES_IN=1d
 ```
 
-The local `.env` file is ignored by Git. Never commit real credentials or production connection strings.
+Replace `JWT_SECRET` locally with a cryptographically random value of at least 32 varied characters; the example value is deliberately rejected at startup. `JWT_EXPIRES_IN` must use a positive duration with a unit, such as `15m`, `1h`, or `1d`. The local `.env` file is ignored by Git. Never commit real credentials, secrets, or production connection strings.
 
 ## Start MongoDB
 
@@ -179,6 +188,16 @@ Invoke-RestMethod http://localhost:5000/api/health
 
 A healthy response reports the API as `up` and MongoDB as `connected`.
 
+## Authentication and Student Profiles
+
+The backend exposes registration, login, current-user, and owner-only student-profile endpoints. Protected requests use this header:
+
+```http
+Authorization: Bearer <access-token>
+```
+
+See [docs/authentication-api.md](docs/authentication-api.md) for endpoint details, request/response examples, security behavior, and manual testing commands.
+
 ## Quality Checks
 
 Run the frontend checks before sharing changes:
@@ -187,6 +206,9 @@ Run the frontend checks before sharing changes:
 cd client
 npm run lint
 npm run build
+
+cd ..\server
+npm run check:models
 ```
 
 ## Git Workflow
