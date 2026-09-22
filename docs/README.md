@@ -8,5 +8,6 @@ This directory contains DAE2UNI Pathway architecture notes, data-source guidance
 * [Authentication and student-profile API](./authentication-api.md) — endpoints, JWT usage, validation, security behavior, examples, and testing
 * [Frontend authentication and student onboarding](./frontend-authentication.md) — browser session behavior, route guards, forms, profile flow, and manual testing
 * [University and program catalogue API](./catalogue-api.md) — administrator CRUD, public browsing, queries, source visibility, integrity safeguards, and testing
+* [Public catalogue frontend](./frontend-catalogue.md) — routes, URL-synchronized discovery, API integration, accessibility, responsive behavior, security, and testing
 
-Catalogue frontend pages, calculation services, broader administrator workflows, and deployment remain future milestones.
+Calculation services, broader administrator workflows, and deployment remain future milestones.

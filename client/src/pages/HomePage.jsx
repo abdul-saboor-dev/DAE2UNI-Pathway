@@ -35,6 +35,11 @@ function HomePage() {
             </Link>
             <span className="text-sm font-medium text-ink/60">Web application · Final Year Project</span>
           </div>
+          <div className="mt-5 flex flex-wrap gap-3 text-sm font-bold">
+            <Link to="/universities" className="rounded-lg text-forest underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">Browse universities</Link>
+            <span aria-hidden="true" className="text-ink/25">·</span>
+            <Link to="/programs" className="rounded-lg text-forest underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">Browse programs</Link>
+          </div>
         </div>
 
         <div className="relative flex items-center">
@@ -43,13 +48,13 @@ function HomePage() {
             <div className="mb-8 flex items-start justify-between gap-6">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-leaf">Development status</p>
-                <h2 className="mt-2 text-2xl font-bold tracking-tight">Student access is ready</h2>
+                <h2 className="mt-2 text-2xl font-bold tracking-tight">Public catalogue is ready</h2>
               </div>
               <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-mint text-xl" aria-hidden="true">↗</span>
             </div>
             <HealthStatus />
             <p className="mt-6 border-t border-ink/10 pt-5 text-sm leading-6 text-ink/55">
-              Student accounts and profile onboarding are available. Eligibility, merit calculations, and university management remain later milestones.
+              University and program browsing, student accounts, and profile onboarding are available. Eligibility and merit calculations remain later milestones.
             </p>
           </div>
         </div>

@@ -28,8 +28,13 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
+}
+
+:focus-visible {
+  scroll-margin: 1rem;
 }
 
 ::selection {

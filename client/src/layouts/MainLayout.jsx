@@ -26,6 +26,8 @@ function MainLayout() {
         </Link>
         <nav className="flex flex-wrap items-center justify-end gap-1" aria-label="Main navigation">
           <NavLink to="/" end className={navigationClass}>Home</NavLink>
+          <NavLink to="/universities" className={navigationClass}>Universities</NavLink>
+          <NavLink to="/programs" className={navigationClass}>Programs</NavLink>
           {!isLoading && !user && (
             <>
               <NavLink to="/login" className={navigationClass}>Login</NavLink>
