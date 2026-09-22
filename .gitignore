@@ -141,3 +141,20 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Build output
+build/
+dist/
+**/build/
+**/dist/
+
+# Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini
