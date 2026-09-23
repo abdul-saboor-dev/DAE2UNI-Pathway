@@ -41,8 +41,11 @@ function MainLayout() {
               <button type="button" onClick={handleLogout} className="ml-1 rounded-lg border border-forest/20 bg-white/60 px-4 py-2 text-sm font-black text-forest transition hover:bg-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">Logout</button>
             </>
           )}
-          {!isLoading && user?.role !== 'student' && user && (
-            <button type="button" onClick={handleLogout} className="rounded-lg border border-forest/20 bg-white/60 px-4 py-2 text-sm font-black text-forest">Logout</button>
+          {!isLoading && user?.role === 'admin' && (
+            <>
+              <NavLink to="/admin" className={navigationClass}>Admin</NavLink>
+              <button type="button" onClick={handleLogout} className="rounded-lg border border-forest/20 bg-white/60 px-4 py-2 text-sm font-black text-forest">Logout</button>
+            </>
           )}
         </nav>
         </div>

@@ -20,7 +20,7 @@ The initial version is a web application focused on universities and undergradua
 * 👨‍🎓 Student admission experiences
 * 🧪 Entry-test preparation resources
 
-> The features above describe the planned product. The current implementation includes the full-stack foundation, domain models, student authentication/profile onboarding, and public university/program catalogue APIs and pages.
+> The features above describe the planned product. The current implementation includes the full-stack foundation, domain models, student authentication/profile onboarding, public catalogue APIs/pages, and an administrator catalogue workspace.
 
 ## Tech Stack
 
@@ -51,7 +51,7 @@ The initial version is a web application focused on universities and undergradua
 
 ## Project Status
 
-🚧 **Foundation, domain-model, student authentication/onboarding, and public catalogue milestones are implemented; core admission features are still in development.**
+🚧 **Foundation, domain-model, student authentication/onboarding, public catalogue, and administrator catalogue-management milestones are implemented; core admission features are still in development.**
 
 This project is being developed as a **DAE CIT Final Year Project**.
 
@@ -76,10 +76,12 @@ The foundation currently includes:
 * Source-verification visibility rules and relationship-safe catalogue deletion
 * Public university/program discovery pages with URL-synchronized search, filters, sorting, and pagination
 * Responsive detail pages with official-source attribution and related programs
+* Administrator dashboard and responsive university, campus, and program management forms
+* Manual, password-safe administrator provisioning command (never run automatically)
 
-Refresh tokens, email verification, password recovery, administrator catalogue pages, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
+Refresh tokens, email verification, password recovery, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
 
-The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md), catalogue endpoints in [docs/catalogue-api.md](docs/catalogue-api.md), and public catalogue pages in [docs/frontend-catalogue.md](docs/frontend-catalogue.md).
+The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md), catalogue endpoints in [docs/catalogue-api.md](docs/catalogue-api.md), public catalogue pages in [docs/frontend-catalogue.md](docs/frontend-catalogue.md), and the administrator workflow in [docs/admin-catalogue-frontend.md](docs/admin-catalogue-frontend.md).
 
 ## Project Structure
 
@@ -215,6 +217,8 @@ Administrators can manage universities and programs under `/api/admin/universiti
 
 The React client exposes public discovery routes at `/universities`, `/universities/:universityIdentifier`, `/programs`, and `/programs/:programId`. Search, filters, sorting, and pagination are synchronized with shareable URL parameters. See [docs/frontend-catalogue.md](docs/frontend-catalogue.md) for interaction, accessibility, security, and testing details.
 
+The administrator workspace lives at `/admin`, with university and program management under `/admin/universities` and `/admin/programs`. It uses the existing protected catalogue APIs and never provisions an admin automatically. See [docs/admin-catalogue-frontend.md](docs/admin-catalogue-frontend.md) for the complete route and field workflow, manual provisioning, and current limitations.
+
 ## Quality Checks
 
 Run the frontend checks before sharing changes:
@@ -223,11 +227,13 @@ Run the frontend checks before sharing changes:
 cd client
 npm run check:frontend
 npm run check:catalogue
+npm run check:admin-frontend
 npm run lint
 npm run build
 
 cd ..\server
 npm run check:models
+npm run check:security
 npm run check:catalogue
 ```
 

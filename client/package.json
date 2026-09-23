@@ -8,6 +8,7 @@
     "build": "vite build",
     "check:frontend": "node scripts/validateFrontend.js",
     "check:catalogue": "node scripts/validateCatalogueFrontend.js",
+    "check:admin-frontend": "node scripts/validateAdminFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

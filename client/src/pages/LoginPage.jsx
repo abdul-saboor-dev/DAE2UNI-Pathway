@@ -7,7 +7,7 @@ import TextField from '../components/TextField.jsx'
 import useAuth from '../context/useAuth.js'
 import { getApiFieldErrors, getApiErrorMessage } from '../utils/apiErrors.js'
 import { validateLogin } from '../utils/authValidation.js'
-import { getSafeDestination } from '../utils/navigation.js'
+import { getRoleDestination } from '../utils/navigation.js'
 
 function LoginPage() {
   const { login, authError, clearAuthError } = useAuth()
@@ -36,8 +36,8 @@ function LoginPage() {
 
     setIsSubmitting(true)
     try {
-      await login({ email: values.email.trim().toLowerCase(), password: values.password })
-      navigate(getSafeDestination(location.state?.from), { replace: true })
+      const user = await login({ email: values.email.trim().toLowerCase(), password: values.password })
+      navigate(getRoleDestination(location.state?.from, user.role), { replace: true })
     } catch (error) {
       setFieldErrors(getApiFieldErrors(error))
       setFormError(getApiErrorMessage(error, 'Unable to sign in right now.'))
@@ -48,7 +48,7 @@ function LoginPage() {
 
   return (
     <AuthShell
-      eyebrow="Student access"
+      eyebrow="Account access"
       title="Welcome back"
       description="Sign in to continue your DAE profile and keep your university pathway in one place."
       aside={<p className="mt-8 rounded-2xl border border-forest/10 bg-mint/45 p-4 text-sm leading-6 text-forest">Your session stays in this browser tab and is cleared when the tab session ends.</p>}
@@ -56,7 +56,7 @@ function LoginPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         <div>
           <h2 className="text-2xl font-black tracking-tight">Sign in</h2>
-          <p className="mt-1 text-sm text-ink/55">Use the email and password for your student account.</p>
+          <p className="mt-1 text-sm text-ink/55">Use your DAE2UNI account email and password.</p>
         </div>
         <FormAlert message={formError || authError} />
         <TextField

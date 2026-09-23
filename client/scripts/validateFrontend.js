@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { validateLogin, validateRegistration } from '../src/utils/authValidation.js'
-import { getSafeDestination } from '../src/utils/navigation.js'
+import { getRoleDestination, getSafeDestination } from '../src/utils/navigation.js'
 import {
   buildProfilePayload,
   emptyProfileForm,
@@ -39,6 +39,13 @@ check(getSafeDestination('https://example.com') === '/dashboard', 'external redi
 check(getSafeDestination('//example.com') === '/dashboard', 'protocol-relative redirect')
 check(getSafeDestination('/login') === '/dashboard', 'authentication loop redirect')
 check(getSafeDestination('/\\example.com') === '/dashboard', 'backslash redirect')
+check(getSafeDestination('/%2f%2fexample.com') === '/dashboard', 'encoded external redirect')
+check(getSafeDestination('/%5cexample.com') === '/dashboard', 'encoded backslash redirect')
+check(getSafeDestination('/%252fexample.com') === '/dashboard', 'double-encoded external redirect')
+check(getSafeDestination('/admin/universities?search=computing%2FIT') === '/admin/universities?search=computing%2FIT', 'encoded filter value retained')
+check(getRoleDestination('/admin/programs/new', 'admin') === '/admin/programs/new', 'administrator intended route')
+check(getRoleDestination('/admin/programs/new', 'student') === '/unauthorized', 'student cannot inherit administrator route')
+check(getRoleDestination('//example.com', 'admin') === '/admin', 'administrator external redirect rejected')
 
 const form = {
   ...emptyProfileForm,

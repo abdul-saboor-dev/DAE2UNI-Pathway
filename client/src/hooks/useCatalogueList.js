@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   catalogueApiParams,
@@ -8,6 +8,7 @@ import {
 
 export default function useCatalogueList({ definition, load, pageSize = 9 }) {
   const [searchParams, setSearchParams] = useSearchParams()
+  const latestParams = useRef(searchParams)
   const parsed = useMemo(
     () => parseCatalogueQuery(searchParams, definition),
     [definition, searchParams],
@@ -16,6 +17,8 @@ export default function useCatalogueList({ definition, load, pageSize = 9 }) {
   const [retryKey, setRetryKey] = useState(0)
   const [state, setState] = useState({ status: 'loading', items: [], pagination: null })
   const normalizedQuery = parsed.normalized.toString()
+
+  useEffect(() => { latestParams.current = searchParams }, [searchParams])
 
   useEffect(() => {
     if (searchParams.toString() !== normalizedQuery) {
@@ -29,14 +32,15 @@ export default function useCatalogueList({ definition, load, pageSize = 9 }) {
 
   const setQueryValue = useCallback((key, value, options = {}) => {
     const next = setCatalogueQueryValue(
-      searchParams,
+      latestParams.current,
       definition,
       key,
       value,
       options.resetPage !== false,
     )
+    latestParams.current = next
     setSearchParams(next, { replace: options.replace === true })
-  }, [definition, searchParams, setSearchParams])
+  }, [definition, setSearchParams])
 
   useEffect(() => {
     const trimmed = searchInput.trim()
@@ -75,7 +79,9 @@ export default function useCatalogueList({ definition, load, pageSize = 9 }) {
 
   const clearFilters = useCallback(() => {
     setSearchInput('')
-    setSearchParams(new URLSearchParams())
+    const empty = new URLSearchParams()
+    latestParams.current = empty
+    setSearchParams(empty)
   }, [setSearchParams])
 
   return {

@@ -1,15 +1,21 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import useAuth from '../context/useAuth.js'
 import LoadingScreen from './LoadingScreen.jsx'
+import { getRoleDestination } from '../utils/navigation.js'
 
 export function PublicOnlyRoute() {
   const { user, isLoading } = useAuth()
+  const location = useLocation()
 
   if (isLoading) return <LoadingScreen label="Restoring your session…" />
   if (user) {
-    return <Navigate to={user.role === 'student' ? '/dashboard' : '/unauthorized'} replace />
+    return <Navigate to={getRoleDestination(location.state?.from, user.role)} replace />
   }
   return <Outlet />
+}
+
+export function AdminRouteGuard() {
+  return <ProtectedRoute allowedRoles={['admin']} />
 }
 
 export function ProtectedRoute({ allowedRoles }) {
