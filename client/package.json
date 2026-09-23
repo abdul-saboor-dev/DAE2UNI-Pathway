@@ -9,6 +9,8 @@
     "check:frontend": "node scripts/validateFrontend.js",
     "check:catalogue": "node scripts/validateCatalogueFrontend.js",
     "check:admin-frontend": "node scripts/validateAdminFrontend.js",
+    "check:setup-frontend": "node scripts/validateAdminSetupFrontend.js",
+    "check:roles-frontend": "node scripts/validateRoleManagementFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

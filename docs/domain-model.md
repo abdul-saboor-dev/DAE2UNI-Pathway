@@ -37,7 +37,7 @@ erDiagram
 
 | Model | Responsibility |
 | --- | --- |
-| `User` | Basic person identity, role, and account lifecycle. It intentionally has no password or authentication behavior yet. |
+| `User` | Person identity, bcrypt password hash, account lifecycle, and `owner`/`co_owner`/`admin`/`student` role. Unique partial indexes protect the single permanent Owner; sensitive Owner/audit fields are not serialized. |
 | `StudentProfile` | DAE CIT, Matric, domicile, and preference data used as inputs to eligibility and merit calculations. Drafts may be partial; completion enforces all calculation inputs. Percentages are derived from marks to prevent inconsistent values. |
 | `University` | Punjab institution identity, sector, campuses, contact information, publication state, and official-source summary. |
 | `Program` | A university's undergraduate offering, credential, duration, campus availability, and official-source summary. |

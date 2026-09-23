@@ -6,7 +6,7 @@ All requests and responses use JSON. Success responses use `{ "status": "success
 
 ## Visibility and trust rules
 
-Administrator endpoints return record status, timestamps, campus identifiers, and the compact source-verification reference needed for management. They require a valid access token and a user whose current database role is `admin`.
+Administrator endpoints return record status, timestamps, campus identifiers, and the compact source-verification reference needed for management. They require a valid access token and an active user whose current database role is `owner`, `co_owner`, or `admin`. These roles have identical catalogue content permissions; only role-management powers differ.
 
 Public endpoints return only records where both conditions are true:
 
@@ -25,7 +25,7 @@ Send the access token to every `/api/admin/*` endpoint:
 Authorization: Bearer <access-token>
 ```
 
-Missing or invalid authentication returns `401`. An authenticated non-administrator returns `403`. Public routes need no token.
+Missing or invalid authentication returns `401`. Students receive `403`; public routes need no token. The current database role/status, not JWT role claims, governs access. See [role management](./role-management.md).
 
 ## Administrator endpoints
 

@@ -1,20 +1,20 @@
 import { z } from 'zod'
 import { requestSchema } from './commonValidation.js'
 
-const nameSchema = z
+export const nameSchema = z
   .string({ error: 'Name is required.' })
   .trim()
   .min(2, 'Name must contain at least 2 characters.')
   .max(120, 'Name cannot exceed 120 characters.')
 
-const emailSchema = z
+export const emailSchema = z
   .string({ error: 'Email is required.' })
   .trim()
   .toLowerCase()
   .email('Enter a valid email address.')
   .max(254, 'Email cannot exceed 254 characters.')
 
-const passwordSchema = z
+export const passwordSchema = z
   .string({ error: 'Password is required.' })
   .min(8, 'Password must contain at least 8 characters.')
   .max(72, 'Password cannot exceed 72 characters.')

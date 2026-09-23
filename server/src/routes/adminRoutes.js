@@ -27,12 +27,23 @@ import {
   updateUniversityRequestSchema,
 } from '../validation/catalogueValidation.js'
 import { emptyRequestSchema } from '../validation/commonValidation.js'
+import { CONTENT_MANAGER_ROLES } from '../utils/roles.js'
+import { OWNER_ONLY_ROLES, ROLE_MANAGER_ROLES } from '../utils/roles.js'
+import { grantCoOwnerAccess, listAdministrators, promote, revoke, revokeCoOwnerAccess } from '../controllers/teamController.js'
+import { teamThrottle } from '../middleware/teamThrottle.js'
+import { changeCoOwnerSchema, listTeamSchema, promoteStudentSchema, revokeAdminSchema } from '../validation/teamValidation.js'
 
 const router = Router()
 
-router.use(authenticate, authorize('admin'))
+router.use(authenticate, authorize(...CONTENT_MANAGER_ROLES))
 
 router.get('/ping', validateRequest(emptyRequestSchema), getAdminPing)
+
+router.get('/administrators', authorize(...ROLE_MANAGER_ROLES), validateRequest(listTeamSchema), listAdministrators)
+router.post('/administrators/promote', authorize(...ROLE_MANAGER_ROLES), teamThrottle, validateRequest(promoteStudentSchema), promote)
+router.post('/administrators/:userId/revoke', authorize(...ROLE_MANAGER_ROLES), teamThrottle, validateRequest(revokeAdminSchema), revoke)
+router.post('/administrators/:userId/grant-co-owner', authorize(...OWNER_ONLY_ROLES), teamThrottle, validateRequest(changeCoOwnerSchema), grantCoOwnerAccess)
+router.post('/administrators/:userId/revoke-co-owner', authorize(...OWNER_ONLY_ROLES), teamThrottle, validateRequest(changeCoOwnerSchema), revokeCoOwnerAccess)
 
 router
   .route('/universities')

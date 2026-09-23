@@ -13,8 +13,9 @@ This local milestone adds a separate administrator workspace for managing the ex
 | `/admin/programs` | Search, filter, sort, page, edit, and delete programs |
 | `/admin/programs/new` | Create a program |
 | `/admin/programs/:programId/edit` | Edit a program |
+| `/admin/administrators` | Owner/Co-Owner team management, search, and role changes |
 
-The route guard waits for the session restoration request (`GET /api/auth/me`). Unauthenticated visitors go to login with an internal intended destination. Students go to `/unauthorized`. After a successful admin login, the admin dashboard (or safe intended route) opens. These frontend checks are for navigation only: every admin API request still requires a Bearer token and the backend checks the account's current database role/status. Public catalogue requests remain token-free. Access tokens are retained only in `sessionStorage`; no JWT claims are decoded to decide a role.
+The route guard waits for the session restoration request (`GET /api/auth/me`). Unauthenticated visitors go to login with an internal intended destination. Students go to `/unauthorized`. Owner, Co-Owner, and Admin have the same catalogue content access; only Owner and Co-Owner see `/admin/administrators`. After login, the safe intended route opens. These frontend checks are for navigation only: every admin API request still requires a Bearer token and the backend checks the account's current database role/status. Public catalogue requests remain token-free. Access tokens are retained only in `sessionStorage`; no JWT claims are decoded to decide a role. See [role management](./role-management.md) for transitions and the team API.
 
 ## Dashboard
 
@@ -38,30 +39,14 @@ Admin lists use the backend's allowlisted search, city, institution, credential,
 
 Native controls, visible focus states, labelled fields/fieldsets, live loading/error text, responsive record cards, mobile admin navigation, and a native modal with focus return are used. No HTML from API responses is interpreted. Do not paste secrets, tokens, or passwords into form fields.
 
-## First administrator provisioning
+## First Owner setup and recovery
 
-Public registration remains student-only. No default admin is created. Run the manual script from `server/` with MongoDB running and a valid local `MONGODB_URI` in ignored `.env`:
-
-```powershell
-cd server
-$securePassword = Read-Host 'New administrator password' -AsSecureString
-$plainPassword = [System.Net.NetworkCredential]::new('', $securePassword).Password
-try {
-  $env:DAE2UNI_ADMIN_PASSWORD = $plainPassword
-  npm run provision:admin -- 'Administrator Name' 'admin@example.invalid'
-} finally {
-  Remove-Item Env:DAE2UNI_ADMIN_PASSWORD -ErrorAction SilentlyContinue
-  $plainPassword = $null
-  $securePassword.Dispose()
-}
-```
-
-Replace the example name and email with your own values; the example domain is not a usable account. The password is never a command-line argument. The script enforces the same name/email/password policy as registration, hashes with bcrypt cost 12, creates only an active `admin`, rejects an existing email without promotion or overwrite, prints no credentials, and disconnects from MongoDB. For deployment, use a secure process environment/secret manager instead of checking credentials into `.env` or a script. Run provisioning deliberately; it is not part of startup or tests.
+The browser flow at `/setup/admin` creates the unique permanent Owner, not a regular Admin. Public registration remains Student-only; Owner and Co-Owner later promote existing Students to Admin. The retained CLI is restricted to explicit recovery of the existing exact Owner, plus a deliberately confirmed migration of one exact active legacy Admin if a legacy database has no Owner. It never creates a second Owner or default credentials. See [First Owner setup](./first-administrator-setup.md) for local/deployed steps, the hidden PowerShell password prompt, backup advice, and both CLI modes.
 
 ## Verification
 
-From `client/`, run `npm run check:admin-frontend`, `npm run lint`, and `npm run build`. Existing frontend safeguards remain available through `check:frontend` and `check:catalogue`. The API's own role, validation, and integrity checks are exercised by `npm run check:catalogue` in `server/`.
+From `client/`, run `npm run check:admin-frontend`, `npm run check:roles-frontend`, `npm run lint`, and `npm run build`. Existing frontend safeguards remain available through `check:frontend`, `check:catalogue`, and `check:setup-frontend`. The API's own role, validation, and integrity checks are exercised by `npm run check:catalogue`, `npm run check:setup`, and `npm run check:roles` in `server/`.
 
 The server also provides `npm run check:security`, a repeatable authentication/authorization regression harness with temporary users and profiles removed in `finally`.
 
-Current limits: no admin controls for eligibility rules, merit formulas, entry tests, admission cycles, verification history, or admissions research. Optional API text fields cannot be explicitly cleared through the existing update contract; editing supplied values is supported. No administrator account is created automatically.
+Current limits: no admin controls for eligibility rules, merit formulas, entry tests, admission cycles, verification-history UI, or admissions research. Optional API text fields cannot be explicitly cleared through the existing update contract; editing supplied values is supported. No account is created automatically.

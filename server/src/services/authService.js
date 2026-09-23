@@ -5,11 +5,11 @@ import ApiError from '../utils/ApiError.js'
 import { signAccessToken } from '../utils/jwt.js'
 import toSafeUser from '../utils/safeUser.js'
 
-const BCRYPT_ROUNDS = 12
+export const BCRYPT_ROUNDS = 12
 const INVALID_CREDENTIALS_MESSAGE = 'Email or password is incorrect.'
 const dummyPasswordHash = bcrypt.hash(randomBytes(32).toString('hex'), BCRYPT_ROUNDS)
 
-function normalizeEmail(email) {
+export function normalizeEmail(email) {
   return email.trim().toLowerCase()
 }
 

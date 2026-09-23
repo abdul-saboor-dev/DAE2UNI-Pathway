@@ -19,10 +19,15 @@ The client removes the token when a protected request reports an invalid or expi
 | `/login` | Signed-out only | Authenticate an existing account |
 | `/dashboard` | Authenticated student | Account and profile status |
 | `/profile` | Authenticated student | Draft/complete profile onboarding |
+| `/setup/admin` | Public one-time setup | Create the permanent Owner when no elevated account exists |
+| `/admin` | Owner, Co-Owner, Admin | Content-management dashboard |
+| `/admin/administrators` | Owner, Co-Owner | Manage Admins; only Owner controls Co-Owners |
 | `/unauthorized` | Public | Role-aware access denial |
 | `*` | Public | Not-found page |
 
 Protected navigation preserves an internal intended destination. Redirect targets must begin with one `/`, cannot contain backslashes, and cannot point back to login or registration, which prevents external/open redirects and authentication loops.
+
+Owner, Co-Owner, and Admin receive the same content-management access. These frontend guards only guide navigation; protected APIs recheck current database-backed role and status. See [role management](./role-management.md).
 
 ## Registration and Login
 

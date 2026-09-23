@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import useAuth from '../context/useAuth.js'
+import { canManageRoles } from '../utils/roles.js'
 
 const navClass = ({ isActive }) => `block rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 ${isActive ? 'bg-teal-100 text-slate-950' : 'text-slate-200 hover:bg-white/10'}`
 
@@ -25,6 +26,7 @@ export default function AdminLayout() {
                 <NavLink to="/admin" end className={navClass}>Dashboard</NavLink>
                 <NavLink to="/admin/universities" className={navClass}>Universities</NavLink>
                 <NavLink to="/admin/programs" className={navClass}>Programs</NavLink>
+                {canManageRoles(user?.role) && <NavLink to="/admin/administrators" className={navClass}>Manage administrators</NavLink>}
                 <NavLink to="/" className={navClass}>Public site</NavLink>
                 <button type="button" onClick={signOut} className="min-h-11 rounded-xl px-4 text-left text-sm font-bold text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300">Logout</button>
               </nav>
@@ -34,6 +36,7 @@ export default function AdminLayout() {
             <NavLink to="/admin" end className={navClass}>Dashboard</NavLink>
             <NavLink to="/admin/universities" className={navClass}>Universities</NavLink>
             <NavLink to="/admin/programs" className={navClass}>Programs</NavLink>
+            {canManageRoles(user?.role) && <NavLink to="/admin/administrators" className={navClass}>Manage administrators</NavLink>}
             <div className="my-5 border-t border-white/15" />
             <NavLink to="/" className={navClass}>Public site</NavLink>
           </nav>

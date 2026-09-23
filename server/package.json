@@ -11,6 +11,8 @@
     "check:models": "node scripts/validateModels.js",
     "check:catalogue": "node scripts/validateCatalogue.js",
     "check:security": "node scripts/validateSecurityRegression.js",
+    "check:setup": "node scripts/validateAdminSetup.js",
+    "check:roles": "node scripts/validateRoleManagement.js",
     "provision:admin": "node scripts/provisionAdmin.js"
   },
   "dependencies": {

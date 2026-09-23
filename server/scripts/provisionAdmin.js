@@ -1,39 +1,66 @@
 import 'dotenv/config'
 import bcrypt from 'bcryptjs'
 import mongoose from 'mongoose'
+import AdminSetupState from '../src/models/AdminSetupState.js'
 import User from '../src/models/User.js'
-import { registerRequestSchema } from '../src/validation/authValidation.js'
+import { emailSchema, passwordSchema } from '../src/validation/authValidation.js'
 
 async function main() {
-  const [name, email] = process.argv.slice(2)
-  const password = process.env.DAE2UNI_ADMIN_PASSWORD
+  const [mode, rawEmail, confirmation, extra] = process.argv.slice(2)
   if (!process.env.MONGODB_URI) throw new Error('MONGODB_URI is required.')
-  if (!password) throw new Error('Set DAE2UNI_ADMIN_PASSWORD in this process only before running the command.')
+  if (extra) throw new Error('Use one explicit recovery mode and exact target email.')
+  const emailResult = emailSchema.safeParse(rawEmail)
+  if (!emailResult.success) throw new Error('A valid exact target email is required.')
+  const email = emailResult.data
+  const recovery = mode === '--recover-owner' && confirmation === undefined
+  const migration = mode === '--migrate-legacy-admin' && confirmation === '--confirm-legacy-migration'
+  if (!recovery && !migration) throw new Error('Choose --recover-owner or explicitly confirmed --migrate-legacy-admin.')
 
-  const parsed = registerRequestSchema.safeParse({
-    body: { name, email, password }, params: {}, query: {},
-  })
-  if (!parsed.success) {
-    const descriptions = [...new Set(parsed.error.issues.map((issue) => issue.message))]
-    throw new Error(`Invalid administrator details: ${descriptions.join(' ')}`)
+  let password
+  if (recovery) {
+    const parsed = passwordSchema.safeParse(process.env.DAE2UNI_OWNER_PASSWORD)
+    if (!parsed.success) throw new Error('Set a strong DAE2UNI_OWNER_PASSWORD in this process for recovery.')
+    password = parsed.data
   }
-
   await mongoose.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 5000 })
-  const normalizedEmail = parsed.data.body.email
-  if (await User.exists({ email: normalizedEmail })) {
-    throw new Error('An account with that email already exists. No account was changed.')
+  await User.init()
+  if (recovery) {
+    const owner = await User.findOne({ role: 'owner' }).select('+ownerMarker')
+    if (!owner || owner.email !== email || owner.ownerMarker !== 'permanent_owner') {
+      throw new Error('Exact existing Owner account was not found. No account was changed.')
+    }
+    const passwordHash = await bcrypt.hash(password, 12)
+    const result = await User.collection.updateOne(
+      { _id: owner._id, role: 'owner', ownerMarker: 'permanent_owner' },
+      { $set: { passwordHash, accountStatus: 'active' } },
+    )
+    if (result.matchedCount !== 1) throw new Error('Owner recovery could not be completed.')
+    process.stdout.write('Existing Owner password reset and account activated.\n')
+    return
   }
-  const passwordHash = await bcrypt.hash(parsed.data.body.password, 12)
-  await User.create({ name: parsed.data.body.name, email: normalizedEmail, passwordHash, role: 'admin', accountStatus: 'active' })
-  process.stdout.write('Active administrator created. Keep the password secure.\n')
+
+  if (await User.exists({ role: 'owner' })) throw new Error('An Owner already exists. No account was changed.')
+  const target = await User.findOne({ email, role: 'admin', accountStatus: 'active' })
+  if (!target) throw new Error('Exact active legacy Admin account was not found. No account was changed.')
+  try {
+    const updated = await User.findOneAndUpdate({ _id: target._id, role: 'admin', accountStatus: 'active' },
+      { $set: { role: 'owner', ownerMarker: 'permanent_owner' } }, { new: true, runValidators: true })
+    if (!updated) throw new Error('Legacy Owner migration could not be completed.')
+  } catch (error) {
+    if (error.code === 11000) throw new Error('An Owner already exists. No account was changed.')
+    throw error
+  }
+  await AdminSetupState.updateOne({ _id: 'first-administrator' },
+    { $set: { state: 'completed', owner: target._id }, $unset: { claimId: '', leaseUntil: '' } }, { upsert: true })
+  process.stdout.write('Selected legacy Admin migrated to permanent Owner.\n')
 }
 
 try {
   await main()
 } catch (error) {
-  if (error.code === 11000) process.stderr.write('Account already exists. No account was changed.\n')
-  else if (error.message.startsWith('Invalid administrator details:') || error.message.startsWith('An account with') || error.message.startsWith('Set DAE2UNI') || error.message.startsWith('MONGODB_URI')) process.stderr.write(`${error.message}\n`)
-  else process.stderr.write('Administrator provisioning failed. Check database connectivity and try again.\n')
+  const safe = ['MONGODB_URI', 'Use one explicit', 'A valid exact', 'Choose --', 'Set a strong',
+    'Exact existing', 'Owner recovery', 'An Owner already', 'Exact active legacy', 'Legacy Owner']
+  process.stderr.write(`${safe.some((prefix) => error.message.startsWith(prefix)) ? error.message : 'Owner recovery failed. Check configuration and database connectivity.'}\n`)
   process.exitCode = 1
 } finally {
   await mongoose.disconnect()

@@ -7,6 +7,7 @@ import {
   setAccessToken,
 } from '../services/tokenStorage.js'
 import { getApiErrorMessage } from '../utils/apiErrors.js'
+import { ROLE_REFRESH_EVENT } from '../services/api.js'
 import AuthContext from './auth-context.js'
 
 function AuthProvider({ children }) {
@@ -24,16 +25,17 @@ function AuthProvider({ children }) {
     }
 
     async function restoreSession() {
-      if (!getAccessToken()) {
+      const tokenAtStart = getAccessToken()
+      if (!tokenAtStart) {
         if (active) setIsLoading(false)
         return
       }
 
       try {
         const currentUser = await getCurrentUser(controller.signal)
-        if (active) setUser(currentUser)
+        if (active && getAccessToken() === tokenAtStart) setUser(currentUser)
       } catch (error) {
-        if (error.name !== 'CanceledError' && active) {
+        if (error.name !== 'CanceledError' && active && getAccessToken() === tokenAtStart) {
           invalidateSession()
         }
       } finally {
@@ -42,12 +44,26 @@ function AuthProvider({ children }) {
     }
 
     window.addEventListener(AUTH_INVALID_EVENT, invalidateSession)
+    async function refreshCurrentUser() {
+      const tokenAtStart = getAccessToken()
+      if (!tokenAtStart) return
+      try {
+        const currentUser = await getCurrentUser(controller.signal)
+        if (active && getAccessToken() === tokenAtStart) setUser(currentUser)
+      } catch (error) {
+        if (active && error.name !== 'CanceledError' && getAccessToken() === tokenAtStart) invalidateSession()
+      }
+    }
+    window.addEventListener(ROLE_REFRESH_EVENT, refreshCurrentUser)
+    window.addEventListener('focus', refreshCurrentUser)
     restoreSession()
 
     return () => {
       active = false
       controller.abort()
       window.removeEventListener(AUTH_INVALID_EVENT, invalidateSession)
+      window.removeEventListener(ROLE_REFRESH_EVENT, refreshCurrentUser)
+      window.removeEventListener('focus', refreshCurrentUser)
     }
   }, [])
 

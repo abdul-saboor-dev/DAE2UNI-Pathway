@@ -66,7 +66,7 @@ The foundation currently includes:
 * Graceful application startup and shutdown
 * Mongoose domain models for student, university, admission-rule, merit, deadline, and source-verification data
 * Student registration, login, JWT authentication, and role authorization
-* Owner-only student-profile read and partial-update APIs
+* Student-owned profile read and partial-update APIs
 * Centralized request and Mongoose validation errors
 * Responsive registration, login, student dashboard, and profile-onboarding pages
 * Session restoration through `GET /api/auth/me` with access tokens kept in `sessionStorage`
@@ -77,11 +77,13 @@ The foundation currently includes:
 * Public university/program discovery pages with URL-synchronized search, filters, sorting, and pagination
 * Responsive detail pages with official-source attribution and related programs
 * Administrator dashboard and responsive university, campus, and program management forms
-* Manual, password-safe administrator provisioning command (never run automatically)
+* One-time browser setup for the permanent Owner, backed by a persistent MongoDB lock
+* Owner/Co-Owner/Admin content access and password-confirmed administrator role management
+* Explicit, password-safe CLI recovery for the existing Owner and legacy migration
 
 Refresh tokens, email verification, password recovery, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
 
-The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md), catalogue endpoints in [docs/catalogue-api.md](docs/catalogue-api.md), public catalogue pages in [docs/frontend-catalogue.md](docs/frontend-catalogue.md), and the administrator workflow in [docs/admin-catalogue-frontend.md](docs/admin-catalogue-frontend.md).
+The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md), catalogue endpoints in [docs/catalogue-api.md](docs/catalogue-api.md), public catalogue pages in [docs/frontend-catalogue.md](docs/frontend-catalogue.md), the administrator workflow in [docs/admin-catalogue-frontend.md](docs/admin-catalogue-frontend.md), [role management](docs/role-management.md), and [first-Owner setup](docs/first-administrator-setup.md).
 
 ## Project Structure
 
@@ -149,9 +151,10 @@ MONGODB_URI=mongodb://127.0.0.1:27017/dae2uni
 CLIENT_URL=http://localhost:5173
 JWT_SECRET=replace-with-a-long-random-secret-at-least-32-characters
 JWT_EXPIRES_IN=1d
+# ADMIN_SETUP_SECRET=replace-with-a-separate-random-secret-at-least-32-characters
 ```
 
-Replace `JWT_SECRET` locally with a cryptographically random value of at least 32 varied characters; the example value is deliberately rejected at startup. `JWT_EXPIRES_IN` must use a positive duration with a unit, such as `15m`, `1h`, or `1d`. The local `.env` file is ignored by Git. Never commit real credentials, secrets, or production connection strings.
+Replace `JWT_SECRET` locally with a cryptographically random value of at least 32 varied characters; the example value is deliberately rejected at startup. `JWT_EXPIRES_IN` must use a positive duration with a unit, such as `15m`, `1h`, or `1d`. For the first Owner only, uncomment and replace the separate `ADMIN_SETUP_SECRET` placeholder with a strong random value and visit `/setup/admin`; see [the setup guide](docs/first-administrator-setup.md). Remove that variable after successful setup if desired. The local `.env` file is ignored by Git. Never commit real credentials, secrets, or production connection strings.
 
 ## Start MongoDB
 
@@ -201,7 +204,7 @@ A healthy response reports the API as `up` and MongoDB as `connected`.
 
 ## Authentication and Student Profiles
 
-The backend exposes registration, login, current-user, and owner-only student-profile endpoints. Protected requests use this header:
+The backend exposes registration, login, current-user, and student-owned profile endpoints. Protected requests use this header:
 
 ```http
 Authorization: Bearer <access-token>
@@ -213,11 +216,11 @@ The React client provides `/register`, `/login`, `/dashboard`, and `/profile`. A
 
 ## University and Program Catalogue
 
-Administrators can manage universities and programs under `/api/admin/universities` and `/api/admin/programs`. Public, read-only browsing is available at `/api/universities` and `/api/programs`; public results are limited to verified, published records. Lists provide allowlisted filters and sorting plus bounded pagination. See [docs/catalogue-api.md](docs/catalogue-api.md) for field contracts, visibility rules, safe deletion behavior, and PowerShell examples.
+Owner, Co-Owner, and Admin have identical content-management access under `/api/admin/universities` and `/api/admin/programs`. Public, read-only browsing is available at `/api/universities` and `/api/programs`; public results are limited to verified, published records. Lists provide allowlisted filters and sorting plus bounded pagination. See [docs/catalogue-api.md](docs/catalogue-api.md) for field contracts, visibility rules, safe deletion behavior, and PowerShell examples.
 
 The React client exposes public discovery routes at `/universities`, `/universities/:universityIdentifier`, `/programs`, and `/programs/:programId`. Search, filters, sorting, and pagination are synchronized with shareable URL parameters. See [docs/frontend-catalogue.md](docs/frontend-catalogue.md) for interaction, accessibility, security, and testing details.
 
-The administrator workspace lives at `/admin`, with university and program management under `/admin/universities` and `/admin/programs`. It uses the existing protected catalogue APIs and never provisions an admin automatically. See [docs/admin-catalogue-frontend.md](docs/admin-catalogue-frontend.md) for the complete route and field workflow, manual provisioning, and current limitations.
+The administrator workspace lives at `/admin`, with university and program management under `/admin/universities` and `/admin/programs`. Owner and Co-Owner also use `/admin/administrators` to manage regular Admin access; only Owner can manage Co-Owners. Admins cannot manage roles. Role removal never deletes an account or profile. See [administrator workflow](docs/admin-catalogue-frontend.md) and [role management](docs/role-management.md).
 
 ## Quality Checks
 
@@ -228,6 +231,8 @@ cd client
 npm run check:frontend
 npm run check:catalogue
 npm run check:admin-frontend
+npm run check:setup-frontend
+npm run check:roles-frontend
 npm run lint
 npm run build
 
@@ -235,6 +240,8 @@ cd ..\server
 npm run check:models
 npm run check:security
 npm run check:catalogue
+npm run check:setup
+npm run check:roles
 ```
 
 ## Git Workflow

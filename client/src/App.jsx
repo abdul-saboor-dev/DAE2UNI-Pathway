@@ -1,6 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
-import { AdminRouteGuard, ProtectedRoute, PublicOnlyRoute } from './components/RouteGuards.jsx'
+import { AdminRouteGuard, ProtectedRoute, PublicOnlyRoute, TeamRouteGuard } from './components/RouteGuards.jsx'
+import AdminTeamPage from './pages/admin/AdminTeamPage.jsx'
 import AdminLayout from './layouts/AdminLayout.jsx'
+import AdministratorSetupPage from './pages/AdministratorSetupPage.jsx'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx'
 import AdminUniversitiesPage from './pages/admin/AdminUniversitiesPage.jsx'
 import AdminUniversityFormPage from './pages/admin/AdminUniversityFormPage.jsx'
@@ -31,9 +33,13 @@ function App() {
           <Route path="programs" element={<AdminProgramsPage />} />
           <Route path="programs/new" element={<AdminProgramFormPage />} />
           <Route path="programs/:programId/edit" element={<AdminProgramFormPage />} />
+          <Route element={<TeamRouteGuard />}>
+            <Route path="administrators" element={<AdminTeamPage />} />
+          </Route>
         </Route>
       </Route>
       <Route element={<MainLayout />}>
+        <Route path="setup/admin" element={<AdministratorSetupPage />} />
         <Route index element={<HomePage />} />
         <Route path="universities" element={<UniversitiesPage />} />
         <Route path="universities/:universityIdentifier" element={<UniversityDetailPage />} />

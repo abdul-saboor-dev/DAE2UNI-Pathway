@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import useAuth from '../context/useAuth.js'
+import { canManageContent } from '../utils/roles.js'
 
 function navigationClass({ isActive }) {
   return `rounded-lg px-3 py-2 text-sm font-bold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf ${isActive ? 'bg-mint text-forest' : 'text-ink/65 hover:bg-white/70 hover:text-forest'}`
@@ -41,7 +42,7 @@ function MainLayout() {
               <button type="button" onClick={handleLogout} className="ml-1 rounded-lg border border-forest/20 bg-white/60 px-4 py-2 text-sm font-black text-forest transition hover:bg-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">Logout</button>
             </>
           )}
-          {!isLoading && user?.role === 'admin' && (
+          {!isLoading && canManageContent(user?.role) && (
             <>
               <NavLink to="/admin" className={navigationClass}>Admin</NavLink>
               <button type="button" onClick={handleLogout} className="rounded-lg border border-forest/20 bg-white/60 px-4 py-2 text-sm font-black text-forest">Logout</button>

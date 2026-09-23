@@ -13,6 +13,8 @@ const api = axios.create({
   },
 })
 
+export const ROLE_REFRESH_EVENT = 'dae2uni:role-refresh'
+
 api.interceptors.request.use((config) => {
   if (config.requiresAuth) {
     const token = getAccessToken()
@@ -34,6 +36,9 @@ api.interceptors.response.use(
     if (authenticationRejected && error.config?.requiresAuth) {
       clearAccessToken()
       window.dispatchEvent(new Event(AUTH_INVALID_EVENT))
+    } else if (error.response?.status === 403 && error.response?.data?.code === 'FORBIDDEN' &&
+      error.config?.requiresAuth && String(error.config.url || '').startsWith('/admin/')) {
+      window.dispatchEvent(new Event(ROLE_REFRESH_EVENT))
     }
     return Promise.reject(error)
   },

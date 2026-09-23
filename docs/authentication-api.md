@@ -1,6 +1,6 @@
 # Authentication and Student-Profile API
 
-This milestone implements student registration, login, JWT authentication, role authorization, and owner-only student-profile access. It does not include refresh tokens, email verification, password recovery, OAuth, administrator management, or frontend authentication pages.
+The API implements Student registration, login, JWT authentication, role authorization, and student-owned profile access. First-Owner setup and focused administrator role management are documented separately in [the setup guide](./first-administrator-setup.md) and [role management](./role-management.md). Refresh tokens, email verification, password recovery, and OAuth are not implemented.
 
 ## Environment Variables
 
@@ -195,7 +195,7 @@ The model derives marks percentages. Changing `profileStatus` to `complete` invo
 
 ## GET `/api/admin/ping`
 
-This minimal endpoint exists only to verify role middleware. It requires an active `admin` token. Student tokens receive `403 FORBIDDEN`. No administrator CRUD or dashboard is part of this milestone.
+This minimal endpoint verifies content-role middleware. Active `owner`, `co_owner`, and `admin` accounts are allowed; Students receive `403 FORBIDDEN`. The current database role/status, not JWT role claims, governs the result. Administrator catalogue and team APIs are documented separately.
 
 ## Manual Testing
 

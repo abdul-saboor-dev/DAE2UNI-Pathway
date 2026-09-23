@@ -11,6 +11,7 @@ let checks = 0
 function check(value, message) { assert.ok(value, message); checks += 1 }
 const app = read('src/App.jsx')
 const guard = read('src/components/RouteGuards.jsx')
+const roles = read('src/utils/roles.js')
 const auth = read('src/context/AuthProvider.jsx')
 const layout = read('src/layouts/AdminLayout.jsx')
 const mainLayout = read('src/layouts/MainLayout.jsx')
@@ -26,12 +27,12 @@ const relevant = [app, guard, auth, layout, api, universityForm, programForm, li
 
 for (const path of ['admin', 'universities', 'universities/new', 'universities/:universityId/edit', 'programs', 'programs/new', 'programs/:programId/edit']) check(app.includes(`path="${path}"`), `administrator route ${path}`)
 check(app.indexOf('<Route element={<AdminRouteGuard />}') < app.indexOf('path="admin"'), 'admin routes use guard')
-check(guard.includes("allowedRoles={['admin']}"), 'admin-only role restriction')
+check(guard.includes('allowedRoles={CONTENT_MANAGER_ROLES}') && roles.includes("['owner', 'co_owner', 'admin']"), 'all elevated roles share content access')
 check(guard.includes("to=\"/login\"") && guard.includes('state={{ from }}'), 'unauthenticated safe login redirect')
 check(guard.includes('to="/unauthorized"'), 'student rejected')
 check(auth.includes('getCurrentUser(controller.signal)'), 'role restored from current-user endpoint')
 check(!relevant.includes('jwtDecode') && !relevant.includes('atob('), 'JWT claims not decoded as role authority')
-check(mainLayout.includes("user?.role === 'admin'"), 'admin navigation only shown to administrators')
+check(mainLayout.includes('canManageContent(user?.role)'), 'content navigation shown to elevated roles')
 for (const endpoint of ["'/admin/universities'", "'/admin/programs'", '`/admin/universities/${safeId(id)}`', '`/admin/programs/${safeId(id)}`']) check(api.includes(endpoint), `administrator endpoint ${endpoint}`)
 check((api.match(/requiresAuth: true/g) || []).length >= 10, 'every admin request opts into Bearer authorization')
 check(!publicApi.includes('requiresAuth'), 'public catalogue remains token-free')

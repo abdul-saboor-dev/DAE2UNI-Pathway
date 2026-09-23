@@ -1,4 +1,5 @@
 const AUTH_ROUTES = new Set(['/login', '/register'])
+import { canManageContent, canManageRoles } from './roles.js'
 
 export function getSafeDestination(candidate, fallback = '/dashboard') {
   if (
@@ -18,10 +19,11 @@ export function getSafeDestination(candidate, fallback = '/dashboard') {
 }
 
 export function getRoleDestination(candidate, role) {
-  const fallback = role === 'admin' ? '/admin' : '/dashboard'
+  const fallback = canManageContent(role) ? '/admin' : '/dashboard'
   const safe = getSafeDestination(candidate, fallback)
   const pathname = safe.split(/[?#]/, 1)[0]
   if (role === 'student' && (pathname === '/admin' || pathname.startsWith('/admin/'))) return '/unauthorized'
-  if (role === 'admin' && (pathname === '/dashboard' || pathname === '/profile')) return fallback
+  if (pathname === '/admin/administrators' && !canManageRoles(role)) return '/unauthorized'
+  if (canManageContent(role) && (pathname === '/dashboard' || pathname === '/profile')) return fallback
   return safe
 }
