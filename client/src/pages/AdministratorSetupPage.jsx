@@ -76,7 +76,7 @@ function AdministratorSetupPage() {
 
   return <AuthShell eyebrow="Owner setup" title="Create platform owner"
     description="This one-time account permanently controls administrator roles. It cannot be removed, demoted, suspended, or replaced through the website."
-    aside={<p className="mt-6 rounded-xl border border-forest/20 p-4 text-sm leading-6 text-ink/70">Use a separate, strong deployment setup secret. It is not your account password. Complete setup over HTTPS when deployed.</p>}>
+    aside={<p className="mt-6 border-l-4 border-gold bg-[var(--ui-paper)] p-4 text-sm leading-6 text-navy">Use a separate, strong deployment setup secret. It is not your account password. Complete setup over HTTPS when deployed.</p>}>
     {state === 'loading' && <p role="status">Checking owner setup…</p>}
     {state === 'error' && <div role="alert"><p>Setup status could not be loaded.</p><button type="button" onClick={retry} className="mt-3 rounded-lg bg-forest px-4 py-2 text-white focus-visible:ring-4 focus-visible:ring-leaf">Retry</button></div>}
     {state === 'completed' && <div role="status"><h2 className="text-2xl font-bold">Owner setup has already been completed.</h2><p className="mt-3 text-ink/70">Sign in with the existing Owner account.</p><Link to="/login" className="mt-5 inline-block rounded-lg bg-forest px-5 py-3 font-bold text-white focus-visible:ring-4 focus-visible:ring-leaf">Go to login</Link></div>}
@@ -89,7 +89,7 @@ function AdministratorSetupPage() {
       <PasswordField id="setup-password" name="password" label="Password" description="Use 8–72 characters and at most 72 UTF-8 bytes, including lowercase, uppercase, and a number." value={values.password} onChange={updateField} error={fieldErrors.password} autoComplete="new-password" minLength={8} maxLength={72} required />
       <PasswordField id="setup-confirm-password" name="confirmPassword" label="Confirm password" value={values.confirmPassword} onChange={updateField} error={fieldErrors.confirmPassword} autoComplete="new-password" maxLength={72} required />
       <PasswordField id="setup-secret" name="setupSecret" label="Deployment setup secret" description="Enter the separate secret configured on the backend. It is used only for this initial setup." value={values.setupSecret} onChange={updateField} error={fieldErrors.setupSecret} autoComplete="off" required />
-      <button type="submit" disabled={isSubmitting} className="w-full rounded-xl bg-forest px-5 py-3 font-bold text-white focus-visible:ring-4 focus-visible:ring-leaf disabled:opacity-60">{isSubmitting ? 'Creating Owner…' : 'Create platform owner'}</button>
+      <button type="submit" disabled={isSubmitting} className="action-primary w-full">{isSubmitting ? 'Creating Owner…' : 'Create platform owner'}</button>
     </form>}
   </AuthShell>
 }

@@ -1,13 +1,13 @@
 function AuthShell({ eyebrow, title, description, children, aside }) {
   return (
-    <section className="mx-auto grid max-w-6xl gap-10 px-6 py-10 lg:grid-cols-[0.82fr_1.18fr] lg:px-10 lg:py-16">
-      <div className="self-center">
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-leaf">{eyebrow}</p>
-        <h1 className="mt-4 text-4xl font-black tracking-[-0.04em] sm:text-5xl">{title}</h1>
-        <p className="mt-5 max-w-md text-base leading-7 text-ink/65">{description}</p>
+    <section className="site-container grid gap-9 py-10 lg:grid-cols-[minmax(0,.82fr)_minmax(0,1.18fr)] lg:gap-16 lg:py-16">
+      <div className="self-start border-t-4 border-gold pt-5 lg:pt-7">
+        <p className="eyebrow">{eyebrow}</p>
+        <h1 className="page-title mt-4 max-w-[14ch] text-4xl text-navy sm:text-5xl">{title}</h1>
+        <p className="body-copy mt-5 max-w-md text-base">{description}</p>
         {aside}
       </div>
-      <div className="rounded-[2rem] border border-white/80 bg-white/80 p-6 shadow-[0_30px_90px_-45px_rgba(16,42,42,0.5)] backdrop-blur sm:p-9">
+      <div className="paper-surface min-w-0 p-6 sm:p-9">
         {children}
       </div>
     </section>

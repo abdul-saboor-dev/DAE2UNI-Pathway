@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Breadcrumbs from '../components/Breadcrumbs.jsx'
+import CampusDirectory from '../components/CampusDirectory.jsx'
 import { CatalogueError, CatalogueLoading, CatalogueNotFound } from '../components/CatalogueStates.jsx'
 import ProgramCard from '../components/ProgramCard.jsx'
 import SourceAttribution from '../components/SourceAttribution.jsx'
@@ -54,32 +55,23 @@ export default function UniversityDetailPage() {
       <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Universities', to: '/universities' }, { label: university.name }]} />
       <Link to="/universities" className="mb-5 inline-flex rounded text-sm font-black text-forest underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">← Back to universities</Link>
 
-      <article className="overflow-hidden rounded-[2rem] border border-forest/10 bg-white/80 shadow-xl">
-        <header className="bg-forest px-6 py-10 text-white sm:px-10">
+      <article className="paper-surface overflow-hidden">
+        <header className="border-b-4 border-gold bg-navy px-6 py-10 text-white sm:px-10">
           <p className="text-xs font-black uppercase tracking-[0.2em] text-mint">{label(university.institutionType) || 'University'} · {label(university.sector)}</p>
-          <h1 className="mt-3 break-words text-4xl font-black tracking-[-0.04em] sm:text-5xl">{university.name}</h1>
+          <h1 className="page-title mt-3 break-words text-4xl sm:text-5xl">{university.name}</h1>
           {university.abbreviation && <p className="mt-3 text-lg font-bold text-white/70">{university.abbreviation}</p>}
           <p className="mt-3 text-sm text-white/80">{university.provinceOrTerritory || 'Location not recorded'} · {label(university.charterAuthority) || 'Charter authority not recorded'} charter</p>
         </header>
 
         <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(16rem,0.65fr)]">
           <div className="min-w-0">
-            <h2 className="text-2xl font-black">Campus information</h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {university.campuses.map((campus) => (
-                <section key={`${campus.name}-${campus.city}`} className="rounded-2xl border border-forest/10 bg-cream p-5">
-                  <h3 className="font-black">{campus.name}</h3>
-                  <p className="mt-2 text-sm leading-6 text-ink/60">{[campus.address, campus.city, campus.district, campus.province].filter(Boolean).join(', ')}</p>
-                  {campus.isMainCampus && <span className="mt-3 inline-flex rounded-full bg-mint px-3 py-1 text-xs font-black text-forest">Main campus</span>}
-                </section>
-              ))}
-              {university.campuses.length === 0 && <p className="text-ink/60">No public campus details are available.</p>}
-            </div>
+            <h2 className="section-title text-2xl text-navy">Campus information</h2>
+            <CampusDirectory campuses={university.campuses} />
 
-            {(university.establishedYear || university.recognitionBodies.length > 0) && (
+            {(university.establishedYear || university.recognitionBodies?.length > 0) && (
               <dl className="mt-8 grid gap-4 rounded-2xl border border-forest/10 p-5 sm:grid-cols-2">
                 {university.establishedYear && <div><dt className="text-sm text-ink/50">Established</dt><dd className="mt-1 font-black">{university.establishedYear}</dd></div>}
-                {university.recognitionBodies.length > 0 && <div><dt className="text-sm text-ink/50">Recognition bodies listed</dt><dd className="mt-1 font-black">{university.recognitionBodies.join(', ')}</dd></div>}
+                {university.recognitionBodies?.length > 0 && <div><dt className="text-sm text-ink/50">Recognition bodies listed</dt><dd className="mt-1 font-black">{university.recognitionBodies.join(', ')}</dd></div>}
               </dl>
             )}
           </div>

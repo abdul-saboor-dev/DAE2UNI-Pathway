@@ -57,9 +57,9 @@ export default function RoleActionDialog({ action, onClose, onConfirm }) {
   }
 
   return <dialog ref={dialogRef} onCancel={(event) => { if (pending) event.preventDefault(); else onClose() }}
-    className="m-auto w-[min(94vw,32rem)] max-w-none rounded-2xl border border-slate-200 p-5 shadow-2xl backdrop:bg-slate-950/55 sm:p-7">
+    className="m-auto w-[min(94vw,32rem)] max-w-none border-t-4 border-gold bg-[var(--ui-paper)] p-5 shadow-2xl backdrop:bg-navy/70 sm:p-7">
     <form onSubmit={submit} className="space-y-5">
-      <h2 className="break-words text-xl font-black">{titles[action.type]}</h2>
+      <h2 className="section-title break-words text-xl text-navy">{titles[action.type]}</h2>
       <p className="break-words text-sm leading-6 text-slate-700">{descriptions[action.type]}</p>
       <p className="break-all text-sm font-bold text-slate-900">{action.target.email}</p>
       {needsEmail && <div><label htmlFor="role-confirm-email" className="block text-sm font-bold">Type the target email to confirm</label><input id="role-confirm-email" className={`${adminInputClass} mt-1`} value={confirmEmail} onChange={(event) => { setConfirmEmail(event.target.value); setError('') }} autoComplete="off" aria-describedby={error ? 'role-dialog-error' : undefined} required /></div>}

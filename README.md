@@ -76,6 +76,7 @@ The foundation currently includes:
 * Source-verification visibility rules and relationship-safe catalogue deletion
 * Public university/program discovery pages with URL-synchronized search, filters, sorting, and pagination
 * Responsive detail pages with official-source attribution and related programs
+* Academic-editorial public and administrator interface with branded university-card fallbacks and address-based campus map-search links
 * Administrator dashboard and responsive university, campus, and program management forms
 * One-time browser setup for the permanent Owner, backed by a persistent MongoDB lock
 * Owner/Co-Owner/Admin content access and password-confirmed administrator role management
@@ -83,7 +84,7 @@ The foundation currently includes:
 
 Refresh tokens, email verification, password recovery, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
 
-The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md), catalogue endpoints in [docs/catalogue-api.md](docs/catalogue-api.md), public catalogue pages in [docs/frontend-catalogue.md](docs/frontend-catalogue.md), the administrator workflow in [docs/admin-catalogue-frontend.md](docs/admin-catalogue-frontend.md), [role management](docs/role-management.md), and [first-Owner setup](docs/first-administrator-setup.md).
+The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md), catalogue endpoints in [docs/catalogue-api.md](docs/catalogue-api.md), public catalogue pages in [docs/frontend-catalogue.md](docs/frontend-catalogue.md), the administrator workflow in [docs/admin-catalogue-frontend.md](docs/admin-catalogue-frontend.md), [role management](docs/role-management.md), [first-Owner setup](docs/first-administrator-setup.md), and the [frontend design system](docs/frontend-design.md).
 
 ## Project Structure
 
@@ -236,6 +237,7 @@ npm run check:admin-frontend
 npm run check:setup-frontend
 npm run check:roles-frontend
 npm run check:geographic-frontend
+npm run check:design
 npm run lint
 npm run build
 

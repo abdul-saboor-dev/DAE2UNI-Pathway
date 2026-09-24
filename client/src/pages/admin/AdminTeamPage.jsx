@@ -82,7 +82,7 @@ export default function AdminTeamPage() {
     </section>
     {success && <p role="status" className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-900">{success}</p>}
     <section aria-label="Administrator team list">
-      <form onSubmit={(event) => { event.preventDefault(); updateQuery('search', searchInput) }} className="mb-5 grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
+      <form onSubmit={(event) => { event.preventDefault(); updateQuery('search', searchInput) }} className="paper-surface mb-5 grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
         <div className="min-w-0"><label htmlFor="team-search" className="block text-sm font-bold">Search name or email</label><input id="team-search" className={`${adminInputClass} mt-1`} value={searchInput} onChange={(event) => setSearchInput(event.target.value)} maxLength={80} /></div>
         <button type="submit" className={adminButtonClass}>Search</button>
         <div><label htmlFor="team-sort" className="block text-sm font-bold">Sort</label><select id="team-sort" className={`${adminInputClass} mt-1`} value={query.sort} onChange={(event) => updateQuery('sort', event.target.value)}><option value="name">Name A–Z</option><option value="-name">Name Z–A</option><option value="-createdAt">Newest</option><option value="createdAt">Oldest</option><option value="-lastLoginAt">Last login</option><option value="role">Role</option></select></div>
@@ -91,7 +91,7 @@ export default function AdminTeamPage() {
       {state === 'ready' && <>
         <p className="mb-4 text-sm text-slate-600" role="status">{pagination.totalRecords} elevated team {pagination.totalRecords === 1 ? 'member' : 'members'} · Page {pagination.page} of {Math.max(pagination.totalPages, 1)}</p>
         {result.users.length === 0 ? <div className="rounded-2xl border border-slate-200 bg-white p-7"><h2 className="text-lg font-black">No team members found</h2><p className="mt-1 text-sm text-slate-600">Try a different search. No accounts are deleted by role changes.</p></div> :
-          <div className="grid gap-4 xl:grid-cols-2">{result.users.map((member) => <article key={member.id} className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="grid gap-4 xl:grid-cols-2">{result.users.map((member) => <article key={member.id} className="paper-surface min-w-0 border-l-4 !border-l-gold p-5">
             <div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><h2 className="break-words text-lg font-black">{member.name} {member.id === user?.id && <span className="text-xs font-semibold text-teal-800">(Current account)</span>}</h2><p className="break-all text-sm text-slate-600">{member.email}</p></div><div className="flex flex-wrap gap-2"><StatusBadge value={member.role} /><StatusBadge value={member.accountStatus} /></div></div>
             <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2"><div><dt className="font-semibold text-slate-600">Created</dt><dd>{formatDate(member.createdAt)}</dd></div><div><dt className="font-semibold text-slate-600">Last login</dt><dd>{formatDate(member.lastLoginAt)}</dd></div></dl>
             <div className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">{member.role === 'owner' && <span className="rounded-full bg-teal-100 px-3 py-2 text-xs font-black text-teal-950">Permanent owner</span>}

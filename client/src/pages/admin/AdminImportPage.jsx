@@ -77,7 +77,7 @@ export default function AdminImportPage() {
     <p className="mb-6 text-sm leading-6 text-slate-700">Use only researched data. Existing published or verified records cannot be overwritten. An import never deletes records omitted from the file.</p>
     <nav aria-label="Import steps" className="mb-6 flex flex-wrap gap-3 text-sm font-bold"><Link to="/admin/import" aria-current={view === 'input' ? 'step' : undefined} className="text-teal-800 underline">1. JSON input</Link><span>→</span><span aria-current={view === 'preview' ? 'step' : undefined}>2. Preview</span><span>→</span><span aria-current={view === 'results' ? 'step' : undefined}>3. Results</span></nav>
     {error && <p role="alert" className="mb-5 break-words rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-900">{error}</p>}
-    {view === 'input' && <form onSubmit={previewDocument} className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 sm:p-7">
+    {view === 'input' && <form onSubmit={previewDocument} className="paper-surface space-y-5 p-5 sm:p-7">
       <h2 className="text-xl font-black">Select or paste a JSON document</h2>
       <p className="text-sm leading-6 text-slate-600">Maximum 512 KB, 50 universities, 30 campuses per university, 100 programs per university and 500 programs total. Each campus has a stable key; programs refer only to keys in their own university. Only draft updates are allowed with the explicit update strategy.</p>
       <a href="/catalogue-import-example.json" download className="inline-flex min-h-11 items-center text-teal-800 underline focus-visible:ring-4 focus-visible:ring-teal-400">Download fictional example template</a>

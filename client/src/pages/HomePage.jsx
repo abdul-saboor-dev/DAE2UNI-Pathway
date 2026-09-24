@@ -1,80 +1,40 @@
-import HealthStatus from '../components/HealthStatus.jsx'
 import { Link } from 'react-router-dom'
+import HealthStatus from '../components/HealthStatus.jsx'
 import useAuth from '../context/useAuth.js'
+import { canManageContent } from '../utils/roles.js'
 
-const pathwaySteps = [
-  ['01', 'Discover', 'Explore relevant universities and degree programs.'],
-  ['02', 'Understand', 'See clear DAE-specific eligibility guidance.'],
-  ['03', 'Prepare', 'Plan merit, entry tests, deadlines, and documents.'],
+const steps = [
+  ['01', 'Search the catalogue', 'Explore source-attributed universities, campuses, and undergraduate programs.'],
+  ['02', 'Build your profile', 'Record DAE CIT, Matric, domicile, and study preferences as a draft or complete profile.'],
+  ['03', 'Plan the next decision', 'Eligibility, merit, entry tests, and application planning are planned—not presented as completed results.'],
 ]
 
-function HomePage() {
+export default function HomePage() {
   const { user } = useAuth()
-
-  return (
-    <>
-      <section className="relative mx-auto grid max-w-7xl gap-14 px-6 pb-20 pt-14 lg:grid-cols-[1.12fr_0.88fr] lg:px-10 lg:pb-28 lg:pt-24">
-        <div className="pointer-events-none absolute -left-24 top-10 size-72 rounded-full bg-mint/70 blur-3xl" />
-        <div className="relative">
-          <p className="mb-6 inline-flex rounded-full border border-leaf/20 bg-white/70 px-4 py-2 text-sm font-semibold text-forest shadow-sm backdrop-blur">
-            A clearer next step after DAE
-          </p>
-          <h1 className="max-w-3xl text-5xl font-black leading-[0.98] tracking-[-0.055em] sm:text-6xl lg:text-7xl">
-            From Diploma to{' '}
-            <span className="relative text-forest">
-              University
-              <span className="absolute -bottom-2 left-1 h-2 w-full -rotate-1 rounded-full bg-leaf/25" />
-            </span>
-          </h1>
-          <p className="mt-8 max-w-2xl text-lg leading-8 text-ink/70 sm:text-xl">
-            DAE2UNI Pathway will help DAE CIT students discover suitable programs, understand admission rules, and plan a confident route into undergraduate study across Punjab.
-          </p>
-          <div className="mt-9 flex flex-wrap items-center gap-4">
-            <Link to={user?.role === 'student' ? '/dashboard' : '/register'} className="rounded-xl bg-forest px-5 py-3 text-sm font-bold text-white shadow-xl shadow-forest/20 transition hover:bg-ink focus:outline-none focus-visible:ring-4 focus-visible:ring-leaf/35">
-              {user?.role === 'student' ? 'Open dashboard' : 'Create your pathway'}
-            </Link>
-            <span className="text-sm font-medium text-ink/60">Web application · Final Year Project</span>
-          </div>
-          <div className="mt-5 flex flex-wrap gap-3 text-sm font-bold">
-            <Link to="/universities" className="rounded-lg text-forest underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">Browse universities</Link>
-            <span aria-hidden="true" className="text-ink/25">·</span>
-            <Link to="/programs" className="rounded-lg text-forest underline decoration-leaf/30 underline-offset-4 hover:decoration-leaf focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">Browse programs</Link>
-          </div>
+  const primary = canManageContent(user?.role) ? ['/admin', 'Open operations workspace'] : user?.role === 'student' ? ['/dashboard', 'Open your dashboard'] : ['/register', 'Create a student account']
+  return <>
+    <section className="border-b border-[var(--ui-border)] bg-navy text-white">
+      <div className="site-container grid gap-10 py-12 sm:py-16 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,.75fr)] lg:gap-16 lg:py-20">
+        <div>
+          <p className="text-xs font-black uppercase tracking-[.2em] text-[#d9b56e]">DAE CIT · Undergraduate pathways</p>
+          <h1 className="display-type mt-5 max-w-[14ch] text-[clamp(3.2rem,7vw,6.4rem)]">From Diploma to University.</h1>
+          <p className="mt-7 max-w-2xl text-lg leading-8 text-[#e1e8eb]">A clearer place to explore universities and programs, keep your academic details together, and understand what to research next after DAE.</p>
+          <div className="mt-9 flex flex-wrap gap-3"><Link to={primary[0]} className="action-primary !bg-[#e5efe9] !text-navy hover:!bg-white">{primary[1]}</Link><Link to="/universities" className="action-secondary !border-white/50 !text-white hover:!bg-white/10">Explore universities</Link></div>
         </div>
-
-        <div className="relative flex items-center">
-          <div className="absolute -right-16 -top-12 size-64 rounded-full bg-leaf/10 blur-3xl" />
-          <div className="relative w-full rounded-[2rem] border border-white/80 bg-white/75 p-6 shadow-[0_30px_90px_-40px_rgba(16,42,42,0.45)] backdrop-blur-xl sm:p-8">
-            <div className="mb-8 flex items-start justify-between gap-6">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-leaf">Development status</p>
-                <h2 className="mt-2 text-2xl font-bold tracking-tight">Public catalogue is ready</h2>
-              </div>
-              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-mint text-xl" aria-hidden="true">↗</span>
-            </div>
-            <HealthStatus />
-            <p className="mt-6 border-t border-ink/10 pt-5 text-sm leading-6 text-ink/55">
-              University and program browsing, student accounts, and profile onboarding are available. Eligibility and merit calculations remain later milestones.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="border-y border-forest/10 bg-white/45">
-        <div className="mx-auto grid max-w-7xl gap-px px-6 py-4 md:grid-cols-3 lg:px-10">
-          {pathwaySteps.map(([number, title, description]) => (
-            <article key={number} className="group flex gap-5 rounded-2xl p-5 transition hover:bg-white/70">
-              <span className="pt-1 font-mono text-xs font-bold text-leaf">{number}</span>
-              <div>
-                <h2 className="font-bold">{title}</h2>
-                <p className="mt-1 text-sm leading-6 text-ink/60">{description}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-    </>
-  )
+        <aside className="self-end border-t border-[#7f99a6] pt-5 lg:border-l lg:border-t-0 lg:pl-7" aria-label="What is available now">
+          <p className="text-xs font-black uppercase tracking-[.18em] text-[#d9b56e]">Available now</p>
+          <h2 className="section-title mt-3 text-2xl text-white">Discovery starts with reliable records.</h2>
+          <p className="mt-4 text-sm leading-7 text-[#d9e3e6]">Browse published, source-verified catalogue entries. A university’s HEC recognition is shown separately from source verification. No eligibility or merit decision is made yet.</p>
+          <Link to="/programs" className="mt-5 inline-flex min-h-11 items-center font-bold text-white underline decoration-[#d9b56e] decoration-2">Browse programs <span aria-hidden="true" className="ml-2">→</span></Link>
+        </aside>
+      </div>
+    </section>
+    <section className="site-container grid gap-10 py-12 lg:grid-cols-[16rem_1fr] lg:py-16" aria-labelledby="how-it-works">
+      <div><p className="eyebrow">A practical sequence</p><h2 id="how-it-works" className="section-title mt-3 text-3xl text-navy">Your next step, made legible.</h2></div>
+      <ol className="border-t border-[var(--ui-border)]">{steps.map(([number, title, description]) => <li key={number} className="grid gap-3 border-b border-[var(--ui-border)] py-5 sm:grid-cols-[3rem_minmax(0,1fr)]"><span className="text-sm font-black text-forest">{number}</span><div><h3 className="text-lg font-black text-navy">{title}</h3><p className="body-copy mt-1 text-sm">{description}</p></div></li>)}</ol>
+    </section>
+    <section className="border-y border-[var(--ui-border)] bg-[var(--ui-paper)]">
+      <div className="site-container grid gap-6 py-9 md:grid-cols-[1fr_auto] md:items-center"><div><p className="eyebrow">Development connection</p><h2 className="section-title mt-2 text-2xl text-navy">Platform status</h2><p className="body-copy mt-2 text-sm">This indicator checks the application API and database; it is not an admission-status signal.</p></div><HealthStatus /></div>
+    </section>
+  </>
 }
-
-export default HomePage

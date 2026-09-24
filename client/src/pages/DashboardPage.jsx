@@ -45,19 +45,19 @@ function DashboardPage() {
       : 'Continue your profile'
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-10 lg:px-10 lg:py-16">
-      <div className="rounded-[2rem] bg-forest px-6 py-9 text-white shadow-2xl shadow-forest/20 sm:px-10">
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-mint">Student dashboard</p>
-        <h1 className="mt-3 text-4xl font-black tracking-[-0.04em] sm:text-5xl">Welcome, {user.name}</h1>
+    <section className="site-container py-10 lg:py-16">
+      <div className="border-b-4 border-gold bg-navy px-6 py-9 text-white sm:px-10">
+        <p className="text-xs font-black uppercase tracking-[0.22em] text-[#d9b56e]">Student dashboard</p>
+        <h1 className="page-title mt-3 text-4xl sm:text-5xl">Welcome, {user.name}</h1>
         <p className="mt-4 max-w-2xl leading-7 text-white/75">Build a complete academic profile now so later eligibility and merit tools can give you accurate DAE-specific guidance.</p>
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-        <article className="rounded-3xl border border-forest/10 bg-white/75 p-6 shadow-sm sm:p-8">
+        <article className="paper-surface p-6 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-5">
             <div>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-leaf">Profile progress</p>
-              <h2 className="mt-2 text-2xl font-black">
+              <h2 className="section-title mt-2 text-2xl text-navy">
                 {profileState.state === 'loading' && 'Checking your profile…'}
                 {profileState.state === 'empty' && 'Your profile is ready to begin'}
                 {profileState.state === 'ready' && (isComplete ? 'Profile complete' : 'Draft saved')}
@@ -76,12 +76,12 @@ function DashboardPage() {
                 : 'Save a partial draft at any time. Completing the required DAE, Matric, and domicile fields unlocks a reliable base for the next milestone.'}
             </p>
           )}
-          <Link className="mt-6 inline-flex rounded-xl bg-forest px-5 py-3 text-sm font-black text-white transition hover:bg-ink focus:outline-none focus-visible:ring-4 focus-visible:ring-leaf/35" to="/profile">
+          <Link className="action-primary mt-6" to="/profile">
             {actionLabel}
           </Link>
         </article>
 
-        <aside className="rounded-3xl border border-forest/10 bg-mint/45 p-6 sm:p-8">
+        <aside className="border-l-4 border-gold bg-[var(--ui-paper)] p-6 sm:p-8">
           <p className="text-xs font-black uppercase tracking-[0.18em] text-leaf">Account</p>
           <dl className="mt-5 space-y-4 text-sm">
             <div>
@@ -96,7 +96,7 @@ function DashboardPage() {
         </aside>
       </div>
 
-      <div className="mt-8 rounded-3xl border border-dashed border-forest/20 p-6 text-sm leading-6 text-ink/55">
+      <div className="mt-8 border-t border-[var(--ui-border)] py-6 text-sm leading-6 text-[var(--ui-muted)]">
         University recommendations, eligibility results, and merit calculations will appear in later milestones. This dashboard currently focuses on building your trusted student profile.
       </div>
     </section>

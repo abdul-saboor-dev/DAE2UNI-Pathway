@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import Breadcrumbs from '../components/Breadcrumbs.jsx'
+import CampusDirectory from '../components/CampusDirectory.jsx'
 import { CatalogueError, CatalogueLoading, CatalogueNotFound } from '../components/CatalogueStates.jsx'
 import SourceAttribution from '../components/SourceAttribution.jsx'
 import useCatalogueDetail from '../hooks/useCatalogueDetail.js'
@@ -30,14 +31,14 @@ export default function ProgramDetailPage() {
       <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Programs', to: '/programs' }, { label: program.name }]} />
       <Link to="/programs" className="mb-5 inline-flex rounded text-sm font-black text-forest underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">← Back to programs</Link>
 
-      <article className="overflow-hidden rounded-[2rem] border border-forest/10 bg-white/80 shadow-xl">
-        <header className="bg-forest px-6 py-10 text-white sm:px-10">
+      <article className="paper-surface overflow-hidden">
+        <header className="border-b-4 border-gold bg-navy px-6 py-10 text-white sm:px-10">
           <div className="flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.16em] text-mint">
             {program.credentialType && <span>{program.credentialType}</span>}
             {program.degreeLevel && <span>· {label(program.degreeLevel)}</span>}
             {program.studyMode && <span>· {label(program.studyMode)}</span>}
           </div>
-          <h1 className="mt-3 break-words text-4xl font-black tracking-[-0.04em] sm:text-5xl">{program.name}</h1>
+          <h1 className="page-title mt-3 break-words text-4xl sm:text-5xl">{program.name}</h1>
           <Link to={`/universities/${encodeURIComponent(universityIdentifier)}`} className="mt-4 inline-flex rounded font-bold text-mint underline decoration-mint/50 underline-offset-4 hover:decoration-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint">
             {program.university.name}
           </Link>
@@ -45,8 +46,8 @@ export default function ProgramDetailPage() {
 
         <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(16rem,0.65fr)]">
           <div className="min-w-0">
-            <h2 className="text-2xl font-black">Program information</h2>
-            <dl className="mt-5 grid gap-4 rounded-2xl bg-cream p-5 sm:grid-cols-2">
+            <h2 className="section-title text-2xl text-navy">Program information</h2>
+            <dl className="mt-5 grid gap-4 border-y border-[var(--ui-border)] py-5 sm:grid-cols-2">
               <div><dt className="text-sm text-ink/50">Degree title</dt><dd className="mt-1 font-black">{program.degreeTitle || 'Not listed'}</dd></div>
               <div><dt className="text-sm text-ink/50">Credential</dt><dd className="mt-1 font-black">{program.credentialType || 'Not listed'}</dd></div>
               <div><dt className="text-sm text-ink/50">Study mode</dt><dd className="mt-1 font-black">{label(program.studyMode) || 'Not listed'}</dd></div>
@@ -55,16 +56,8 @@ export default function ProgramDetailPage() {
               {program.disciplineCode && <div><dt className="text-sm text-ink/50">Discipline code</dt><dd className="mt-1 font-black">{program.disciplineCode}</dd></div>}
             </dl>
 
-            <h2 className="mt-8 text-2xl font-black">Available campuses</h2>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {program.campuses.map((campus) => (
-                <section key={`${campus.name}-${campus.city}`} className="rounded-2xl border border-forest/10 p-5">
-                  <h3 className="font-black">{campus.name}</h3>
-                  <p className="mt-2 text-sm leading-6 text-ink/60">{[campus.address, campus.city, campus.district, campus.province].filter(Boolean).join(', ')}</p>
-                </section>
-              ))}
-              {program.campuses.length === 0 && <p className="text-ink/60">No public campus details are available.</p>}
-            </div>
+            <h2 className="section-title mt-8 text-2xl text-navy">Available campuses</h2>
+            <CampusDirectory campuses={program.campuses} />
           </div>
 
           <div className="space-y-4">

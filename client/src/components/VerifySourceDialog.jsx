@@ -35,9 +35,9 @@ export default function VerifySourceDialog({ record, onClose, onConfirm }) {
     finally { setPending(false) }
   }
 
-  return <dialog ref={dialogRef} onCancel={(event) => { if (pending) event.preventDefault(); else onClose() }} className="m-auto w-[min(94vw,34rem)] max-w-none rounded-2xl border border-slate-200 p-5 shadow-2xl backdrop:bg-slate-950/55 sm:p-7">
+  return <dialog ref={dialogRef} onCancel={(event) => { if (pending) event.preventDefault(); else onClose() }} className="m-auto w-[min(94vw,34rem)] max-w-none border-t-4 border-gold bg-[var(--ui-paper)] p-5 shadow-2xl backdrop:bg-navy/70 sm:p-7">
     <form onSubmit={submit} className="space-y-4">
-      <h2 className="break-words text-xl font-black">Record manual source verification</h2>
+      <h2 className="section-title break-words text-xl text-navy">Record manual source verification</h2>
       <p className="break-words text-sm">Check the official page yourself before confirming. Verification does not publish this record or assert HEC recognition.</p>
       <p className="break-all text-sm font-bold">{record.name}</p>
       {safeUrl ? <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="block break-all text-sm text-teal-800 underline">Open official source (external site)</a> : <p role="alert" className="break-all text-sm text-red-800">The current source URL is unsafe or missing. Edit the record first.</p>}

@@ -126,7 +126,7 @@ export default function AdminProgramFormPage() {
       </fieldset>
       <SourceVerificationFields value={form.source} onChange={changeSource} errors={errors} originalUrl={original?.source?.officialUrl} publicationStatus={form.recordStatus} />
       <fieldset className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6"><legend className="px-2 text-lg font-black">Publication</legend><AdminField id="program-publication" label="Publication status" error={errors.recordStatus}><select id="program-publication" className={adminInputClass} value={form.recordStatus} onChange={(event) => change('recordStatus', event.target.value)}>{programStatusOptions.map((status) => <option key={status} value={status}>{status}</option>)}</select></AdminField></fieldset>
-      <div className="flex flex-wrap gap-3"><button type="submit" disabled={saving} className={adminButtonClass}>{saving ? 'Saving…' : 'Save program'}</button><Link to="/admin/programs" className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-5 text-sm font-bold focus:outline-none focus-visible:ring-4 focus-visible:ring-teal-400/50">Cancel</Link></div>
+      <div className="sticky bottom-2 z-10 flex flex-wrap gap-3 border-t-4 border-gold bg-[var(--ui-paper)] p-4 shadow-lg"><button type="submit" disabled={saving} className={adminButtonClass}>{saving ? 'Saving…' : 'Save program'}</button><Link to="/admin/programs" className="action-secondary">Cancel</Link></div>
     </form>
   </>
 }

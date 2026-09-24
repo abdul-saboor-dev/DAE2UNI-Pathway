@@ -51,11 +51,11 @@ function LoginPage() {
       eyebrow="Account access"
       title="Welcome back"
       description="Sign in to continue your DAE profile and keep your university pathway in one place."
-      aside={<p className="mt-8 rounded-2xl border border-forest/10 bg-mint/45 p-4 text-sm leading-6 text-forest">Your session stays in this browser tab and is cleared when the tab session ends.</p>}
+      aside={<p className="mt-8 border-l-4 border-gold bg-[var(--ui-paper)] p-4 text-sm leading-6 text-navy">Your session stays in this browser tab and is cleared when the tab session ends.</p>}
     >
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         <div>
-          <h2 className="text-2xl font-black tracking-tight">Sign in</h2>
+          <h2 className="section-title text-2xl text-navy">Sign in</h2>
           <p className="mt-1 text-sm text-ink/55">Use your DAE2UNI account email and password.</p>
         </div>
         <FormAlert message={formError || authError} />
@@ -84,7 +84,7 @@ function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-forest px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-forest/20 transition hover:bg-ink focus:outline-none focus-visible:ring-4 focus-visible:ring-leaf/35 disabled:cursor-not-allowed disabled:opacity-60"
+          className="action-primary w-full"
         >
           {isSubmitting ? 'Signing in…' : 'Sign in'}
         </button>

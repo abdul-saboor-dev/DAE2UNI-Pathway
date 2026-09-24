@@ -54,7 +54,7 @@ export default function AdminVerificationQueuePage() {
   return <div className="min-w-0">
     <div id="verification-heading" tabIndex={-1}><AdminHeading eyebrow="Evidence review" title="Verification queue" description="Review an official source manually. This queue never scrapes, verifies automatically, or publishes records." /></div>
     {success && <p role="status" className="mb-5 break-words rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-900">{success}</p>}
-    <form onSubmit={(event) => { event.preventDefault(); updateQuery('search', String(new FormData(event.currentTarget).get('search') || '').trim()) }} className="grid min-w-0 gap-4 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
+    <form onSubmit={(event) => { event.preventDefault(); updateQuery('search', String(new FormData(event.currentTarget).get('search') || '').trim()) }} className="paper-surface grid min-w-0 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
       <div><label htmlFor="queue-type" className="block text-sm font-bold">Record type</label><select id="queue-type" className={`${adminInputClass} mt-1`} value={query.entityType} onChange={(event) => updateQuery('entityType', event.target.value)}><option value="university">Universities</option><option value="program">Programs</option></select></div>
       <div><label htmlFor="queue-status" className="block text-sm font-bold">Verification status</label><select id="queue-status" className={`${adminInputClass} mt-1`} value={query.verificationStatus} onChange={(event) => updateQuery('verificationStatus', event.target.value)}><option value="">All requiring review</option>{['unverified', 'pending_review', 'needs_update', 'unavailable'].map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}</select></div>
       <div><label htmlFor="queue-search" className="block text-sm font-bold">Search name or slug</label><input id="queue-search" name="search" className={`${adminInputClass} mt-1`} value={searchInput} maxLength={100} onChange={(event) => setSearchInput(event.target.value)} /></div>
@@ -68,7 +68,7 @@ export default function AdminVerificationQueuePage() {
         <div className="grid min-w-0 gap-4 lg:grid-cols-2">{result.records.map((record) => {
           const safeUrl = getSafeExternalUrl(record.sourceUrl)
           const editPath = record.entityType === 'university' ? `/admin/universities/${record.id}/edit` : `/admin/programs/${record.id}/edit`
-          return <article key={`${record.entityType}-${record.id}`} className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5">
+          return <article key={`${record.entityType}-${record.id}`} className="paper-surface min-w-0 border-l-4 !border-l-gold p-5">
             <h2 className="break-words text-lg font-black">{record.name}</h2>
             {record.university?.name && <p className="break-words text-sm text-slate-600">{record.university.name}</p>}
             <div className="mt-3 flex flex-wrap gap-2"><StatusBadge value={record.verificationStatus} /><StatusBadge value={record.recordStatus} /></div>

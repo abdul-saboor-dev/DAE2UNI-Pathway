@@ -1,57 +1,53 @@
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import useAuth from '../context/useAuth.js'
 import { canManageRoles } from '../utils/roles.js'
 
-const navClass = ({ isActive }) => `block rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300 ${isActive ? 'bg-teal-100 text-slate-950' : 'text-slate-200 hover:bg-white/10'}`
+const navClass = () => 'admin-nav-link'
+
+function AdminLinks({ user, signOut }) {
+  return <>
+    <NavLink to="/admin" end className={navClass}>Dashboard</NavLink>
+    <NavLink to="/admin/universities" className={navClass}>Universities</NavLink>
+    <NavLink to="/admin/programs" className={navClass}>Programs</NavLink>
+    <NavLink to="/admin/import" className={navClass}>Bulk import</NavLink>
+    <NavLink to="/admin/verification-queue" className={navClass}>Verification queue</NavLink>
+    {canManageRoles(user?.role) && <NavLink to="/admin/administrators" className={navClass}>Manage administrators</NavLink>}
+    <div className="my-3 border-t border-white/20" />
+    <NavLink to="/" className={navClass}>Public site</NavLink>
+    <button type="button" onClick={signOut} className="admin-nav-link w-full text-left">Logout</button>
+  </>
+}
 
 export default function AdminLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   function signOut() {
     logout()
     navigate('/', { replace: true })
   }
-  return (
-    <div className="min-h-screen min-w-0 bg-slate-50 text-slate-900">
-      <div className="mx-auto grid min-h-screen max-w-[1600px] min-w-0 lg:grid-cols-[16rem_minmax(0,1fr)]">
-        <header className="min-w-0 bg-slate-950 px-4 py-4 text-white sm:px-6 lg:px-5 lg:py-7">
-          <div className="flex flex-wrap items-center justify-between gap-3 lg:block">
-            <Link to="/admin" className="inline-flex min-h-11 items-center gap-3 rounded-lg font-black focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300">
-              <span className="grid size-10 place-items-center rounded-xl bg-teal-500 text-slate-950">D2U</span>
-              <span>DAE2UNI <span className="block text-xs font-semibold text-teal-200">Administrator</span></span>
-            </Link>
-            <details className="group lg:hidden">
-              <summary className="flex min-h-11 cursor-pointer items-center rounded-xl border border-white/20 px-4 text-sm font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300">Admin menu</summary>
-              <nav aria-label="Administrator navigation" className="mt-3 grid gap-1">
-                <NavLink to="/admin" end className={navClass}>Dashboard</NavLink>
-                <NavLink to="/admin/universities" className={navClass}>Universities</NavLink>
-                <NavLink to="/admin/programs" className={navClass}>Programs</NavLink>
-                <NavLink to="/admin/import" className={navClass}>Bulk import</NavLink>
-                <NavLink to="/admin/verification-queue" className={navClass}>Verification queue</NavLink>
-                {canManageRoles(user?.role) && <NavLink to="/admin/administrators" className={navClass}>Manage administrators</NavLink>}
-                <NavLink to="/" className={navClass}>Public site</NavLink>
-                <button type="button" onClick={signOut} className="min-h-11 rounded-xl px-4 text-left text-sm font-bold text-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300">Logout</button>
-              </nav>
-            </details>
-          </div>
-          <nav aria-label="Administrator navigation" className="mt-10 hidden space-y-1 lg:block">
-            <NavLink to="/admin" end className={navClass}>Dashboard</NavLink>
-            <NavLink to="/admin/universities" className={navClass}>Universities</NavLink>
-            <NavLink to="/admin/programs" className={navClass}>Programs</NavLink>
-            <NavLink to="/admin/import" className={navClass}>Bulk import</NavLink>
-            <NavLink to="/admin/verification-queue" className={navClass}>Verification queue</NavLink>
-            {canManageRoles(user?.role) && <NavLink to="/admin/administrators" className={navClass}>Manage administrators</NavLink>}
-            <div className="my-5 border-t border-white/15" />
-            <NavLink to="/" className={navClass}>Public site</NavLink>
-          </nav>
-          <div className="mt-10 hidden min-w-0 rounded-2xl border border-white/10 bg-white/5 p-4 lg:block">
-            <p className="break-words text-sm font-bold">{user?.name || 'Administrator'}</p>
-            <p className="mt-1 break-all text-xs text-slate-300">{user?.email}</p>
-            <button type="button" onClick={signOut} className="mt-4 min-h-11 rounded-lg border border-white/20 px-4 text-sm font-bold text-white hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-300">Logout</button>
-          </div>
-        </header>
-        <main className="min-w-0 px-4 py-7 sm:px-7 lg:px-10 lg:py-10"><Outlet /></main>
-      </div>
+  return <div className="admin-workspace min-h-screen min-w-0">
+    <a href="#admin-main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-white focus:px-4 focus:py-3">Skip to administrator content</a>
+    <div className="mx-auto grid min-h-screen max-w-[1700px] min-w-0 lg:grid-cols-[15rem_minmax(0,1fr)]">
+      <header className="admin-sidebar relative z-20 min-w-0 lg:sticky lg:top-0 lg:h-screen">
+        <div className="flex items-center justify-between gap-3 border-b border-white/15 px-4 py-4 lg:px-5 lg:py-6">
+          <Link to="/admin" className="inline-flex min-h-11 min-w-0 items-center gap-3 font-black focus-visible:outline-3">
+            <span className="grid size-10 shrink-0 place-items-center bg-gold text-xs tracking-[-.08em] text-navy">D2U</span>
+            <span className="leading-tight">DAE2UNI <span className="block text-[.65rem] font-semibold uppercase tracking-[.12em] text-[#b7d4d0]">Operations</span></span>
+          </Link>
+          <details key={location.pathname} className="group lg:hidden">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center border border-white/35 px-3 text-sm font-bold focus-visible:outline-3">Admin menu</summary>
+            <nav aria-label="Administrator navigation" className="absolute inset-x-0 top-full z-30 border-b border-white/20 bg-navy p-3 shadow-xl"><AdminLinks user={user} signOut={signOut} /></nav>
+          </details>
+        </div>
+        <nav aria-label="Administrator navigation" className="hidden px-3 py-5 lg:block"><AdminLinks user={user} signOut={signOut} /></nav>
+        <div className="hidden border-t border-white/15 px-5 py-5 text-sm lg:block">
+          <p className="break-words font-bold">{user?.name || 'Administrator'}</p>
+          <p className="mt-1 break-all text-xs text-[#b7d4d0]">{user?.email}</p>
+          <p className="mt-2 text-xs uppercase tracking-wider text-[#b7d4d0]">{user?.role?.replaceAll('_', ' ')}</p>
+        </div>
+      </header>
+      <main id="admin-main" className="min-w-0 px-4 py-7 sm:px-7 lg:px-10 lg:py-10" tabIndex={-1}><Outlet /></main>
     </div>
-  )
+  </div>
 }

@@ -33,11 +33,11 @@ function mapProfileErrors(errors) {
 
 function Section({ eyebrow, title, description, children }) {
   return (
-    <fieldset className="rounded-3xl border border-forest/10 bg-white/80 p-5 shadow-sm sm:p-7">
+    <fieldset className="paper-surface min-w-0 p-5 sm:p-7">
       <legend className="sr-only">{title}</legend>
-      <p className="text-xs font-black uppercase tracking-[0.18em] text-leaf">{eyebrow}</p>
-      <h2 className="mt-2 text-2xl font-black tracking-tight">{title}</h2>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-ink/55">{description}</p>
+      <p className="eyebrow">{eyebrow}</p>
+      <h2 className="section-title mt-2 text-2xl text-navy">{title}</h2>
+      <p className="body-copy mt-2 max-w-3xl text-sm">{description}</p>
       <div className="mt-6 grid gap-5 sm:grid-cols-2">{children}</div>
     </fieldset>
   )
@@ -126,11 +126,11 @@ function StudentProfilePage() {
   if (isLoading) return <LoadingScreen label="Loading your student profile…" />
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-10 lg:px-10 lg:py-14">
+    <section className="site-container max-w-6xl py-10 lg:py-14">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-leaf">Student onboarding</p>
-          <h1 className="mt-3 text-4xl font-black tracking-[-0.04em] sm:text-5xl">Build your academic profile</h1>
+          <p className="eyebrow">Student onboarding</p>
+          <h1 className="page-title mt-3 text-4xl text-navy sm:text-5xl">Build your academic profile</h1>
           <p className="mt-4 max-w-3xl leading-7 text-ink/65">Save a draft with only the details you know today, or complete every required academic and domicile field when you are ready.</p>
         </div>
         <span className={`w-fit rounded-full px-4 py-2 text-xs font-black uppercase tracking-wide ${profile?.profileStatus === 'complete' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
@@ -181,11 +181,11 @@ function StudentProfilePage() {
           </div>
         </Section>
 
-        <div className="sticky bottom-3 z-10 flex flex-col gap-3 rounded-2xl border border-forest/15 bg-cream/95 p-4 shadow-xl backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+        <div className="sticky bottom-2 z-10 flex flex-col gap-3 border-t-4 border-gold bg-[var(--ui-paper)] p-4 shadow-lg sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs leading-5 text-ink/55">Completing the profile requires DAE, Matric, and domicile fields. Drafts can remain partial.</p>
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
-            <button type="button" disabled={isSaving} onClick={() => saveProfile('draft')} className="rounded-xl border border-forest/20 bg-white px-5 py-3 text-sm font-black text-forest hover:bg-mint/40 focus:outline-none focus-visible:ring-4 focus-visible:ring-leaf/30 disabled:opacity-60">{isSaving ? 'Saving…' : 'Save draft'}</button>
-            <button type="button" disabled={isSaving} onClick={() => saveProfile('complete')} className="rounded-xl bg-forest px-5 py-3 text-sm font-black text-white shadow-lg shadow-forest/20 hover:bg-ink focus:outline-none focus-visible:ring-4 focus-visible:ring-leaf/35 disabled:opacity-60">{isSaving ? 'Saving…' : 'Complete profile'}</button>
+            <button type="button" disabled={isSaving} onClick={() => saveProfile('draft')} className="action-secondary">{isSaving ? 'Saving…' : 'Save draft'}</button>
+            <button type="button" disabled={isSaving} onClick={() => saveProfile('complete')} className="action-primary">{isSaving ? 'Saving…' : 'Complete profile'}</button>
           </div>
         </div>
       </form>

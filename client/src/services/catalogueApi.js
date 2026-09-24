@@ -47,6 +47,9 @@ function normalizeUniversitySummary(value) {
     abbreviation: optionalString(value.abbreviation),
     sector: optionalString(value.sector),
     institutionType: optionalString(value.institutionType),
+    provinceOrTerritory: optionalString(value.provinceOrTerritory),
+    charterAuthority: optionalString(value.charterAuthority),
+    hecRecognitionStatus: optionalString(value.hecRecognitionStatus),
   }
 }
 
@@ -68,6 +71,7 @@ export function normalizeUniversity(value) {
     recognitionBodies: safeArray(value.recognitionBodies).filter((item) => typeof item === 'string'),
     campuses: safeArray(value.campuses).map(normalizeCampus).filter(Boolean),
     contact,
+    hecProfileUrl: optionalString(value.hecProfileUrl),
     source: normalizeSource(value.source),
   }
 }

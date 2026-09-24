@@ -39,15 +39,15 @@ function HealthStatus() {
   }, [])
 
   const dotStyles = {
-    loading: 'bg-amber-400 animate-pulse',
-    healthy: 'bg-emerald-500',
-    warning: 'bg-amber-500',
-    error: 'bg-rose-500',
+    loading: 'bg-amber-700 animate-pulse',
+    healthy: 'bg-[#145b42]',
+    warning: 'bg-amber-700',
+    error: 'bg-[#8b2525]',
   }
 
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-ink/8 bg-cream/70 p-4" aria-live="polite">
-      <span className={`size-3 shrink-0 rounded-full shadow-[0_0_0_5px_rgba(47,143,115,0.12)] ${dotStyles[health.state]}`} />
+    <div className="flex items-center gap-4 border-l-4 border-gold bg-cream p-4" aria-live="polite">
+      <span className={`size-3 shrink-0 rounded-full ${dotStyles[health.state]}`} aria-hidden="true" />
       <div>
         <p className="font-semibold">{health.label}</p>
         <p className="mt-0.5 text-sm text-ink/55">{health.detail}</p>

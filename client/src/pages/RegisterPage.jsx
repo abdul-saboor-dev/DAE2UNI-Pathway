@@ -57,11 +57,11 @@ function RegisterPage() {
       eyebrow="Begin your pathway"
       title="Create your student account"
       description="Your account is the starting point for a DAE CIT profile that you can save gradually and complete when ready."
-      aside={<ul className="mt-8 space-y-3 text-sm text-ink/65"><li>✓ Student accounts only</li><li>✓ Draft-friendly onboarding</li><li>✓ DAE and Matric marks kept together</li></ul>}
+      aside={<ul className="mt-8 space-y-3 border-l-4 border-gold pl-5 text-sm text-[var(--ui-muted)]"><li>Student accounts only</li><li>Draft-friendly onboarding</li><li>DAE and Matric marks kept together</li></ul>}
     >
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         <div>
-          <h2 className="text-2xl font-black tracking-tight">Register</h2>
+          <h2 className="section-title text-2xl text-navy">Register</h2>
           <p className="mt-1 text-sm text-ink/55">All fields are required. You will be signed in after registration.</p>
         </div>
         <FormAlert message={formError || authError} />
@@ -117,7 +117,7 @@ function RegisterPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-xl bg-forest px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-forest/20 transition hover:bg-ink focus:outline-none focus-visible:ring-4 focus-visible:ring-leaf/35 disabled:cursor-not-allowed disabled:opacity-60"
+          className="action-primary w-full"
         >
           {isSubmitting ? 'Creating account…' : 'Create student account'}
         </button>
