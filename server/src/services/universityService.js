@@ -27,6 +27,10 @@ const simpleUniversityFields = [
   'slug',
   'abbreviation',
   'sector',
+  'provinceOrTerritory',
+  'charterAuthority',
+  'hecRecognitionStatus',
+  'hecProfileUrl',
   'institutionType',
   'establishedYear',
   'recognitionBodies',
@@ -44,6 +48,7 @@ async function ensureUniqueSlug(slug, excludedId) {
 
 function normalizedCampuses(document, campuses) {
   const existingIds = new Set(document.campuses.map((campus) => campus._id.toString()))
+  const existingById = new Map(document.campuses.map((campus) => [campus._id.toString(), campus]))
   const suppliedIds = campuses.map((campus) => campus.id).filter(Boolean)
 
   if (new Set(suppliedIds).size !== suppliedIds.length) {
@@ -55,7 +60,10 @@ function normalizedCampuses(document, campuses) {
     }
   }
 
-  return campuses.map(({ id, ...campus }) => ({ ...campus, ...(id && { _id: id }) }))
+  return campuses.map(({ id, ...campus }) => ({ ...campus,
+    ...(id && { _id: id }),
+    ...(id && existingById.get(id)?.importKey && { importKey: existingById.get(id).importKey }),
+  }))
 }
 
 async function ensureRemovedCampusesAreUnused(universityId, currentCampuses, nextCampuses) {
@@ -87,6 +95,9 @@ export async function listAdminUniversities(filters) {
   }
   if (filters.city) query['campuses.city'] = exactCaseInsensitive(filters.city)
   if (filters.sector) query.sector = filters.sector
+  if (filters.provinceOrTerritory) query.provinceOrTerritory = filters.provinceOrTerritory
+  if (filters.charterAuthority) query.charterAuthority = filters.charterAuthority
+  if (filters.hecRecognitionStatus) query.hecRecognitionStatus = filters.hecRecognitionStatus
   if (filters.institutionType) query.institutionType = filters.institutionType
   if (filters.recordStatus) query.recordStatus = filters.recordStatus
   if (filters.verificationStatus) query['source.verificationStatus'] = filters.verificationStatus
@@ -182,6 +193,9 @@ function publicUniversityQuery(filters = {}) {
     }
   }
   if (filters.sector) query.sector = filters.sector
+  if (filters.provinceOrTerritory) query.provinceOrTerritory = filters.provinceOrTerritory
+  if (filters.charterAuthority) query.charterAuthority = filters.charterAuthority
+  if (filters.hecRecognitionStatus) query.hecRecognitionStatus = filters.hecRecognitionStatus
   if (filters.institutionType) query.institutionType = filters.institutionType
   return query
 }

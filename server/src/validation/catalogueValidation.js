@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { emptyObjectSchema } from './commonValidation.js'
+import { CHARTER_AUTHORITIES, HEC_RECOGNITION_STATUSES, PHYSICAL_LOCATIONS } from '../utils/geography.js'
 
 const verificationStatuses = [
   'unverified',
@@ -73,7 +74,7 @@ const campusBaseShape = {
   name: trimmedString(160),
   city: trimmedString(100),
   district: optionalTrimmedString(100),
-  province: z.literal('Punjab').default('Punjab'),
+  province: z.enum(PHYSICAL_LOCATIONS).default('Punjab'),
   address: optionalTrimmedString(300),
   isMainCampus: z.boolean().default(false),
   isActive: z.boolean().default(true),
@@ -103,6 +104,10 @@ const universityCreateBodySchema = z
     slug: slugSchema,
     abbreviation: trimmedString(30).transform((value) => value.toUpperCase()).optional(),
     sector: z.enum(['public', 'private']),
+    provinceOrTerritory: z.enum(PHYSICAL_LOCATIONS).optional(),
+    charterAuthority: z.enum(CHARTER_AUTHORITIES).optional(),
+    hecRecognitionStatus: z.enum(HEC_RECOGNITION_STATUSES).optional(),
+    hecProfileUrl: httpUrlSchema.optional(),
     institutionType: z.enum(['general', 'engineering', 'technology', 'specialized']).default('general'),
     establishedYear: z.number().int().min(1800).max(2100).optional(),
     recognitionBodies: z.array(trimmedString(100)).max(30).optional(),
@@ -119,6 +124,10 @@ const universityUpdateBodySchema = z
     slug: slugSchema.optional(),
     abbreviation: trimmedString(30).transform((value) => value.toUpperCase()).optional(),
     sector: z.enum(['public', 'private']).optional(),
+    provinceOrTerritory: z.enum(PHYSICAL_LOCATIONS).optional(),
+    charterAuthority: z.enum(CHARTER_AUTHORITIES).optional(),
+    hecRecognitionStatus: z.enum(HEC_RECOGNITION_STATUSES).optional(),
+    hecProfileUrl: httpUrlSchema.nullable().optional(),
     institutionType: z.enum(['general', 'engineering', 'technology', 'specialized']).optional(),
     establishedYear: z.number().int().min(1800).max(2100).optional(),
     recognitionBodies: z.array(trimmedString(100)).max(30).optional(),
@@ -203,6 +212,9 @@ const adminUniversityQuerySchema = z
     search: searchSchema,
     city: citySchema,
     sector: z.enum(['public', 'private']).optional(),
+    provinceOrTerritory: z.enum(PHYSICAL_LOCATIONS).optional(),
+    charterAuthority: z.enum(CHARTER_AUTHORITIES).optional(),
+    hecRecognitionStatus: z.enum(HEC_RECOGNITION_STATUSES).optional(),
     institutionType: z.enum(['general', 'engineering', 'technology', 'specialized']).optional(),
     recordStatus: z.enum(universityStatuses).optional(),
     verificationStatus: z.enum(verificationStatuses).optional(),
@@ -216,6 +228,9 @@ const publicUniversityQuerySchema = z
     search: searchSchema,
     city: citySchema,
     sector: z.enum(['public', 'private']).optional(),
+    provinceOrTerritory: z.enum(PHYSICAL_LOCATIONS).optional(),
+    charterAuthority: z.enum(CHARTER_AUTHORITIES).optional(),
+    hecRecognitionStatus: z.enum(HEC_RECOGNITION_STATUSES).optional(),
     institutionType: z.enum(['general', 'engineering', 'technology', 'specialized']).optional(),
     sort: z.enum(['name', '-name', 'establishedYear', '-establishedYear']).default('name'),
     ...paginationShape,

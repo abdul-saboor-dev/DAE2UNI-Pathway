@@ -17,6 +17,7 @@ export default function UniversityCard({ university }) {
       </div>
       <h2 className="mt-4 break-words text-2xl font-black tracking-tight">{university.name}</h2>
       {university.abbreviation && <p className="mt-1 font-bold text-ink/50">{university.abbreviation}</p>}
+      <p className="mt-2 text-xs font-semibold text-ink/60">{university.provinceOrTerritory || 'Location unrecorded'} · {university.charterAuthority || 'Charter unrecorded'} charter · HEC: {(university.hecRecognitionStatus || 'unverified').replaceAll('_', ' ')}</p>
       <div className="mt-5 flex-1 rounded-2xl bg-cream p-4 text-sm leading-6 text-ink/65">
         <span className="font-bold text-ink">Campus locations: </span>
         {locations.length ? locations.join(', ') : 'Location not listed'}

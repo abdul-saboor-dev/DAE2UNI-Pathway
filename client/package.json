@@ -11,6 +11,7 @@
     "check:admin-frontend": "node scripts/validateAdminFrontend.js",
     "check:setup-frontend": "node scripts/validateAdminSetupFrontend.js",
     "check:roles-frontend": "node scripts/validateRoleManagementFrontend.js",
+    "check:geographic-frontend": "node scripts/validateGeographicFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

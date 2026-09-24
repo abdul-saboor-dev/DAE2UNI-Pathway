@@ -48,6 +48,7 @@ export default function UniversityDetailPage() {
 
   const university = detail.item
   const website = getSafeExternalUrl(university.contact?.websiteUrl)
+  const hecProfile = getSafeExternalUrl(university.hecProfileUrl)
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-14">
       <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Universities', to: '/universities' }, { label: university.name }]} />
@@ -58,6 +59,7 @@ export default function UniversityDetailPage() {
           <p className="text-xs font-black uppercase tracking-[0.2em] text-mint">{label(university.institutionType) || 'University'} · {label(university.sector)}</p>
           <h1 className="mt-3 break-words text-4xl font-black tracking-[-0.04em] sm:text-5xl">{university.name}</h1>
           {university.abbreviation && <p className="mt-3 text-lg font-bold text-white/70">{university.abbreviation}</p>}
+          <p className="mt-3 text-sm text-white/80">{university.provinceOrTerritory || 'Location not recorded'} · {label(university.charterAuthority) || 'Charter authority not recorded'} charter</p>
         </header>
 
         <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(16rem,0.65fr)]">
@@ -82,6 +84,7 @@ export default function UniversityDetailPage() {
             )}
           </div>
           <div className="space-y-4">
+            <div className="rounded-2xl border border-forest/10 p-4 text-sm"><h2 className="font-black">HEC recognition record</h2><p className="mt-1 text-ink/60">{label(university.hecRecognitionStatus) || 'Unverified'}</p>{hecProfile && <a href={hecProfile} target="_blank" rel="noopener noreferrer" className="mt-2 block break-all text-teal-800 underline">Open HEC institution profile (external site)</a>}</div>
             {website && (
               <a href={website} target="_blank" rel="noopener noreferrer" className="flex min-h-12 items-center justify-center rounded-xl bg-forest px-4 py-3 text-center text-sm font-black text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-leaf/35">
                 Visit official website <span className="sr-only">(opens in a new tab)</span>

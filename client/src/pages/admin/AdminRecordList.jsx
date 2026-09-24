@@ -7,16 +7,20 @@ import { cataloguePageHref } from '../../utils/catalogueQuery.js'
 import { getApiErrorMessage } from '../../utils/apiErrors.js'
 import { isPublicRecord } from '../../utils/adminCatalogue.js'
 import { getAdminUniversity } from '../../services/adminCatalogueApi.js'
+import { charterAuthorities, hecRecognitionStatuses, physicalLocations } from '../../utils/geography.js'
 
 const controls = {
   sector: [['', 'All sectors'], ['public', 'Public'], ['private', 'Private']],
+  provinceOrTerritory: [['', 'All locations'], ...physicalLocations.map((value) => [value, value])],
+  charterAuthority: [['', 'All charter authorities'], ...charterAuthorities.map((value) => [value, value])],
+  hecRecognitionStatus: [['', 'All HEC states'], ...hecRecognitionStatuses.map((value) => [value, value.replaceAll('_', ' ')])],
   institutionType: [['', 'All types'], ['general', 'General'], ['engineering', 'Engineering'], ['technology', 'Technology'], ['specialized', 'Specialized']],
   credentialType: [['', 'All credentials'], ['BS', 'BS'], ['BSc', 'BSc'], ['BE', 'BE'], ['BTech', 'BTech'], ['ADP', 'ADP'], ['other', 'Other']],
   degreeLevel: [['', 'All levels'], ['undergraduate', 'Undergraduate']],
   studyMode: [['', 'All modes'], ['morning', 'Morning'], ['evening', 'Evening'], ['weekend', 'Weekend'], ['multiple', 'Multiple']],
   verificationStatus: [['', 'All verification states'], ['unverified', 'Unverified'], ['pending_review', 'Pending review'], ['verified', 'Verified'], ['needs_update', 'Needs update'], ['unavailable', 'Unavailable']],
 }
-const labels = { sector: 'Sector', institutionType: 'Institution type', credentialType: 'Credential type', degreeLevel: 'Degree level', studyMode: 'Study mode', verificationStatus: 'Verification', recordStatus: 'Publication status' }
+const labels = { sector: 'Sector', provinceOrTerritory: 'Primary location', charterAuthority: 'Charter authority', hecRecognitionStatus: 'HEC recognition', institutionType: 'Institution type', credentialType: 'Credential type', degreeLevel: 'Degree level', studyMode: 'Study mode', verificationStatus: 'Verification', recordStatus: 'Publication status' }
 
 export default function AdminRecordList({ kind, definition, load, remove }) {
   const isUniversity = kind === 'university'
@@ -41,7 +45,7 @@ export default function AdminRecordList({ kind, definition, load, remove }) {
     return () => { active = false; controller.abort() }
   }, [isUniversity, list.items, list.status])
   const fields = isUniversity
-    ? ['sector', 'institutionType', 'recordStatus', 'verificationStatus']
+    ? ['provinceOrTerritory', 'charterAuthority', 'sector', 'hecRecognitionStatus', 'institutionType', 'recordStatus', 'verificationStatus']
     : ['university', 'institutionType', 'credentialType', 'degreeLevel', 'studyMode', 'recordStatus', 'verificationStatus']
   const sortOptions = isUniversity
     ? [['name', 'Name A–Z'], ['-name', 'Name Z–A'], ['establishedYear', 'Oldest first'], ['-establishedYear', 'Newest first'], ['-updatedAt', 'Recently updated']]

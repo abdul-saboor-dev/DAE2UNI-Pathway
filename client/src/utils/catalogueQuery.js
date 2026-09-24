@@ -1,3 +1,5 @@
+import { charterAuthorities, hecRecognitionStatuses, physicalLocations } from './geography.js'
+
 const textField = (maximum = 100) => ({ type: 'text', maximum })
 const enumField = (values, defaultValue = '') => ({ type: 'enum', values, defaultValue })
 const identifierField = () => ({ type: 'identifier' })
@@ -6,6 +8,10 @@ const universityIdentifierPattern = /^(?:[a-f\d]{24}|[a-z0-9]+(?:-[a-z0-9]+)*)$/
 export const universityQueryDefinition = {
   search: textField(),
   city: textField(),
+  provinceOrTerritory: enumField(physicalLocations),
+  charterAuthority: enumField(charterAuthorities),
+  hecRecognitionStatus: enumField(hecRecognitionStatuses),
+  sector: enumField(['public', 'private']),
   institutionType: enumField(['general', 'engineering', 'technology', 'specialized']),
   sort: enumField(['name', '-name', 'establishedYear', '-establishedYear'], 'name'),
   page: { type: 'page', defaultValue: 1 },

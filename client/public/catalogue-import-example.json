@@ -1,0 +1,34 @@
+{
+  "strategy": "skip",
+  "universities": [
+    {
+      "slug": "temporary-fictional-pathway-institute",
+      "name": "Fictional Pathway Institute (example only)",
+      "sector": "private",
+      "institutionType": "technology",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://example.invalid/fictional-institute" },
+      "campuses": [
+        {
+          "key": "fictional-main-campus",
+          "name": "Fictional Main Campus",
+          "city": "Example City",
+          "province": "Punjab",
+          "isMainCampus": true
+        }
+      ],
+      "programs": [
+        {
+          "slug": "fictional-computing-program",
+          "name": "Fictional Computing Program (example only)",
+          "degreeTitle": "Bachelor of Fictional Computing",
+          "credentialType": "BS",
+          "duration": { "years": 4 },
+          "campusKeys": ["fictional-main-campus"],
+          "source": { "officialUrl": "https://example.invalid/fictional-program" }
+        }
+      ]
+    }
+  ]
+}

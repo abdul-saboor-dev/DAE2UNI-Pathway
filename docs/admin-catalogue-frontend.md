@@ -14,6 +14,8 @@ This local milestone adds a separate administrator workspace for managing the ex
 | `/admin/programs/new` | Create a program |
 | `/admin/programs/:programId/edit` | Edit a program |
 | `/admin/administrators` | Owner/Co-Owner team management, search, and role changes |
+| `/admin/import` | Draft-only JSON import, dry-run preview, and result subroutes |
+| `/admin/verification-queue` | Manual official-source review queue |
 
 The route guard waits for the session restoration request (`GET /api/auth/me`). Unauthenticated visitors go to login with an internal intended destination. Students go to `/unauthorized`. Owner, Co-Owner, and Admin have the same catalogue content access; only Owner and Co-Owner see `/admin/administrators`. After login, the safe intended route opens. These frontend checks are for navigation only: every admin API request still requires a Bearer token and the backend checks the account's current database role/status. Public catalogue requests remain token-free. Access tokens are retained only in `sessionStorage`; no JWT claims are decoded to decide a role. See [role management](./role-management.md) for transitions and the team API.
 
@@ -23,7 +25,7 @@ Counts come from the `pagination.totalRecords` of bounded, filtered admin list r
 
 ## University workflow
 
-The form supports the fields accepted by the current API: name, abbreviation, slug, sector, institution type, establishment year, recognition bodies, Punjab campuses (name, city, district, address, main/active state), contact URLs/email/phone, official source URL, source verification status/date, and record publication status. The API does **not** accept a description or separate source title/publisher; these are intentionally absent. A published university requires exactly one main campus. On edit, the entire campus array is submitted with the original server-issued `id` for each retained campus. New campuses have no server ID in the request; client-only rendering keys are discarded. Removing a campus referenced by a program returns a conflict and leaves the form values intact.
+The form supports the fields accepted by the current API: name, abbreviation, slug, sector, institution type, physical province/territory, charter authority, HEC recognition status/profile URL, establishment year, recognition bodies, campuses (name, city, province/territory, district, address, main/active state), contact URLs/email/phone, official source URL, source verification status/date, and record publication status. The API does **not** accept a description or separate source title/publisher; these are intentionally absent. A published university requires exactly one main campus. On edit, the entire campus array is submitted with the original server-issued `id` for each retained campus. New campuses have no server ID in the request; client-only rendering keys are discarded. Removing a campus referenced by a program returns a conflict and leaves the form values intact.
 
 ## Program workflow
 

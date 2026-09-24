@@ -7,6 +7,7 @@ import UniversityCard from '../components/UniversityCard.jsx'
 import useCatalogueList from '../hooks/useCatalogueList.js'
 import { getUniversities } from '../services/catalogueApi.js'
 import { cataloguePageHref, universityQueryDefinition } from '../utils/catalogueQuery.js'
+import { charterAuthorities, hecRecognitionStatuses, physicalLocations } from '../utils/geography.js'
 
 const institutionTypes = [
   ['', 'All institution types'],
@@ -25,14 +26,14 @@ const sortOptions = [
 
 export default function UniversitiesPage() {
   const catalogue = useCatalogueList({ definition: universityQueryDefinition, load: getUniversities })
-  const activeCount = ['search', 'city', 'institutionType'].filter((key) => catalogue.query[key]).length
+  const activeCount = ['search', 'city', 'provinceOrTerritory', 'charterAuthority', 'hecRecognitionStatus', 'sector', 'institutionType'].filter((key) => catalogue.query[key]).length
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-14">
       <CataloguePageHeader
         eyebrow="University discovery"
-        title="Explore verified universities across Punjab"
-        description="Browse public catalogue records and official source links relevant to the next step after DAE CIT. Eligibility decisions are intentionally not shown yet."
+        title="Explore verified university sources"
+        description="Discover Punjab campuses and federally chartered institutions across Pakistan. Physical location, charter authority, sector, and HEC recognition are separate facts; eligibility decisions are not shown yet."
       />
 
       <div className="mt-8 grid min-w-0 gap-7 lg:grid-cols-[18rem_minmax(0,1fr)]">
@@ -44,6 +45,10 @@ export default function UniversitiesPage() {
             <FilterField id="university-city" label="City">
               <input id="university-city" value={catalogue.query.city} onChange={(event) => catalogue.setQueryValue('city', event.target.value, { replace: true })} className={filterControlClass} placeholder="For example, Lahore" autoComplete="address-level2" />
             </FilterField>
+            <FilterField id="university-province" label="Primary province or territory"><select id="university-province" value={catalogue.query.provinceOrTerritory} onChange={(event) => catalogue.setQueryValue('provinceOrTerritory', event.target.value)} className={filterControlClass}><option value="">All locations</option>{physicalLocations.map((value) => <option key={value} value={value}>{value}</option>)}</select></FilterField>
+            <FilterField id="university-charter" label="Charter authority"><select id="university-charter" value={catalogue.query.charterAuthority} onChange={(event) => catalogue.setQueryValue('charterAuthority', event.target.value)} className={filterControlClass}><option value="">All charter authorities</option>{charterAuthorities.map((value) => <option key={value} value={value}>{value}</option>)}</select></FilterField>
+            <FilterField id="university-sector" label="Sector"><select id="university-sector" value={catalogue.query.sector} onChange={(event) => catalogue.setQueryValue('sector', event.target.value)} className={filterControlClass}><option value="">Public and private</option><option value="public">Public</option><option value="private">Private</option></select></FilterField>
+            <FilterField id="university-hec" label="HEC recognition status"><select id="university-hec" value={catalogue.query.hecRecognitionStatus} onChange={(event) => catalogue.setQueryValue('hecRecognitionStatus', event.target.value)} className={filterControlClass}><option value="">All HEC states</option>{hecRecognitionStatuses.map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}</select></FilterField>
             <FilterField id="university-type" label="Institution type">
               <select id="university-type" value={catalogue.query.institutionType} onChange={(event) => catalogue.setQueryValue('institutionType', event.target.value)} className={filterControlClass}>
                 {institutionTypes.map(([value, label]) => <option key={value} value={value}>{label}</option>)}

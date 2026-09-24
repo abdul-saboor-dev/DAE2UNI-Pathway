@@ -222,6 +222,8 @@ The React client exposes public discovery routes at `/universities`, `/universit
 
 The administrator workspace lives at `/admin`, with university and program management under `/admin/universities` and `/admin/programs`. Owner and Co-Owner also use `/admin/administrators` to manage regular Admin access; only Owner can manage Co-Owners. Admins cannot manage roles. Role removal never deletes an account or profile. See [administrator workflow](docs/admin-catalogue-frontend.md) and [role management](docs/role-management.md).
 
+Geographic catalogue fields now distinguish physical province/territory, charter authority, sector, and HEC recognition. Content managers can preview/apply draft-only JSON at `/admin/import` and manually review official sources at `/admin/verification-queue`. No real university data was added. See the [geographic catalogue guide](docs/geographic-catalogue.md) for import limits, existing-draft backfill, endpoints, and verification safeguards.
+
 ## Quality Checks
 
 Run the frontend checks before sharing changes:
@@ -233,6 +235,7 @@ npm run check:catalogue
 npm run check:admin-frontend
 npm run check:setup-frontend
 npm run check:roles-frontend
+npm run check:geographic-frontend
 npm run lint
 npm run build
 
@@ -242,6 +245,7 @@ npm run check:security
 npm run check:catalogue
 npm run check:setup
 npm run check:roles
+npm run check:geographic-catalogue
 ```
 
 ## Git Workflow

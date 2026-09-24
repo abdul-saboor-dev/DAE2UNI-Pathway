@@ -1,6 +1,8 @@
 # University and Program Catalogue API
 
-The catalogue API provides administrator-managed university and undergraduate-program records and a separate public, read-only view. It does not evaluate eligibility, calculate merit, manage entry tests/admission cycles, seed institutional facts, or provide a catalogue frontend.
+The catalogue API provides administrator-managed university and undergraduate-program records and a separate public, read-only view. It does not evaluate eligibility, calculate merit, manage entry tests/admission cycles, or seed institutional facts.
+
+The geographic extension adds backward-compatible university fields `provinceOrTerritory`, `charterAuthority`, `hecRecognitionStatus`, and `hecProfileUrl`, plus campus provinces/territories outside Punjab. Location, charter, sector, and HEC recognition are separate dimensions. Existing records are not automatically rewritten; see the [geographic backfill/import and verification guide](./geographic-catalogue.md). University lists additionally support allowlisted `sector`, `provinceOrTerritory`, `charterAuthority`, and `hecRecognitionStatus` filters. HEC recognition is informational and distinct from the existing source-verification/publication visibility gate.
 
 All requests and responses use JSON. Success responses use `{ "status": "success", "data": { ... } }`. Errors use `{ "status": "error", "code": "...", "message": "..." }`; request-validation errors also include a `details` array with field paths and safe messages.
 

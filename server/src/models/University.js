@@ -1,16 +1,27 @@
 import mongoose, { Schema } from 'mongoose'
 import { baseSchemaOptions, isHttpUrl } from './schemas/schemaOptions.js'
 import sourceInfoSchema from './schemas/sourceInfoSchema.js'
+import { CHARTER_AUTHORITIES, HEC_RECOGNITION_STATUSES, PHYSICAL_LOCATIONS } from '../utils/geography.js'
 
 const campusSchema = new Schema({
   name: { type: String, required: true, trim: true, maxlength: 160 },
   city: { type: String, required: true, trim: true, maxlength: 100 },
   district: { type: String, trim: true, maxlength: 100 },
-  province: { type: String, enum: ['Punjab'], default: 'Punjab', required: true },
+  province: { type: String, enum: PHYSICAL_LOCATIONS, default: 'Punjab', required: true },
+  importKey: { type: String, trim: true, lowercase: true, match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/ },
   address: { type: String, trim: true, maxlength: 300 },
   isMainCampus: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
 })
+
+function isSafeHecProfileUrl(value) {
+  if (!value) return true
+  if (!isHttpUrl(value)) return false
+  try {
+    const parsed = new URL(value)
+    return !parsed.username && !parsed.password
+  } catch { return false }
+}
 
 const universitySchema = new Schema(
   {
@@ -28,6 +39,10 @@ const universitySchema = new Schema(
       enum: ['public', 'private'],
       required: true,
     },
+    provinceOrTerritory: { type: String, enum: PHYSICAL_LOCATIONS, default: 'unknown', required: true },
+    charterAuthority: { type: String, enum: CHARTER_AUTHORITIES, default: 'unknown', required: true },
+    hecRecognitionStatus: { type: String, enum: HEC_RECOGNITION_STATUSES, default: 'unverified', required: true },
+    hecProfileUrl: { type: String, trim: true, validate: { validator: isSafeHecProfileUrl, message: 'HEC profile URL must use HTTP or HTTPS without embedded credentials.' } },
     institutionType: {
       type: String,
       enum: ['general', 'engineering', 'technology', 'specialized'],
@@ -40,7 +55,7 @@ const universitySchema = new Schema(
       type: [campusSchema],
       validate: {
         validator: (campuses) => campuses.length > 0,
-        message: 'At least one Punjab campus is required.',
+        message: 'At least one campus is required.',
       },
     },
     contact: {
@@ -72,8 +87,13 @@ universitySchema.index({ slug: 1 }, { unique: true })
 universitySchema.index({ name: 'text', abbreviation: 'text' })
 universitySchema.index({ sector: 1, recordStatus: 1 })
 universitySchema.index({ 'campuses.city': 1 })
+universitySchema.index({ provinceOrTerritory: 1, charterAuthority: 1, hecRecognitionStatus: 1 })
 
 universitySchema.pre('validate', function validateMainCampus() {
+  const importKeys = this.campuses.map((campus) => campus.importKey).filter(Boolean)
+  if (new Set(importKeys).size !== importKeys.length) {
+    this.invalidate('campuses', 'Campus import keys must be unique within a university.')
+  }
   const mainCampusCount = this.campuses.filter((campus) => campus.isMainCampus).length
   if (this.recordStatus === 'published' && mainCampusCount !== 1) {
     this.invalidate('campuses', 'A published university must have exactly one main campus.')

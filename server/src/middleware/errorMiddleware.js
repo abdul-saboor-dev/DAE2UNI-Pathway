@@ -35,6 +35,10 @@ export function errorHandler(error, _request, response, _next) {
     statusCode = 400
     code = 'INVALID_JSON'
     message = 'Request body contains invalid JSON.'
+  } else if (error?.type === 'entity.too.large') {
+    statusCode = 413
+    code = 'PAYLOAD_TOO_LARGE'
+    message = 'Request body exceeds the permitted size.'
   }
 
   if (statusCode >= 500 && !(error instanceof ApiError)) {

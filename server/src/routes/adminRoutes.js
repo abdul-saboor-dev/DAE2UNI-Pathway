@@ -32,12 +32,16 @@ import { OWNER_ONLY_ROLES, ROLE_MANAGER_ROLES } from '../utils/roles.js'
 import { grantCoOwnerAccess, listAdministrators, promote, revoke, revokeCoOwnerAccess } from '../controllers/teamController.js'
 import { teamThrottle } from '../middleware/teamThrottle.js'
 import { changeCoOwnerSchema, listTeamSchema, promoteStudentSchema, revokeAdminSchema } from '../validation/teamValidation.js'
+import { getVerificationQueue, postVerifySource } from '../controllers/verificationQueueController.js'
+import { listVerificationQueueSchema, verifyCatalogueSourceSchema } from '../validation/verificationQueueValidation.js'
 
 const router = Router()
 
 router.use(authenticate, authorize(...CONTENT_MANAGER_ROLES))
 
 router.get('/ping', validateRequest(emptyRequestSchema), getAdminPing)
+router.get('/verification-queue', validateRequest(listVerificationQueueSchema), getVerificationQueue)
+router.post('/verification-queue/:entityType/:recordId/verify', validateRequest(verifyCatalogueSourceSchema), postVerifySource)
 
 router.get('/administrators', authorize(...ROLE_MANAGER_ROLES), validateRequest(listTeamSchema), listAdministrators)
 router.post('/administrators/promote', authorize(...ROLE_MANAGER_ROLES), teamThrottle, validateRequest(promoteStudentSchema), promote)

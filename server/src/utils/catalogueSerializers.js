@@ -26,6 +26,7 @@ function adminSource(source) {
 function campus(campusRecord, includeId = false) {
   return {
     ...(includeId && { id: identifier(campusRecord._id || campusRecord.id) }),
+    ...(includeId && campusRecord.importKey && { importKey: campusRecord.importKey }),
     name: campusRecord.name,
     city: campusRecord.city,
     district: campusRecord.district,
@@ -44,9 +45,13 @@ export function toAdminUniversity(university) {
     slug: record.slug,
     abbreviation: record.abbreviation,
     sector: record.sector,
+    provinceOrTerritory: record.provinceOrTerritory || 'unknown',
+    charterAuthority: record.charterAuthority || 'unknown',
+    hecRecognitionStatus: record.hecRecognitionStatus || 'unverified',
+    hecProfileUrl: record.hecProfileUrl,
     institutionType: record.institutionType,
     establishedYear: record.establishedYear,
-    recognitionBodies: record.recognitionBodies,
+    recognitionBodies: record.recognitionBodies || [],
     campuses: record.campuses?.map((item) => campus(item, true)),
     contact: record.contact,
     source: adminSource(record.source),
@@ -64,9 +69,13 @@ export function toPublicUniversity(university) {
     slug: record.slug,
     abbreviation: record.abbreviation,
     sector: record.sector,
+    provinceOrTerritory: record.provinceOrTerritory || 'unknown',
+    charterAuthority: record.charterAuthority || 'unknown',
+    hecRecognitionStatus: record.hecRecognitionStatus || 'unverified',
+    hecProfileUrl: record.hecProfileUrl,
     institutionType: record.institutionType,
     establishedYear: record.establishedYear,
-    recognitionBodies: record.recognitionBodies,
+    recognitionBodies: record.recognitionBodies || [],
     campuses: record.campuses
       ?.filter((item) => item.isActive)
       .map((item) => campus(item)),

@@ -1,5 +1,6 @@
 import { catalogueApiParams, parseCatalogueQuery } from './catalogueQuery.js'
 import { sourceDateToIso } from './adminDates.js'
+import { charterAuthorities, hecRecognitionStatuses, physicalLocations } from './geography.js'
 
 const text = (maximum = 100) => ({ type: 'text', maximum })
 const choice = (values, defaultValue = '') => ({ type: 'enum', values, defaultValue })
@@ -10,6 +11,8 @@ export const programStatusOptions = ['draft', 'published', 'suspended', 'archive
 
 export const adminUniversityQueryDefinition = {
   search: text(), city: text(), sector: choice(['public', 'private']),
+  provinceOrTerritory: choice(physicalLocations), charterAuthority: choice(charterAuthorities),
+  hecRecognitionStatus: choice(hecRecognitionStatuses),
   institutionType: choice(['general', 'engineering', 'technology', 'specialized']),
   recordStatus: choice(universityStatusOptions), verificationStatus: choice(verificationOptions),
   sort: choice(['name', '-name', 'establishedYear', '-establishedYear', 'createdAt', '-createdAt', 'updatedAt', '-updatedAt'], 'name'),
@@ -62,9 +65,11 @@ export function buildUniversityPayload(form, original, isNew) {
   const payload = {
     name: optional(form.name), slug: optional(form.slug)?.toLowerCase(),
     sector: form.sector, institutionType: form.institutionType,
+    provinceOrTerritory: form.provinceOrTerritory, charterAuthority: form.charterAuthority,
+    hecRecognitionStatus: form.hecRecognitionStatus,
     campuses: form.campuses.map((campus) => ({
       ...(!isNew && campus.id ? { id: campus.id } : {}),
-      name: optional(campus.name), city: optional(campus.city), province: 'Punjab',
+      name: optional(campus.name), city: optional(campus.city), province: campus.province || 'Punjab',
       ...(optional(campus.district) && { district: optional(campus.district) }),
       ...(optional(campus.address) && { address: optional(campus.address) }),
       isMainCampus: Boolean(campus.isMainCampus), isActive: Boolean(campus.isActive),
@@ -74,6 +79,8 @@ export function buildUniversityPayload(form, original, isNew) {
   const source = buildSourcePayload(form.source, original?.source, isNew)
   if (source) payload.source = source
   if (optional(form.abbreviation)) payload.abbreviation = optional(form.abbreviation)
+  if (optional(form.hecProfileUrl)) payload.hecProfileUrl = optional(form.hecProfileUrl)
+  else if (!isNew && original?.hecProfileUrl) payload.hecProfileUrl = null
   if (form.establishedYear !== '') payload.establishedYear = Number(form.establishedYear)
   const bodies = form.recognitionBodies.split(',').map((part) => part.trim()).filter(Boolean)
   if (bodies.length || original?.recognitionBodies?.length) payload.recognitionBodies = bodies

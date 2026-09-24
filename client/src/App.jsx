@@ -1,6 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
 import { AdminRouteGuard, ProtectedRoute, PublicOnlyRoute, TeamRouteGuard } from './components/RouteGuards.jsx'
 import AdminTeamPage from './pages/admin/AdminTeamPage.jsx'
+import AdminImportPage from './pages/admin/AdminImportPage.jsx'
+import AdminVerificationQueuePage from './pages/admin/AdminVerificationQueuePage.jsx'
 import AdminLayout from './layouts/AdminLayout.jsx'
 import AdministratorSetupPage from './pages/AdministratorSetupPage.jsx'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx'
@@ -33,6 +35,8 @@ function App() {
           <Route path="programs" element={<AdminProgramsPage />} />
           <Route path="programs/new" element={<AdminProgramFormPage />} />
           <Route path="programs/:programId/edit" element={<AdminProgramFormPage />} />
+          <Route path="import/*" element={<AdminImportPage />} />
+          <Route path="verification-queue" element={<AdminVerificationQueuePage />} />
           <Route element={<TeamRouteGuard />}>
             <Route path="administrators" element={<AdminTeamPage />} />
           </Route>
