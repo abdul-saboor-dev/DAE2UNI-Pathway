@@ -2,9 +2,8 @@
 
 @theme {
   --color-ink: #17212b;
-  --color-forest: #146b5a;
-  --color-leaf: #146b5a;
-  --color-mint: #e5efe9;
+  --color-academic: #285f8f;
+  --color-bluewash: #e8f1f7;
   --color-cream: #f7f4ed;
   --color-navy: #102a43;
   --color-gold: #c9963b;
@@ -22,6 +21,10 @@
   --ui-paper: #fffdf9;
   --ui-error: #8b2525;
   --ui-success: #145b42;
+  --academic-hover: #1f4f78;
+  --academic-pressed: #173f62;
+  --academic-disabled: #a5bed2;
+  --academic-focus-inverse: #a9cee6;
   --ui-radius: .65rem;
   --ui-shadow: 0 12px 32px -24px rgb(16 42 67 / .42);
 }
@@ -32,37 +35,39 @@ body { min-width: 320px; min-height: 100vh; margin: 0; }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a, button, summary { text-underline-offset: .2em; }
-:focus-visible { outline: 3px solid var(--color-forest); outline-offset: 3px; scroll-margin: 1rem; }
-::selection { background: #d7e9dc; color: var(--color-navy); }
+:focus-visible { outline: 3px solid var(--color-academic); outline-offset: 3px; scroll-margin: 1rem; }
+::selection { background: var(--color-bluewash); color: var(--color-navy); }
 
 .display-type { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: -.035em; line-height: 1.05; text-wrap: balance; }
 .page-title { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: -.025em; line-height: 1.12; text-wrap: balance; }
 .section-title { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
-.eyebrow { color: var(--color-forest); font-size: .72rem; font-weight: 800; letter-spacing: .16em; line-height: 1.4; text-transform: uppercase; }
+.eyebrow { color: var(--color-academic); font-size: .72rem; font-weight: 800; letter-spacing: .16em; line-height: 1.4; text-transform: uppercase; }
 .body-copy { color: var(--ui-muted); line-height: 1.7; }
 .site-container { width: min(100% - 2rem, 78rem); margin-inline: auto; }
 .editorial-rule { border-top: 1px solid var(--ui-border); }
 .paper-surface { border: 1px solid var(--ui-border); border-radius: var(--ui-radius); background: var(--ui-paper); box-shadow: var(--ui-shadow); }
 .action-primary, .action-secondary { display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; gap: .5rem; padding: .7rem 1.15rem; border-radius: .45rem; font-size: .875rem; font-weight: 800; line-height: 1.3; transition: background-color .16s ease, border-color .16s ease, color .16s ease; }
-.action-primary { background: var(--color-forest); color: #fff; }
-.action-primary:hover { background: #0e5346; }
-.action-secondary { border: 1px solid #9eaaa5; background: transparent; color: var(--color-navy); }
-.action-secondary:hover { border-color: var(--color-forest); background: #e5efe9; }
-.action-primary:disabled, .action-secondary:disabled { cursor: not-allowed; opacity: .55; }
-.site-input { min-height: 2.75rem; width: 100%; min-width: 0; border: 1px solid #aeb8b6; border-radius: .4rem; background: #fff; padding: .65rem .8rem; color: var(--color-ink); }
-.site-input:focus { border-color: var(--color-forest); outline: 3px solid var(--color-forest); outline-offset: 2px; }
+.action-primary { background: var(--color-academic); color: #fff; }
+.action-primary:hover:not(:disabled) { background: var(--academic-hover); }
+.action-primary:active:not(:disabled) { background: var(--academic-pressed); }
+.action-secondary { border: 1px solid #a9adb2; background: transparent; color: var(--color-navy); }
+.action-secondary:hover:not(:disabled) { border-color: var(--color-academic); background: var(--color-bluewash); }
+.action-primary:disabled { background: var(--academic-disabled); color: var(--color-navy); cursor: not-allowed; }
+.action-secondary:disabled { cursor: not-allowed; opacity: .55; }
+.site-input { min-height: 2.75rem; width: 100%; min-width: 0; border: 1px solid #aeb7c0; border-radius: .4rem; background: #fff; padding: .65rem .8rem; color: var(--color-ink); }
+.site-input:focus { border-color: var(--color-academic); outline: 3px solid var(--color-academic); outline-offset: 2px; }
 .site-input[aria-invalid="true"] { border-color: var(--ui-error); }
 
 .site-shell { background: var(--color-cream); color: var(--color-ink); }
 .site-header { border-bottom: 1px solid var(--ui-border); background: var(--ui-paper); }
 .site-nav-link { display: inline-flex; min-height: 2.75rem; align-items: center; padding: .5rem .7rem; border-bottom: 3px solid transparent; color: var(--color-navy); font-size: .88rem; font-weight: 700; }
-.site-nav-link:hover { color: var(--color-forest); }
-.site-nav-link[aria-current="page"] { border-bottom-color: var(--color-gold); color: var(--color-forest); }
+.site-nav-link:hover { color: var(--color-academic); }
+.site-nav-link[aria-current="page"] { border-bottom-color: var(--color-gold); color: var(--color-academic); }
 .site-footer { border-top: 1px solid var(--ui-border); color: var(--ui-muted); }
 
 .admin-workspace { color: var(--color-ink); background: #f3f1eb; }
 .admin-sidebar { background: var(--color-navy); color: #fff; }
-.admin-sidebar :focus-visible { outline-color: #f0c772; }
+.admin-sidebar :focus-visible { outline-color: var(--academic-focus-inverse); }
 .admin-nav-link { display: flex; min-height: 2.75rem; align-items: center; border-left: 3px solid transparent; padding: .55rem .85rem; color: #dce7e9; font-size: .875rem; font-weight: 700; }
 .admin-nav-link:hover { background: #183a54; color: #fff; }
 .admin-nav-link[aria-current="page"] { border-left-color: var(--color-gold); background: #1d4059; color: #fff; }
@@ -70,7 +75,7 @@ a, button, summary { text-underline-offset: .2em; }
 .admin-workspace fieldset { border-color: var(--ui-border); border-radius: var(--ui-radius); background: var(--ui-paper); }
 .admin-workspace dialog { max-height: min(90dvh, 48rem); overflow-y: auto; border-radius: var(--ui-radius); }
 .admin-workspace :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="file"]) { border-radius: .4rem; }
-.admin-workspace :is(input[type="checkbox"], input[type="radio"]) { accent-color: var(--color-forest); }
+.admin-workspace :is(input[type="checkbox"], input[type="radio"]) { accent-color: var(--color-academic); }
 .admin-workspace .rounded-full { border-radius: .4rem; }
 
 @media (max-width: 767px) {

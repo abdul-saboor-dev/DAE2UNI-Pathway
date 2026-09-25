@@ -22,7 +22,7 @@ function PasswordField({ id, label, error, description, ...inputProps }) {
         <button
           type="button"
           onClick={() => setVisible((current) => !current)}
-          className="absolute inset-y-0 right-0 min-w-14 px-3 text-xs font-bold text-forest hover:text-navy focus-visible:outline-3"
+          className="absolute inset-y-0 right-0 min-w-14 px-3 text-xs font-bold text-academic hover:text-navy focus-visible:outline-3"
           aria-label={`${visible ? 'Hide' : 'Show'} ${label.toLowerCase()}`}
           aria-pressed={visible}
         >

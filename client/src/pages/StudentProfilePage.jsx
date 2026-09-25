@@ -142,7 +142,7 @@ function StudentProfilePage() {
 
       <form className="mt-7 space-y-6" onSubmit={(event) => event.preventDefault()} noValidate>
         <Section eyebrow="DAE CIT" title="Diploma details" description="This version is designed for Computer Information Technology students. Percentages are calculated by the server from your marks.">
-          <div className="rounded-xl border border-forest/10 bg-mint/35 px-4 py-3 text-sm"><span className="text-ink/50">Technology</span><p className="mt-1 font-bold">Computer Information Technology (CIT)</p></div>
+          <div className="rounded-xl border border-academic/10 bg-bluewash/35 px-4 py-3 text-sm"><span className="text-ink/50">Technology</span><p className="mt-1 font-bold">Computer Information Technology (CIT)</p></div>
           <TextField id="dae-registration" name="daeRegistrationNumber" label="Registration number" value={form.daeRegistrationNumber} onChange={updateField} error={fieldErrors.daeRegistrationNumber} autoComplete="off" maxLength={80} />
           <TextField id="dae-board" name="daeBoardName" label="DAE board name" value={form.daeBoardName} onChange={updateField} error={fieldErrors.daeBoardName} placeholder="Punjab Board of Technical Education" autoComplete="organization" maxLength={160} />
           <TextField id="dae-institute" name="daeInstituteName" label="Institute name" value={form.daeInstituteName} onChange={updateField} error={fieldErrors.daeInstituteName} autoComplete="organization" maxLength={200} />
@@ -150,7 +150,7 @@ function StudentProfilePage() {
           <div className="hidden sm:block" />
           <TextField id="dae-total" name="daeTotalMarks" label="DAE total marks" type="number" min="1" step="any" inputMode="decimal" value={form.daeTotalMarks} onChange={updateField} error={fieldErrors.daeTotalMarks} />
           <TextField id="dae-obtained" name="daeObtainedMarks" label="DAE obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.daeObtainedMarks} onChange={updateField} error={fieldErrors.daeObtainedMarks} />
-          {profile?.dae?.marks?.percentage != null && <p className="sm:col-span-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-900">Server-calculated DAE percentage: {profile.dae.marks.percentage}%</p>}
+          {profile?.dae?.marks?.percentage != null && <p className="sm:col-span-2 rounded-xl bg-bluewash px-4 py-3 text-sm font-bold text-navy">Server-calculated DAE percentage: {profile.dae.marks.percentage}%</p>}
         </Section>
 
         <Section eyebrow="Matric" title="Secondary education" description="Enter the marks and passing information shown on your Matric certificate.">
@@ -160,11 +160,11 @@ function StudentProfilePage() {
           <div className="hidden sm:block" />
           <TextField id="matric-total" name="matricTotalMarks" label="Matric total marks" type="number" min="1" step="any" inputMode="decimal" value={form.matricTotalMarks} onChange={updateField} error={fieldErrors.matricTotalMarks} />
           <TextField id="matric-obtained" name="matricObtainedMarks" label="Matric obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.matricObtainedMarks} onChange={updateField} error={fieldErrors.matricObtainedMarks} />
-          {profile?.matric?.marks?.percentage != null && <p className="sm:col-span-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-900">Server-calculated Matric percentage: {profile.matric.marks.percentage}%</p>}
+          {profile?.matric?.marks?.percentage != null && <p className="sm:col-span-2 rounded-xl bg-bluewash px-4 py-3 text-sm font-bold text-navy">Server-calculated Matric percentage: {profile.matric.marks.percentage}%</p>}
         </Section>
 
         <Section eyebrow="Location" title="Domicile and preferences" description="The first release covers Punjab. Preferences are optional and can be changed later.">
-          <div className="rounded-xl border border-forest/10 bg-mint/35 px-4 py-3 text-sm"><span className="text-ink/50">Domicile province</span><p className="mt-1 font-bold">Punjab</p></div>
+          <div className="rounded-xl border border-academic/10 bg-bluewash/35 px-4 py-3 text-sm"><span className="text-ink/50">Domicile province</span><p className="mt-1 font-bold">Punjab</p></div>
           <TextField id="domicile-district" name="domicileDistrict" label="Domicile district" value={form.domicileDistrict} onChange={updateField} error={fieldErrors.domicileDistrict} autoComplete="address-level2" maxLength={100} />
           <TextField id="preferred-cities" name="preferredCities" label="Preferred cities" description="Separate up to 20 cities with commas." value={form.preferredCities} onChange={updateField} error={fieldErrors.preferredCities} placeholder="Lahore, Faisalabad, Rawalpindi" />
           <TextField id="preferred-fields" name="preferredDegreeFields" label="Preferred degree fields" description="Separate up to 20 fields with commas." value={form.preferredDegreeFields} onChange={updateField} error={fieldErrors.preferredDegreeFields} placeholder="Computer Science, Information Technology" />
@@ -173,7 +173,7 @@ function StudentProfilePage() {
             <div className="mt-3 flex flex-wrap gap-4">
               {['public', 'private'].map((sector) => (
                 <label key={sector} className="flex cursor-pointer items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-semibold capitalize">
-                  <input type="checkbox" name="preferredUniversitySectors" value={sector} checked={form.preferredUniversitySectors.includes(sector)} onChange={toggleSector} className="size-4 accent-forest" />
+                  <input type="checkbox" name="preferredUniversitySectors" value={sector} checked={form.preferredUniversitySectors.includes(sector)} onChange={toggleSector} className="size-4 accent-academic" />
                   {sector}
                 </label>
               ))}

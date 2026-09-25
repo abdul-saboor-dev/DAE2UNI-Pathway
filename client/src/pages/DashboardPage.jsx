@@ -56,7 +56,7 @@ function DashboardPage() {
         <article className="paper-surface p-6 sm:p-8">
           <div className="flex flex-wrap items-start justify-between gap-5">
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-leaf">Profile progress</p>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-academic">Profile progress</p>
               <h2 className="section-title mt-2 text-2xl text-navy">
                 {profileState.state === 'loading' && 'Checking your profile…'}
                 {profileState.state === 'empty' && 'Your profile is ready to begin'}
@@ -82,7 +82,7 @@ function DashboardPage() {
         </article>
 
         <aside className="border-l-4 border-gold bg-[var(--ui-paper)] p-6 sm:p-8">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-leaf">Account</p>
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-academic">Account</p>
           <dl className="mt-5 space-y-4 text-sm">
             <div>
               <dt className="text-ink/50">Email</dt>

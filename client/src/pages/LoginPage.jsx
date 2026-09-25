@@ -90,7 +90,7 @@ function LoginPage() {
         </button>
         <p className="text-center text-sm text-ink/60">
           New to DAE2UNI?{' '}
-          <Link className="font-bold text-forest underline decoration-leaf/35 underline-offset-4 hover:text-leaf" to="/register" state={location.state}>
+          <Link className="font-bold text-academic underline decoration-academic/35 underline-offset-4 hover:text-academic" to="/register" state={location.state}>
             Create a student account
           </Link>
         </p>

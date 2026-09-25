@@ -11,7 +11,7 @@ export default function CampusDirectory({ campuses = [] }) {
           <p className="body-copy mt-1 break-words text-sm">{[campus.address, campus.city, campus.district, campus.province].filter(Boolean).join(', ') || 'Location details not listed'}</p>
           <p className="mt-2 text-xs font-semibold text-[var(--ui-muted)]">{campus.isMainCampus ? 'Main campus' : 'Campus'} · {campus.isActive === false ? 'Inactive' : 'Active'}</p>
         </div>
-        {mapUrl && <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center self-start font-bold text-forest underline decoration-gold decoration-2 focus-visible:outline-3">Search address on Google Maps <span className="sr-only">(opens in a new tab)</span></a>}
+        {mapUrl && <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center self-start font-bold text-academic underline decoration-gold decoration-2 focus-visible:outline-3">Search address on Google Maps <span className="sr-only">(opens in a new tab)</span></a>}
       </section>
     })}
   </div>

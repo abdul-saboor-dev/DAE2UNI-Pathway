@@ -78,9 +78,9 @@ function AdministratorSetupPage() {
     description="This one-time account permanently controls administrator roles. It cannot be removed, demoted, suspended, or replaced through the website."
     aside={<p className="mt-6 border-l-4 border-gold bg-[var(--ui-paper)] p-4 text-sm leading-6 text-navy">Use a separate, strong deployment setup secret. It is not your account password. Complete setup over HTTPS when deployed.</p>}>
     {state === 'loading' && <p role="status">Checking owner setup…</p>}
-    {state === 'error' && <div role="alert"><p>Setup status could not be loaded.</p><button type="button" onClick={retry} className="mt-3 rounded-lg bg-forest px-4 py-2 text-white focus-visible:ring-4 focus-visible:ring-leaf">Retry</button></div>}
-    {state === 'completed' && <div role="status"><h2 className="text-2xl font-bold">Owner setup has already been completed.</h2><p className="mt-3 text-ink/70">Sign in with the existing Owner account.</p><Link to="/login" className="mt-5 inline-block rounded-lg bg-forest px-5 py-3 font-bold text-white focus-visible:ring-4 focus-visible:ring-leaf">Go to login</Link></div>}
-    {state === 'success' && <div role="status"><h2 className="text-2xl font-bold">Owner account created</h2><p className="mt-3 text-ink/70">Setup is now permanently closed. Sign in normally to manage content and administrator roles.</p><Link to="/login" className="mt-5 inline-block rounded-lg bg-forest px-5 py-3 font-bold text-white focus-visible:ring-4 focus-visible:ring-leaf">Go to login</Link></div>}
+    {state === 'error' && <div role="alert"><p>Setup status could not be loaded.</p><button type="button" onClick={retry} className="action-primary mt-3">Retry</button></div>}
+    {state === 'completed' && <div role="status"><h2 className="text-2xl font-bold">Owner setup has already been completed.</h2><p className="mt-3 text-ink/70">Sign in with the existing Owner account.</p><Link to="/login" className="action-primary mt-5">Go to login</Link></div>}
+    {state === 'success' && <div role="status"><h2 className="text-2xl font-bold">Owner account created</h2><p className="mt-3 text-ink/70">Setup is now permanently closed. Sign in normally to manage content and administrator roles.</p><Link to="/login" className="action-primary mt-5">Go to login</Link></div>}
     {state === 'required' && <form onSubmit={submit} noValidate className="space-y-5">
       <h2 className="text-2xl font-bold">Set Owner credentials</h2>
       <FormAlert message={formError} />

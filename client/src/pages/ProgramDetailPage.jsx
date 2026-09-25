@@ -29,17 +29,17 @@ export default function ProgramDetailPage() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-14">
       <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Programs', to: '/programs' }, { label: program.name }]} />
-      <Link to="/programs" className="mb-5 inline-flex rounded text-sm font-black text-forest underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">← Back to programs</Link>
+      <Link to="/programs" className="mb-5 inline-flex rounded text-sm font-black text-academic underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-academic">← Back to programs</Link>
 
       <article className="paper-surface overflow-hidden">
         <header className="border-b-4 border-gold bg-navy px-6 py-10 text-white sm:px-10">
-          <div className="flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.16em] text-mint">
+          <div className="flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.16em] text-bluewash">
             {program.credentialType && <span>{program.credentialType}</span>}
             {program.degreeLevel && <span>· {label(program.degreeLevel)}</span>}
             {program.studyMode && <span>· {label(program.studyMode)}</span>}
           </div>
           <h1 className="page-title mt-3 break-words text-4xl sm:text-5xl">{program.name}</h1>
-          <Link to={`/universities/${encodeURIComponent(universityIdentifier)}`} className="mt-4 inline-flex rounded font-bold text-mint underline decoration-mint/50 underline-offset-4 hover:decoration-mint focus:outline-none focus-visible:ring-2 focus-visible:ring-mint">
+          <Link to={`/universities/${encodeURIComponent(universityIdentifier)}`} className="mt-4 inline-flex rounded font-bold text-bluewash underline decoration-gold/60 underline-offset-4 hover:decoration-gold focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--academic-focus-inverse)]">
             {program.university.name}
           </Link>
         </header>
@@ -66,7 +66,7 @@ export default function ProgramDetailPage() {
               <p className="font-black">Eligibility is not evaluated here</p>
               <p className="mt-1 text-amber-900/75">This page reports catalogue information only. DAE eligibility, merit, fees, deadlines, and entry-test requirements belong to later verified services.</p>
             </div>
-            <Link to={`/universities/${encodeURIComponent(universityIdentifier)}`} className="flex min-h-12 items-center justify-center rounded-xl border border-forest/20 px-4 py-3 text-center text-sm font-black text-forest hover:bg-mint focus:outline-none focus-visible:ring-4 focus-visible:ring-leaf/20">
+            <Link to={`/universities/${encodeURIComponent(universityIdentifier)}`} className="flex min-h-12 items-center justify-center rounded-xl border border-academic/20 px-4 py-3 text-center text-sm font-black text-academic hover:bg-bluewash focus:outline-none focus-visible:ring-4 focus-visible:ring-academic/20">
               View parent university
             </Link>
           </div>

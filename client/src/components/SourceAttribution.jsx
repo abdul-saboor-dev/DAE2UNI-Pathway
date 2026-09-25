@@ -12,12 +12,12 @@ export default function SourceAttribution({ source, label = 'Official source' })
   if (!source || !url) return null
   const verifiedDate = formatVerificationDate(source.lastVerifiedAt)
   return (
-    <aside className="border-l-4 border-gold bg-[#f3f4ef] p-4 text-sm">
+    <aside className="border-l-4 border-gold bg-cream p-4 text-sm">
       <p className="font-black text-navy">Verified source attribution</p>
       <p className="mt-1 leading-6 text-ink/60">
         {verifiedDate ? `Last verified ${verifiedDate}.` : 'Verification date is not available.'}
       </p>
-      <a href={url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex max-w-full break-all rounded font-bold text-forest underline decoration-leaf/40 underline-offset-4 hover:decoration-leaf focus:outline-none focus-visible:ring-2 focus-visible:ring-leaf">
+      <a href={url} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex max-w-full break-all rounded font-bold text-academic underline decoration-academic/40 underline-offset-4 hover:decoration-academic focus:outline-none focus-visible:ring-2 focus-visible:ring-academic">
         {label} <span className="sr-only">(opens in a new tab)</span>
       </a>
     </aside>

@@ -132,7 +132,7 @@ function RegisterPage() {
         </button>
         <p className="text-center text-sm text-ink/60">
           Already registered?{' '}
-          <Link className="font-bold text-forest underline decoration-leaf/35 underline-offset-4 hover:text-leaf" to="/login" state={location.state}>
+          <Link className="font-bold text-academic underline decoration-academic/35 underline-offset-4 hover:text-academic" to="/login" state={location.state}>
             Sign in
           </Link>
         </p>

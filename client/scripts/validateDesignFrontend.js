@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import process from 'node:process'
 import { getCampusMapUrl } from '../src/utils/campusMap.js'
@@ -50,9 +50,22 @@ equal(universityMonogram({ abbreviation: 'UIT' }), 'UIT', 'Abbreviation takes pr
 equal(getSafeExternalUrl('javascript:alert(1)'), null, 'Unsafe URL cannot become clickable')
 
 const css = read('src/index.css')
-for (const token of ['#102a43', '#f7f4ed', '#146b5a', '#c9963b', '.display-type', '.page-title', '.site-input', ':focus-visible', 'prefers-reduced-motion']) {
+for (const token of ['#102a43', '#f7f4ed', '#285f8f', '#c9963b', '.display-type', '.page-title', '.site-input', ':focus-visible', 'prefers-reduced-motion']) {
   check(css.includes(token), `Design token or accessibility rule: ${token}`)
 }
+const linear = (value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+const channels = [0, 2, 4].map((offset) => linear(Number.parseInt('285f8f'.slice(offset, offset + 2), 16) / 255))
+const luminance = channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
+check(1.05 / (luminance + 0.05) >= 4.5, 'White text on academic blue meets WCAG AA')
+check(css.includes('--academic-hover:') && css.includes('--academic-pressed:') && css.includes('--academic-disabled:'), 'Action states derive from academic blue')
+check(css.includes('background: var(--color-academic)') && css.includes('outline: 3px solid var(--color-academic)'), 'Primary actions and focus use academic blue')
+const sourceFiles = (directory) => readdirSync(resolve(import.meta.dirname, '..', directory), { withFileTypes: true }).flatMap((entry) => {
+  const relativePath = `${directory}/${entry.name}`
+  return entry.isDirectory() ? sourceFiles(relativePath) : entry.name.endsWith('.jsx') ? [read(relativePath)] : []
+})
+check(![css, ...sourceFiles('src')].some((source) => /#146b5a|teal-|(?:^|[^a-z])(?:forest|leaf|mint)(?:$|[^a-z])/i.test(source)), 'Old green brand utilities are absent')
+const adminUi = read('src/components/AdminUi.jsx')
+check(adminUi.includes("['verified', 'active', 'completed']") && adminUi.includes("safeValue === 'published'") && adminUi.includes('bg-bluewash'), 'Green badges are semantic; published uses blue')
 const allVisualFiles = [main, admin, campus, universityCard, ui, roleDialog, verifyDialog,
   read('src/pages/HomePage.jsx'), read('src/pages/UniversityDetailPage.jsx'), read('src/pages/ProgramDetailPage.jsx')]
 check(allVisualFiles.every((source) => !source.includes('dangerouslySetInnerHTML')), 'Visual components never render raw HTML')

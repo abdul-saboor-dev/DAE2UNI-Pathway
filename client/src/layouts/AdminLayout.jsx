@@ -33,7 +33,7 @@ export default function AdminLayout() {
         <div className="flex items-center justify-between gap-3 border-b border-white/15 px-4 py-4 lg:px-5 lg:py-6">
           <Link to="/admin" className="inline-flex min-h-11 min-w-0 items-center gap-3 font-black focus-visible:outline-3">
             <span className="grid size-10 shrink-0 place-items-center bg-gold text-xs tracking-[-.08em] text-navy">D2U</span>
-            <span className="leading-tight">DAE2UNI <span className="block text-[.65rem] font-semibold uppercase tracking-[.12em] text-[#b7d4d0]">Operations</span></span>
+            <span className="leading-tight">DAE2UNI <span className="block text-[.65rem] font-semibold uppercase tracking-[.12em] text-[#c4d7e6]">Operations</span></span>
           </Link>
           <details key={location.pathname} className="group lg:hidden">
             <summary className="flex min-h-11 cursor-pointer list-none items-center border border-white/35 px-3 text-sm font-bold focus-visible:outline-3">Admin menu</summary>
@@ -43,8 +43,8 @@ export default function AdminLayout() {
         <nav aria-label="Administrator navigation" className="hidden px-3 py-5 lg:block"><AdminLinks user={user} signOut={signOut} /></nav>
         <div className="hidden border-t border-white/15 px-5 py-5 text-sm lg:block">
           <p className="break-words font-bold">{user?.name || 'Administrator'}</p>
-          <p className="mt-1 break-all text-xs text-[#b7d4d0]">{user?.email}</p>
-          <p className="mt-2 text-xs uppercase tracking-wider text-[#b7d4d0]">{user?.role?.replaceAll('_', ' ')}</p>
+          <p className="mt-1 break-all text-xs text-[#c4d7e6]">{user?.email}</p>
+          <p className="mt-2 text-xs uppercase tracking-wider text-[#c4d7e6]">{user?.role?.replaceAll('_', ' ')}</p>
         </div>
       </header>
       <main id="admin-main" className="min-w-0 px-4 py-7 sm:px-7 lg:px-10 lg:py-10" tabIndex={-1}><Outlet /></main>

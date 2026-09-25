@@ -105,7 +105,7 @@ export default function AdminProgramFormPage() {
     finally { setSaving(false) }
   }
 
-  if (state === 'not-found') return <div role="alert"><h1 className="text-2xl font-black">Program not found</h1><Link to="/admin/programs" className="text-teal-800 underline">Back to programs</Link></div>
+  if (state === 'not-found') return <div role="alert"><h1 className="text-2xl font-black">Program not found</h1><Link to="/admin/programs" className="text-academic underline">Back to programs</Link></div>
   if (state !== 'ready') return <AdminState state={state} retry={() => { setState('loading'); setRetryKey((value) => value + 1) }} noun="program" />
   return <>
     <AdminHeading eyebrow="Program management" title={isNew ? 'Add program' : `Edit ${original?.name || 'program'}`} description="Associate each program with an existing university and its own official source. Eligibility and merit are not evaluated here." />

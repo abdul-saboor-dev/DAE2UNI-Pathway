@@ -40,7 +40,7 @@ export default function MainLayout() {
       <div className="site-container flex min-h-20 items-center justify-between gap-5 py-3">
         <Link to="/" className="flex min-w-0 items-center gap-3 focus-visible:outline-3" aria-label="DAE2UNI Pathway home">
           <span className="grid size-11 shrink-0 place-items-center bg-navy text-[.8rem] font-black tracking-[-.08em] text-white">D2U</span>
-          <span className="min-w-0 leading-tight"><strong className="block text-lg tracking-[-.04em] text-navy">DAE2UNI</strong><span className="block text-[.62rem] font-bold uppercase tracking-[.14em] text-forest">Pathway</span></span>
+          <span className="min-w-0 leading-tight"><strong className="block text-lg tracking-[-.04em] text-navy">DAE2UNI</strong><span className="block text-[.62rem] font-bold uppercase tracking-[.14em] text-academic">Pathway</span></span>
         </Link>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation"><NavigationLinks user={user} isLoading={isLoading} onLogout={handleLogout} /></nav>
         <details key={location.pathname} className="group relative lg:hidden">
@@ -53,7 +53,7 @@ export default function MainLayout() {
     <footer className="site-footer mt-14 bg-[var(--ui-paper)]">
       <div className="site-container grid gap-5 py-8 text-sm sm:grid-cols-[1fr_auto] sm:items-end">
         <div><p className="font-black text-navy">DAE2UNI Pathway</p><p className="mt-1 max-w-xl">A practical pathway for DAE CIT students exploring undergraduate study. Catalogue information is source-attributed; eligibility and merit tools are future work.</p></div>
-        <p className="font-semibold text-forest">From Diploma to University</p>
+        <p className="font-semibold text-academic">From Diploma to University</p>
       </div>
     </footer>
   </div>

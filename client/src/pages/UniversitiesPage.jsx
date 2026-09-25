@@ -65,7 +65,7 @@ export default function UniversitiesPage() {
         <section id="university-results" tabIndex="-1" aria-label="University results" className="min-w-0 focus:outline-none">
           <div className="mb-5 flex min-h-11 flex-wrap items-center justify-between gap-3">
             <ResultSummary pagination={catalogue.pagination} noun="universities" />
-            {activeCount > 0 && <span className="rounded-full bg-mint px-3 py-1.5 text-xs font-black text-forest">Filtered view</span>}
+            {activeCount > 0 && <span className="rounded-full bg-bluewash px-3 py-1.5 text-xs font-black text-academic">Filtered view</span>}
           </div>
           {catalogue.status === 'loading' && <CatalogueLoading label="Loading universities…" />}
           {catalogue.status === 'error' && <CatalogueError onRetry={catalogue.retry} />}

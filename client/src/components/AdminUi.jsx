@@ -12,7 +12,13 @@ export function AdminHeading({ eyebrow, title, description, action }) {
 
 export function StatusBadge({ value }) {
   const safeValue = typeof value === 'string' ? value : 'unknown'
-  const tone = safeValue === 'verified' || safeValue === 'published' ? 'border-[#b4d6c5] bg-[#e5f3e9] text-[#145b42]' : safeValue === 'draft' || safeValue === 'pending_review' ? 'border-[#dcc491] bg-[#fcf4df] text-[#765219]' : 'border-[#cbd0cf] bg-[#ecefed] text-navy'
+  const tone = ['verified', 'active', 'completed'].includes(safeValue)
+    ? 'border-[#b4d6c5] bg-[#e5f3e9] text-[#145b42]'
+    : safeValue === 'published'
+      ? 'border-academic/25 bg-bluewash text-academic'
+      : safeValue === 'draft' || safeValue === 'pending_review'
+        ? 'border-[#dcc491] bg-[#fcf4df] text-[#765219]'
+        : 'border-[#cbd0cf] bg-[#ecefed] text-navy'
   return <span className={`inline-flex max-w-full border px-2.5 py-1 text-xs font-bold ${tone}`}>{safeValue.replaceAll('_', ' ')}</span>
 }
 

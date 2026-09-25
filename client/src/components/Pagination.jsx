@@ -20,7 +20,7 @@ function PageLink({ page, currentPage, href, children, label, onNavigate }) {
     )
   }
   return (
-    <Link aria-label={label || `Go to page ${page}`} className="grid min-h-11 min-w-11 place-items-center border border-[var(--ui-border)] bg-white px-3 text-sm font-bold text-forest hover:bg-mint focus-visible:outline-3" to={href} onClick={onNavigate}>
+    <Link aria-label={label || `Go to page ${page}`} className="grid min-h-11 min-w-11 place-items-center border border-[var(--ui-border)] bg-white px-3 text-sm font-bold text-academic hover:bg-bluewash focus-visible:outline-3" to={href} onClick={onNavigate}>
       {children}
     </Link>
   )
