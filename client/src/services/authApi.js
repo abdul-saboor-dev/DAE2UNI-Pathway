@@ -1,7 +1,7 @@
 import api from './api.js'
 
-export async function registerStudent({ name, email, password }) {
-  const { data } = await api.post('/auth/register', { name, email, password })
+export async function registerStudent({ name, email, password, turnstileToken }) {
+  const { data } = await api.post('/auth/register', { name, email, password, turnstileToken })
   return data.data.user
 }
 

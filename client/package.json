@@ -13,6 +13,7 @@
     "check:roles-frontend": "node scripts/validateRoleManagementFrontend.js",
     "check:geographic-frontend": "node scripts/validateGeographicFrontend.js",
     "check:design": "node scripts/validateDesignFrontend.js",
+    "check:turnstile": "node scripts/validateTurnstileFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

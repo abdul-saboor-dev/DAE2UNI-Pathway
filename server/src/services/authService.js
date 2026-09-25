@@ -4,6 +4,7 @@ import User from '../models/User.js'
 import ApiError from '../utils/ApiError.js'
 import { signAccessToken } from '../utils/jwt.js'
 import toSafeUser from '../utils/safeUser.js'
+import { verifyTurnstile } from './turnstileService.js'
 
 export const BCRYPT_ROUNDS = 12
 const INVALID_CREDENTIALS_MESSAGE = 'Email or password is incorrect.'
@@ -13,7 +14,8 @@ export function normalizeEmail(email) {
   return email.trim().toLowerCase()
 }
 
-export async function registerStudent({ name, email, password }) {
+export async function registerStudent({ name, email, password, turnstileToken }) {
+  await verifyTurnstile(turnstileToken)
   const normalizedEmail = normalizeEmail(email)
   const existingUser = await User.exists({ email: normalizedEmail })
 

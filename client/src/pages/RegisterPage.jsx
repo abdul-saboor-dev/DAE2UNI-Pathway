@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import AuthShell from '../components/AuthShell.jsx'
 import FormAlert from '../components/FormAlert.jsx'
 import PasswordField from '../components/PasswordField.jsx'
 import TextField from '../components/TextField.jsx'
+import TurnstileWidget from '../components/TurnstileWidget.jsx'
 import useAuth from '../context/useAuth.js'
 import { getApiFieldErrors, getApiErrorMessage } from '../utils/apiErrors.js'
 import { validateRegistration } from '../utils/authValidation.js'
@@ -19,6 +20,8 @@ function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState({})
   const [formError, setFormError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
+  const turnstileRef = useRef(null)
 
   useEffect(() => () => clearAuthError(), [clearAuthError])
 
@@ -35,6 +38,7 @@ function RegisterPage() {
     setFieldErrors(errors)
     setFormError('')
     if (Object.keys(errors).length) return
+    if (!turnstileToken) return
 
     setIsSubmitting(true)
     try {
@@ -42,11 +46,15 @@ function RegisterPage() {
         name: values.name.trim(),
         email: values.email.trim().toLowerCase(),
         password: values.password,
+        turnstileToken,
       })
+      setTurnstileToken('')
       navigate(getSafeDestination(location.state?.from), { replace: true })
     } catch (error) {
       setFieldErrors(getApiFieldErrors(error))
       setFormError(getApiErrorMessage(error, 'Unable to create your account right now.'))
+      turnstileRef.current?.reset()
+      setTurnstileToken('')
     } finally {
       setIsSubmitting(false)
     }
@@ -114,9 +122,10 @@ function RegisterPage() {
           maxLength={72}
           required
         />
+        <TurnstileWidget ref={turnstileRef} onTokenChange={setTurnstileToken} />
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || !turnstileToken}
           className="action-primary w-full"
         >
           {isSubmitting ? 'Creating account…' : 'Create student account'}

@@ -57,7 +57,7 @@ Password hashes are excluded from model serialization and every API response.
 
 ## POST `/api/auth/register`
 
-Creates an active student account. Public clients cannot select a role; including `role`, `accountStatus`, `passwordHash`, or another unknown field causes request validation to fail.
+Creates an active student account only after backend Cloudflare Turnstile Siteverify succeeds. Public clients cannot select a role; including `role`, `accountStatus`, `passwordHash`, or another unknown field causes request validation to fail. The registration request accepts a single-use `turnstileToken` (1–2048 characters). The widget alone is not trusted. See [Turnstile registration setup](./turnstile-registration.md).
 
 Password requirements:
 
@@ -72,7 +72,8 @@ Request:
 {
   "name": "Ayesha Khan",
   "email": "ayesha@example.com",
-  "password": "SecurePass123!"
+  "password": "SecurePass123!",
+  "turnstileToken": "<fresh-token-from-registration-widget>"
 }
 ```
 
@@ -97,6 +98,7 @@ Response — `201 Created`:
 ```
 
 Duplicate normalized emails return `409` with code `EMAIL_IN_USE`.
+Missing or invalid tokens are rejected before user creation. Siteverify rejection, replay/expiry, action/hostname mismatch, timeout, and network failure return a generic `400 HUMAN_VERIFICATION_FAILED`; missing local verification configuration returns `503 HUMAN_VERIFICATION_UNAVAILABLE`. Cloudflare response details, token, and secret are never returned. In production, startup requires a strong non-test `TURNSTILE_SECRET_KEY` and `TURNSTILE_ALLOWED_HOSTNAMES`.
 
 ## POST `/api/auth/login`
 
@@ -214,6 +216,7 @@ $registration = @{
   name = "Ayesha Khan"
   email = "ayesha@example.com"
   password = "SecurePass123!"
+  turnstileToken = "<fresh-token-from-registration-widget>"
 } | ConvertTo-Json
 
 Invoke-RestMethod http://localhost:5000/api/auth/register `

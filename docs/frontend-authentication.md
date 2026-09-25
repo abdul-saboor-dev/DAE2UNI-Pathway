@@ -31,7 +31,7 @@ Owner, Co-Owner, and Admin receive the same content-management access. These fro
 
 ## Registration and Login
 
-Registration submits exactly `name`, `email`, and `password`. Confirmation is checked only in the browser and is never sent. Role, status, password hash, user ID, and unknown properties are absent from the request.
+Registration submits exactly `name`, `email`, `password`, and a short-lived `turnstileToken` obtained from the Cloudflare widget. Confirmation is checked only in the browser and is never sent. Role, status, password hash, user ID, and unknown properties are absent from the request. The widget token is held only in component state, never browser storage; it is cleared and the widget reset after a failed attempt. Submission stays disabled until a token is available. Backend Siteverify remains mandatory. See [Turnstile setup](./turnstile-registration.md).
 
 The current registration endpoint returns a safe user but not an access token. To establish the session without changing the backend contract, the client completes registration and then calls the existing login endpoint using the submitted credentials. Only the token returned from login is placed in `sessionStorage`.
 

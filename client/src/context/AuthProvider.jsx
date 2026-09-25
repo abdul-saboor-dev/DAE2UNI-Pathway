@@ -81,10 +81,10 @@ function AuthProvider({ children }) {
     }
   }, [])
 
-  const register = useCallback(async ({ name, email, password }) => {
+  const register = useCallback(async ({ name, email, password, turnstileToken }) => {
     setAuthError('')
     try {
-      await registerStudent({ name, email, password })
+      await registerStudent({ name, email, password, turnstileToken })
       const result = await loginStudent({ email, password })
       setAccessToken(result.token)
       setUser(result.user)

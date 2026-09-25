@@ -12,6 +12,7 @@
     "check:catalogue": "node scripts/validateCatalogue.js",
     "check:geographic-catalogue": "node scripts/validateGeographicCatalogue.js",
     "check:security": "node scripts/validateSecurityRegression.js",
+    "check:turnstile": "node scripts/validateTurnstile.js",
     "check:setup": "node scripts/validateAdminSetup.js",
     "check:roles": "node scripts/validateRoleManagement.js",
     "provision:admin": "node scripts/provisionAdmin.js"

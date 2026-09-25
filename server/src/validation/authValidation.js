@@ -31,6 +31,9 @@ export const registerRequestSchema = requestSchema(
       name: nameSchema,
       email: emailSchema,
       password: passwordSchema,
+      turnstileToken: z.string({ error: 'Human verification is required.' }).trim()
+        .min(1, 'Human verification is required.')
+        .max(2048, 'Human verification token is invalid.'),
     })
     .strict(),
 )

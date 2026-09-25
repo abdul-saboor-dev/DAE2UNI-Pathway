@@ -153,9 +153,13 @@ CLIENT_URL=http://localhost:5173
 JWT_SECRET=replace-with-a-long-random-secret-at-least-32-characters
 JWT_EXPIRES_IN=1d
 # ADMIN_SETUP_SECRET=replace-with-a-separate-random-secret-at-least-32-characters
+# TURNSTILE_SECRET_KEY=replace-with-cloudflare-turnstile-secret
+# TURNSTILE_ALLOWED_HOSTNAMES=your-production-frontend.example
 ```
 
 Replace `JWT_SECRET` locally with a cryptographically random value of at least 32 varied characters; the example value is deliberately rejected at startup. `JWT_EXPIRES_IN` must use a positive duration with a unit, such as `15m`, `1h`, or `1d`. For the first Owner only, uncomment and replace the separate `ADMIN_SETUP_SECRET` placeholder with a strong random value and visit `/setup/admin`; see [the setup guide](docs/first-administrator-setup.md). Remove that variable after successful setup if desired. The local `.env` file is ignored by Git. Never commit real credentials, secrets, or production connection strings.
+
+Student registration additionally requires Cloudflare Turnstile: set the public `VITE_TURNSTILE_SITE_KEY` in an ignored client environment file and the private `TURNSTILE_SECRET_KEY` on the backend. Production also requires `TURNSTILE_ALLOWED_HOSTNAMES`. See [Turnstile registration setup](docs/turnstile-registration.md); login and Owner setup are unchanged.
 
 ## Start MongoDB
 
