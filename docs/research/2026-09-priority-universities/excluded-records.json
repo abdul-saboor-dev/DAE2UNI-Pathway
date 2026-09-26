@@ -1,0 +1,35 @@
+{
+  "accessDate": "2026-09-26",
+  "excluded": [
+    {
+      "type": "university",
+      "name": "University of Engineering and Technology, Lahore",
+      "proposedSlug": "uet-lahore",
+      "classification": "possible_duplicate_requiring_human_review",
+      "reason": "The local catalogue already contains a draft university with this slug, the same institutional identity, a uet.edu.pk official-source domain, and five campus names. This batch must not replace or update it."
+    },
+    {
+      "type": "university",
+      "name": "National University of Technology",
+      "proposedSlug": "national-university-of-technology",
+      "classification": "unselected_alternative",
+      "reason": "Current official admissions and HEC material place the operational university at I-12, Islamabad. NUTECH described its Capital Smart City site as upcoming in December 2025. A 2023 inauguration story uses ambiguous 'main campus' wording. NUST was already selected as the alternative for this batch; NUTECH remains outside the JSON pending a separate focused record review."
+    },
+    {
+      "type": "campus",
+      "parentUniversitySlug": "university-of-engineering-and-technology-taxila",
+      "name": "Chakwal Campus",
+      "classification": "historical_or_closed",
+      "reason": "HEC says UET Taxila's Chakwal campus was upgraded to the independent University of Chakwal effective 2020-01-09. A university undergraduate page still lists it; this batch follows the HEC change notice and will not import it as a current UET Taxila campus.",
+      "officialSourceUrl": "https://www.hec.gov.pk/english/universities/Pages/DAIs/HEC-recognized-Campuses.aspx"
+    },
+    {
+      "type": "campus",
+      "parentUniversitySlug": "the-islamia-university-of-bahawalpur",
+      "name": "Ahmedpur East Sub-Campus",
+      "classification": "insufficient_current_evidence",
+      "reason": "IUB's 2024 annual report labels the physical campus proposed; a 2026 university statement counts six operating campuses and omits Ahmedpur East. Older admissions publicity alone does not prove current physical degree teaching.",
+      "officialSourceUrl": "https://www.iub.edu.pk/uploads/2340/annual-report-2024/1762152441-annual-report-2024.pdf"
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "strategy": "skip",
+  "universities": [
+    {
+      "slug": "university-of-the-punjab",
+      "name": "University of the Punjab",
+      "abbreviation": "PU",
+      "sector": "public",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://www.pu.edu.pk/page/show/AboutUs.html" },
+      "campuses": [
+        { "key": "quaid-e-azam-campus", "name": "Quaid-e-Azam Campus", "city": "Lahore", "province": "Punjab" },
+        { "key": "allama-iqbal-campus", "name": "Allama Iqbal Campus", "city": "Lahore", "province": "Punjab", "address": "Mall Road, Lahore" },
+        { "key": "gujranwala-campus", "name": "Gujranwala Campus", "city": "Gujranwala", "province": "Punjab", "address": "Near Ali Pur Chowk, Rawalpindi Bypass, Gujranwala" },
+        { "key": "jhelum-campus", "name": "Jhelum Campus", "city": "Jhelum", "province": "Punjab" }
+      ],
+      "programs": []
+    },
+    {
+      "slug": "government-college-university-lahore",
+      "name": "Government College University Lahore",
+      "abbreviation": "GCU",
+      "sector": "public",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://gcu.edu.pk/" },
+      "campuses": [
+        { "key": "lahore-main-campus", "name": "Main Campus", "city": "Lahore", "province": "Punjab", "address": "Katchery Road, Lahore", "isMainCampus": true },
+        { "key": "kala-shah-kaku-campus", "name": "Kala Shah Kaku Campus", "city": "Kala Shah Kaku", "district": "Sheikhupura", "province": "Punjab" }
+      ],
+      "programs": []
+    },
+    {
+      "slug": "information-technology-university-of-the-punjab",
+      "name": "Information Technology University of the Punjab",
+      "abbreviation": "ITU",
+      "sector": "public",
+      "institutionType": "technology",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://itu.edu.pk/itu-act/" },
+      "campuses": [
+        { "key": "main-barki-campus", "name": "Main Barki Campus", "city": "Lahore", "province": "Punjab", "address": "4-KM Main Barki Road, Lahore", "isMainCampus": true },
+        { "key": "arfa-tower-campus", "name": "Arfa Tower Campus", "city": "Lahore", "province": "Punjab", "address": "Arfa Software Technology Park, 346-B, Ferozepur Road, Lahore" }
+      ],
+      "programs": []
+    },
+    {
+      "slug": "university-of-engineering-and-technology-taxila",
+      "name": "University of Engineering and Technology, Taxila",
+      "abbreviation": "UET Taxila",
+      "sector": "public",
+      "institutionType": "engineering",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://www.uettaxila.edu.pk/" },
+      "campuses": [
+        { "key": "taxila-campus", "name": "Taxila Campus", "city": "Taxila", "district": "Rawalpindi", "province": "Punjab", "isMainCampus": true }
+      ],
+      "programs": []
+    },
+    {
+      "slug": "bahauddin-zakariya-university",
+      "name": "Bahauddin Zakariya University",
+      "abbreviation": "BZU",
+      "sector": "public",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://bzu.edu.pk/about-bzu.php" },
+      "campuses": [
+        { "key": "multan-main-campus", "name": "Main Campus", "city": "Multan", "province": "Punjab", "address": "Bosan Road, Multan", "isMainCampus": true },
+        { "key": "vehari-sub-campus", "name": "Vehari Sub-Campus", "city": "Vehari", "province": "Punjab" },
+        { "key": "lodhran-campus", "name": "Lodhran Campus", "city": "Lodhran", "province": "Punjab" }
+      ],
+      "programs": []
+    },
+    {
+      "slug": "the-islamia-university-of-bahawalpur",
+      "name": "The Islamia University of Bahawalpur",
+      "abbreviation": "IUB",
+      "sector": "public",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://iub.edu.pk/index.php/about-university" },
+      "campuses": [
+        { "key": "baghdad-ul-jadeed-campus", "name": "Baghdad-ul-Jadeed Campus", "city": "Bahawalpur", "province": "Punjab", "address": "Hasilpur Road, Bahawalpur", "isMainCampus": true },
+        { "key": "abbasia-campus", "name": "Abbasia Campus", "city": "Bahawalpur", "province": "Punjab", "address": "University Chowk, Bahawalpur" },
+        { "key": "khawaja-fareed-campus", "name": "Khawaja Fareed Campus", "city": "Bahawalpur", "province": "Punjab", "address": "Railway Road, Bahawalpur" },
+        { "key": "bahawalnagar-sub-campus", "name": "Bahawalnagar Sub-Campus", "city": "Bahawalnagar", "province": "Punjab", "address": "Minchanabad Road, Bahawalnagar" },
+        { "key": "rahim-yar-khan-sub-campus", "name": "Rahim Yar Khan Sub-Campus", "city": "Rahim Yar Khan", "province": "Punjab", "address": "Abu Dhabi Road, Rahim Yar Khan" },
+        { "key": "liaquatpur-sub-campus", "name": "Liaquatpur Sub-Campus", "city": "Liaquatpur", "district": "Rahim Yar Khan", "province": "Punjab" }
+      ],
+      "programs": []
+    },
+    {
+      "slug": "comsats-university-islamabad",
+      "name": "COMSATS University Islamabad",
+      "abbreviation": "CUI",
+      "sector": "public",
+      "provinceOrTerritory": "Islamabad Capital Territory",
+      "charterAuthority": "federal",
+      "source": { "officialUrl": "https://www.comsats.edu.pk/" },
+      "campuses": [
+        { "key": "islamabad-campus", "name": "Islamabad Campus", "city": "Islamabad", "province": "Islamabad Capital Territory", "address": "Park Road, Tarlai Kalan, Islamabad", "isMainCampus": true },
+        { "key": "wah-campus", "name": "Wah Campus", "city": "Wah Cantt", "province": "Punjab" },
+        { "key": "lahore-campus", "name": "Lahore Campus", "city": "Lahore", "province": "Punjab", "address": "Defence Road, Off Raiwind Road, Lahore" },
+        { "key": "attock-campus", "name": "Attock Campus", "city": "Attock", "province": "Punjab" },
+        { "key": "sahiwal-campus", "name": "Sahiwal Campus", "city": "Sahiwal", "province": "Punjab" },
+        { "key": "vehari-campus", "name": "Vehari Campus", "city": "Vehari", "province": "Punjab" }
+      ],
+      "programs": []
+    },
+    {
+      "slug": "national-university-of-computer-and-emerging-sciences",
+      "name": "National University of Computer and Emerging Sciences",
+      "abbreviation": "FAST-NUCES",
+      "sector": "private",
+      "institutionType": "technology",
+      "provinceOrTerritory": "Islamabad Capital Territory",
+      "charterAuthority": "federal",
+      "source": { "officialUrl": "https://nu.edu.pk/" },
+      "campuses": [
+        { "key": "islamabad-campus", "name": "Islamabad Campus", "city": "Islamabad", "province": "Islamabad Capital Territory", "address": "3 A.K. Brohi Road, H-11/4, Islamabad" },
+        { "key": "lahore-campus", "name": "Lahore Campus", "city": "Lahore", "province": "Punjab", "address": "852-B Millaad Street, Block B, Faisal Town, Lahore" },
+        { "key": "chiniot-faisalabad-campus", "name": "Chiniot-Faisalabad Campus", "city": "Chiniot", "province": "Punjab", "address": "FAST Square, 9 km from Faisalabad Motorway Interchange towards Chiniot" },
+        { "key": "multan-campus", "name": "Multan Campus", "city": "Multan", "province": "Punjab", "address": "Plot E-01, Jinnah Avenue, DHA Multan" }
+      ],
+      "programs": []
+    },
+    {
+      "slug": "national-university-of-sciences-and-technology",
+      "name": "National University of Sciences and Technology",
+      "abbreviation": "NUST",
+      "sector": "public",
+      "provinceOrTerritory": "Islamabad Capital Territory",
+      "charterAuthority": "federal",
+      "source": { "officialUrl": "https://nust.edu.pk/" },
+      "campuses": [
+        { "key": "h-12-main-campus", "name": "Main Campus (H-12)", "city": "Islamabad", "province": "Islamabad Capital Territory", "address": "Sector H-12, Islamabad", "isMainCampus": true }
+      ],
+      "programs": []
+    }
+  ]
+}
