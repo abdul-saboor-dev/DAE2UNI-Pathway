@@ -82,7 +82,7 @@ The foundation currently includes:
 * Owner/Co-Owner/Admin content access and password-confirmed administrator role management
 * Explicit, password-safe CLI recovery for the existing Owner and legacy migration
 
-Refresh tokens, email verification, password recovery, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
+Refresh tokens, password recovery, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
 
 The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md), catalogue endpoints in [docs/catalogue-api.md](docs/catalogue-api.md), public catalogue pages in [docs/frontend-catalogue.md](docs/frontend-catalogue.md), the administrator workflow in [docs/admin-catalogue-frontend.md](docs/admin-catalogue-frontend.md), [role management](docs/role-management.md), [first-Owner setup](docs/first-administrator-setup.md), and the [frontend design system](docs/frontend-design.md).
 
@@ -231,6 +231,8 @@ Geographic catalogue fields now distinguish physical province/territory, charter
 
 ## Quality Checks
 
+New public Student registrations require email verification before login. Configure a verified Brevo sender and backend-only API key, then see the [email verification guide](docs/email-verification.md) for the one-use link, resend limits, deployment configuration, and legacy-account behavior. Registration still requires Turnstile.
+
 Run the frontend checks before sharing changes:
 
 ```powershell
@@ -242,6 +244,7 @@ npm run check:setup-frontend
 npm run check:roles-frontend
 npm run check:geographic-frontend
 npm run check:design
+npm run check:email-verification
 npm run lint
 npm run build
 
@@ -252,6 +255,7 @@ npm run check:catalogue
 npm run check:setup
 npm run check:roles
 npm run check:geographic-catalogue
+npm run check:email-verification
 ```
 
 ## Git Workflow

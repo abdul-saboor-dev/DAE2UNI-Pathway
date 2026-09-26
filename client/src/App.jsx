@@ -22,6 +22,8 @@ import StudentProfilePage from './pages/StudentProfilePage.jsx'
 import UnauthorizedPage from './pages/UnauthorizedPage.jsx'
 import UniversityDetailPage from './pages/UniversityDetailPage.jsx'
 import UniversitiesPage from './pages/UniversitiesPage.jsx'
+import VerifyEmailPage from './pages/VerifyEmailPage.jsx'
+import ResendVerificationPage from './pages/ResendVerificationPage.jsx'
 
 function App() {
   return (
@@ -49,9 +51,11 @@ function App() {
         <Route path="universities/:universityIdentifier" element={<UniversityDetailPage />} />
         <Route path="programs" element={<ProgramsPage />} />
         <Route path="programs/:programId" element={<ProgramDetailPage />} />
+        <Route path="verify-email" element={<VerifyEmailPage />} />
         <Route element={<PublicOnlyRoute />}>
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
+          <Route path="resend-verification" element={<ResendVerificationPage />} />
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['student']} />}>
           <Route path="dashboard" element={<DashboardPage />} />

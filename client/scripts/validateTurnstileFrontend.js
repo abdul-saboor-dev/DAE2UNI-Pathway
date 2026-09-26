@@ -15,7 +15,7 @@ function check(condition, label) { assert.ok(condition, label); checks += 1 }
 
 check(widget.includes('https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'), 'official explicit-render script')
 check(widget.includes('if (scriptPromise) return scriptPromise'), 'duplicate script insertion prevented')
-check(widget.includes("action: 'student_register'"), 'registration action assigned')
+check(widget.includes("action = 'student_register'") && widget.includes('action,'), 'registration action defaults and passes to widget')
 check(widget.includes("'response-field': false"), 'automatic extra form field disabled')
 check(widget.includes("'expired-callback'") && widget.includes("'error-callback'"), 'expiration and error callbacks')
 check(widget.includes('turnstile.reset(widgetRef.current)'), 'widget resets after failure')

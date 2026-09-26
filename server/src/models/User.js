@@ -56,6 +56,9 @@ const userSchema = new Schema(
       required: true,
     },
     lastLoginAt: Date,
+    // Missing on pre-verification accounts means trusted legacy behavior.
+    emailVerificationRequired: { type: Boolean, default: false, required: true },
+    emailVerifiedAt: Date,
     ownerMarker: { type: String, enum: ['permanent_owner'], select: false },
     roleAudit: { type: [roleAuditSchema], select: false, default: undefined },
   },

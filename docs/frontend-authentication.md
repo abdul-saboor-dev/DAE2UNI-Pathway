@@ -16,6 +16,8 @@ The client removes the token when a protected request reports an invalid or expi
 | --- | --- | --- |
 | `/` | Public | Existing DAE2UNI landing page |
 | `/register` | Signed-out only | Create a student account |
+| `/verify-email` | Public | Consume a one-use email verification link |
+| `/resend-verification` | Public | Request a new link with Turnstile protection |
 | `/login` | Signed-out only | Authenticate an existing account |
 | `/dashboard` | Authenticated student | Account and profile status |
 | `/profile` | Authenticated student | Draft/complete profile onboarding |
@@ -33,7 +35,7 @@ Owner, Co-Owner, and Admin receive the same content-management access. These fro
 
 Registration submits exactly `name`, `email`, `password`, and a short-lived `turnstileToken` obtained from the Cloudflare widget. Confirmation is checked only in the browser and is never sent. Role, status, password hash, user ID, and unknown properties are absent from the request. The widget token is held only in component state, never browser storage; it is cleared and the widget reset after a failed attempt. Submission stays disabled until a token is available. Backend Siteverify remains mandatory. See [Turnstile setup](./turnstile-registration.md).
 
-The current registration endpoint returns a safe user but not an access token. To establish the session without changing the backend contract, the client completes registration and then calls the existing login endpoint using the submitted credentials. Only the token returned from login is placed in `sessionStorage`.
+The registration endpoint returns a safe user but not an access token. The client shows a “Check your email” state and does not log in automatically. The one-use link opens `/verify-email#token=...`; the page removes the fragment from browser history before submitting it by POST. The resend form uses the separate `email_verification_resend` Turnstile action and gives a generic response. Only a later successful login stores a token in `sessionStorage`. Correct credentials for an unverified account return `EMAIL_VERIFICATION_REQUIRED` without a JWT. See [student email verification](./email-verification.md).
 
 Client validation mirrors the API:
 

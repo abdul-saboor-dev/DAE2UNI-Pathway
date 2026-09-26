@@ -1,10 +1,10 @@
 import ApiError from '../utils/ApiError.js'
-import { getTurnstileAllowedHostnames, isInvalidTurnstileSecret } from '../config/environment.js'
+import { getTurnstileAllowedHostnames, isInvalidTurnstileSecret, isLocalAlwaysPassTurnstileSecret } from '../config/environment.js'
 
 const SITEVERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 const FAILURE_MESSAGE = 'Human verification failed. Please try again.'
 
-export async function verifyTurnstile(token, { fetchImpl = fetch, timeoutMs = 5000 } = {}) {
+export async function verifyTurnstile(token, { fetchImpl = fetch, timeoutMs = 5000, expectedAction = 'student_register' } = {}) {
   const secret = process.env.TURNSTILE_SECRET_KEY
   if (isInvalidTurnstileSecret(secret)) {
     throw new ApiError(503, 'Human verification is temporarily unavailable.', 'HUMAN_VERIFICATION_UNAVAILABLE')
@@ -26,9 +26,16 @@ export async function verifyTurnstile(token, { fetchImpl = fetch, timeoutMs = 50
     const result = await response.json()
     const hostnames = getTurnstileAllowedHostnames()
     const hostname = typeof result?.hostname === 'string' ? result.hostname.toLowerCase() : ''
-    if (result?.success !== true || result.action !== 'student_register' || !hostname ||
+    const realResponseMatches = result?.action === expectedAction && hostname &&
+      (hostnames.length === 0 || hostnames.includes(hostname))
+    // Cloudflare's official always-pass secret can return no action and example.com.
+    // This exception is unavailable with real secrets and in production.
+    const localDummyResponseMatches = isLocalAlwaysPassTurnstileSecret(secret) &&
+      (result?.action == null || result.action === 'test') &&
+      (hostname === 'example.com' || hostnames.includes(hostname))
+    if (result?.success !== true || !hostname ||
       typeof result.challenge_ts !== 'string' || Number.isNaN(Date.parse(result.challenge_ts)) ||
-      (hostnames.length > 0 && !hostnames.includes(hostname))) {
+      !(realResponseMatches || localDummyResponseMatches)) {
       throw new Error('Siteverify did not approve registration')
     }
   } catch {

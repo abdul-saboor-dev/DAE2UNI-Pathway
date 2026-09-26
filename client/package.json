@@ -14,6 +14,7 @@
     "check:geographic-frontend": "node scripts/validateGeographicFrontend.js",
     "check:design": "node scripts/validateDesignFrontend.js",
     "check:turnstile": "node scripts/validateTurnstileFrontend.js",
+    "check:email-verification": "node scripts/validateEmailVerificationFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

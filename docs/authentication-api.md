@@ -1,6 +1,6 @@
 # Authentication and Student-Profile API
 
-The API implements Student registration, login, JWT authentication, role authorization, and student-owned profile access. First-Owner setup and focused administrator role management are documented separately in [the setup guide](./first-administrator-setup.md) and [role management](./role-management.md). Refresh tokens, email verification, password recovery, and OAuth are not implemented.
+The API implements Student registration, email verification, login, JWT authentication, role authorization, and student-owned profile access. First-Owner setup and focused administrator role management are documented separately in [the setup guide](./first-administrator-setup.md) and [role management](./role-management.md). Refresh tokens, password recovery, and OAuth are not implemented. See [student email verification](./email-verification.md) for provider setup and resend behavior.
 
 ## Environment Variables
 
@@ -57,7 +57,7 @@ Password hashes are excluded from model serialization and every API response.
 
 ## POST `/api/auth/register`
 
-Creates an active student account only after backend Cloudflare Turnstile Siteverify succeeds. Public clients cannot select a role; including `role`, `accountStatus`, `passwordHash`, or another unknown field causes request validation to fail. The registration request accepts a single-use `turnstileToken` (1–2048 characters). The widget alone is not trusted. See [Turnstile registration setup](./turnstile-registration.md).
+Creates an active, email-verification-required student account only after backend Cloudflare Turnstile Siteverify succeeds. Public clients cannot select a role; including `role`, `accountStatus`, `passwordHash`, or another unknown field causes request validation to fail. The registration request accepts a single-use `turnstileToken` (1–2048 characters). The widget alone is not trusted. A successful registration sends a 30-minute email link and returns a safe user, not a JWT. See [Turnstile registration setup](./turnstile-registration.md) and [student email verification](./email-verification.md).
 
 Password requirements:
 

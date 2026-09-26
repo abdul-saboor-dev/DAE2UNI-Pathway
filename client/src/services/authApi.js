@@ -14,3 +14,13 @@ export async function getCurrentUser(signal) {
   const { data } = await api.get('/auth/me', { requiresAuth: true, signal })
   return data.data.user
 }
+
+export async function verifyEmailToken(token) {
+  const { data } = await api.post('/auth/verify-email', { token })
+  return data.data
+}
+
+export async function resendVerificationEmail({ email, turnstileToken }) {
+  const { data } = await api.post('/auth/resend-verification', { email, turnstileToken })
+  return data.data
+}

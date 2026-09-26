@@ -1,6 +1,6 @@
 # Student-registration Turnstile setup
 
-Only `POST /api/auth/register` uses Cloudflare Turnstile. Backend [Siteverify](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/) is mandatory; client widget state is never proof by itself. Login, Owner setup, role management, profiles, and catalogue endpoints do not use Turnstile.
+Public `POST /api/auth/register` and `POST /api/auth/resend-verification` use Cloudflare Turnstile. Registration requires the `student_register` action; resend requires `email_verification_resend`. Backend [Siteverify](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/) is mandatory; client widget state is never proof by itself. Login, Owner setup, role management, profiles, and catalogue endpoints do not use Turnstile.
 
 ## Cloudflare dashboard and deployment
 
@@ -10,6 +10,8 @@ Only `POST /api/auth/register` uses Cloudflare Turnstile. Backend [Siteverify](h
 4. Deploy over HTTPS. Test registration, then confirm that replaying an old token fails. Siteverify tokens expire after five minutes and are single-use. Never put a token or secret in a URL or log.
 
 The widget uses action `student_register`. The backend requires Siteverify `success: true`, the matching action, a hostname, and an allowed hostname when configured. Failed verification creates no account and returns only a generic error. A network outage fails closed. `TURNSTILE_SECRET_KEY` must be separate from the JWT and Owner-setup secrets.
+
+Cloudflare's official always-pass dummy secret may return `hostname: "example.com"` and no `action` even when the widget supplied an action. Only in non-production, and only when the configured secret exactly equals that official always-pass secret, the backend accepts this documented dummy response after a successful Siteverify response and valid challenge timestamp. Real keys and all production requests still require the exact action and allowed hostname. Dummy-key tests cannot establish real token replay or action enforcement; test those with mocked Siteverify failures and a real production widget before launch.
 
 ## Local development and automated tests
 

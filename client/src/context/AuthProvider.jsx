@@ -85,10 +85,7 @@ function AuthProvider({ children }) {
     setAuthError('')
     try {
       await registerStudent({ name, email, password, turnstileToken })
-      const result = await loginStudent({ email, password })
-      setAccessToken(result.token)
-      setUser(result.user)
-      return result.user
+      return true
     } catch (error) {
       const message = getApiErrorMessage(error, 'Unable to create your account right now.')
       setAuthError(message)

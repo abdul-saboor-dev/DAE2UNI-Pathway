@@ -89,11 +89,14 @@ async function changeRole({ actorId, currentPassword, allowedRoles, targetId, ta
     const actor = await verifyActor(actorId, currentPassword, allowedRoles)
     const target = targetId
       ? await User.findById(targetId).select('name email role accountStatus createdAt lastLoginAt')
-      : await User.findOne({ email: normalizeEmail(targetEmail) }).select('name email role accountStatus createdAt lastLoginAt')
+      : await User.findOne({ email: normalizeEmail(targetEmail) }).select('name email role accountStatus emailVerificationRequired createdAt lastLoginAt')
     if (!target) throw new ApiError(404, 'The target account was not found.', 'USER_NOT_FOUND')
     if (target._id.equals(actor._id)) throw new ApiError(409, 'You cannot change your own role.', 'SELF_ROLE_CHANGE')
     if (target.role !== expectedRole || (requireActive && target.accountStatus !== 'active')) {
       throw new ApiError(409, ROLE_CONFLICT, 'ROLE_CONFLICT')
+    }
+    if (expectedRole === 'student' && target.emailVerificationRequired === true) {
+      throw new ApiError(409, 'The student must verify their email before promotion.', 'EMAIL_VERIFICATION_REQUIRED')
     }
     if (confirmEmail && normalizeEmail(confirmEmail) !== target.email) {
       throw new ApiError(400, 'Typed email does not match the target account.', 'EMAIL_CONFIRMATION_MISMATCH')
@@ -102,7 +105,8 @@ async function changeRole({ actorId, currentPassword, allowedRoles, targetId, ta
     const audit = { operationId: randomUUID(), actor: actor._id, actorRole: actor.role,
       target: target._id, action, previousRole: expectedRole, newRole, occurredAt: new Date() }
     const updated = await User.findOneAndUpdate({ _id: target._id, role: expectedRole,
-      ...(requireActive && { accountStatus: 'active' }) },
+      ...(requireActive && { accountStatus: 'active' }),
+      ...(expectedRole === 'student' && { emailVerificationRequired: { $ne: true } }) },
     { $set: { role: newRole }, $push: { roleAudit: audit } },
     { new: true, runValidators: true })
     if (!updated) throw new ApiError(409, ROLE_CONFLICT, 'ROLE_CONFLICT')

@@ -6,6 +6,38 @@ const TURNSTILE_TEST_SECRETS = new Set([
   '2x0000000000000000000000000000000AA',
   '3x0000000000000000000000000000000AA',
 ])
+const TURNSTILE_ALWAYS_PASS_TEST_SECRET = '1x0000000000000000000000000000000AA'
+
+export function isLocalAlwaysPassTurnstileSecret(secret, production = process.env.NODE_ENV === 'production') {
+  return !production && secret === TURNSTILE_ALWAYS_PASS_TEST_SECRET
+}
+
+const EMAIL_PLACEHOLDERS = ['replace-with', 'change-me', 'example', 'placeholder', 'your-key']
+
+export function isValidClientBaseUrl(value, production = process.env.NODE_ENV === 'production') {
+  if (typeof value !== 'string' || !value || value !== value.trim()) return false
+  try {
+    const url = new URL(value)
+    return (url.protocol === 'https:' || (!production && url.protocol === 'http:')) &&
+      !url.username && !url.password && !url.search && !url.hash && url.pathname === '/' &&
+      !value.includes('\\') && !/\s/.test(value) &&
+      (!production || !/^(?:localhost|127\.0\.0\.1|example\.com)$|\.(?:localhost|invalid|test|example)$/i.test(url.hostname))
+  } catch { return false }
+}
+
+export function isValidEmailConfiguration(environment = process.env, production = environment.NODE_ENV === 'production') {
+  const key = environment.BREVO_API_KEY
+  const sender = environment.EMAIL_FROM_ADDRESS
+  const name = environment.EMAIL_FROM_NAME
+  return typeof key === 'string' && key.length >= 24 && key === key.trim() &&
+    new Set(key).size >= 10 && !EMAIL_PLACEHOLDERS.some((marker) => key.toLowerCase().includes(marker)) &&
+    (!production || !['temporary', 'synthetic', 'dummy', 'fixture', 'test-key'].some((marker) => key.toLowerCase().includes(marker))) &&
+    key !== environment.JWT_SECRET && key !== environment.TURNSTILE_SECRET_KEY && key !== environment.ADMIN_SETUP_SECRET &&
+    typeof sender === 'string' && sender.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sender) &&
+    (!production || !/@(?:example\.com|[^@]+\.(?:invalid|test|example|localhost))$/i.test(sender)) &&
+    typeof name === 'string' && name.trim().length > 0 && name.length <= 120 && !/[\r\n]/.test(name) &&
+    isValidClientBaseUrl(environment.CLIENT_BASE_URL, production)
+}
 
 export function isInvalidTurnstileSecret(secret, production = process.env.NODE_ENV === 'production') {
   if (typeof secret !== 'string') return true
@@ -69,6 +101,9 @@ export default function validateEnvironment() {
     throw new Error('TURNSTILE_SECRET_KEY must be separate from other application secrets.')
   }
   if (process.env.NODE_ENV === 'production') {
+    if (!isValidEmailConfiguration(process.env, true)) {
+      throw new Error('Brevo sender, API key, and HTTPS CLIENT_BASE_URL must be configured securely.')
+    }
     if (isInvalidTurnstileSecret(process.env.TURNSTILE_SECRET_KEY, true)) {
       throw new Error('TURNSTILE_SECRET_KEY must be a valid non-example production secret.')
     }

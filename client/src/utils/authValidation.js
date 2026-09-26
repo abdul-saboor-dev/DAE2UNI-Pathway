@@ -4,16 +4,20 @@ function utf8Length(value) {
   return new TextEncoder().encode(value).length
 }
 
-export function validateLogin(values) {
+export function validateEmail(value) {
   const errors = {}
-  const email = values.email.trim()
+  const email = value.trim()
 
   if (!email) errors.email = 'Email is required.'
   else if (email.length > 254 || !emailPattern.test(email)) {
     errors.email = 'Enter a valid email address.'
   }
-  if (!values.password) errors.password = 'Password is required.'
+  return errors
+}
 
+export function validateLogin(values) {
+  const errors = validateEmail(values.email)
+  if (!values.password) errors.password = 'Password is required.'
   return errors
 }
 

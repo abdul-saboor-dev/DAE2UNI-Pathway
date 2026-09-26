@@ -5,6 +5,7 @@ import ApiError from '../utils/ApiError.js'
 import { signAccessToken } from '../utils/jwt.js'
 import toSafeUser from '../utils/safeUser.js'
 import { verifyTurnstile } from './turnstileService.js'
+import { ensureDeliveryConfigured, sendInitialVerification } from './emailVerificationService.js'
 
 export const BCRYPT_ROUNDS = 12
 const INVALID_CREDENTIALS_MESSAGE = 'Email or password is incorrect.'
@@ -16,6 +17,7 @@ export function normalizeEmail(email) {
 
 export async function registerStudent({ name, email, password, turnstileToken }) {
   await verifyTurnstile(turnstileToken)
+  ensureDeliveryConfigured()
   const normalizedEmail = normalizeEmail(email)
   const existingUser = await User.exists({ email: normalizedEmail })
 
@@ -30,7 +32,10 @@ export async function registerStudent({ name, email, password, turnstileToken })
     passwordHash,
     role: 'student',
     accountStatus: 'active',
+    emailVerificationRequired: true,
   })
+
+  await sendInitialVerification(user)
 
   return toSafeUser(user)
 }
@@ -46,6 +51,9 @@ export async function login({ email, password }) {
   }
   if (user.accountStatus !== 'active') {
     throw new ApiError(403, 'This account is not active.', 'ACCOUNT_DISABLED')
+  }
+  if (user.emailVerificationRequired === true) {
+    throw new ApiError(403, 'Verify your email address before signing in.', 'EMAIL_VERIFICATION_REQUIRED')
   }
 
   user.lastLoginAt = new Date()

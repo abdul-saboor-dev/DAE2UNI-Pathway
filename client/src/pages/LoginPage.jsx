@@ -8,6 +8,7 @@ import useAuth from '../context/useAuth.js'
 import { getApiFieldErrors, getApiErrorMessage } from '../utils/apiErrors.js'
 import { validateLogin } from '../utils/authValidation.js'
 import { getRoleDestination } from '../utils/navigation.js'
+import { isApiError } from '../utils/apiErrors.js'
 
 function LoginPage() {
   const { login, authError, clearAuthError } = useAuth()
@@ -17,6 +18,7 @@ function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState({})
   const [formError, setFormError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [verificationRequired, setVerificationRequired] = useState(false)
 
   useEffect(() => () => clearAuthError(), [clearAuthError])
 
@@ -25,6 +27,7 @@ function LoginPage() {
     setValues((current) => ({ ...current, [name]: value }))
     setFieldErrors((current) => ({ ...current, [name]: undefined }))
     setFormError('')
+    setVerificationRequired(false)
   }
 
   async function handleSubmit(event) {
@@ -41,6 +44,7 @@ function LoginPage() {
     } catch (error) {
       setFieldErrors(getApiFieldErrors(error))
       setFormError(getApiErrorMessage(error, 'Unable to sign in right now.'))
+      setVerificationRequired(isApiError(error, 403, 'EMAIL_VERIFICATION_REQUIRED'))
     } finally {
       setIsSubmitting(false)
     }
@@ -59,6 +63,7 @@ function LoginPage() {
           <p className="mt-1 text-sm text-ink/55">Use your DAE2UNI account email and password.</p>
         </div>
         <FormAlert message={formError || authError} />
+        {verificationRequired && <p className="text-sm"><Link className="font-bold text-academic underline" to="/resend-verification" state={{ email: values.email.trim().toLowerCase() }}>Request another verification email</Link></p>}
         <TextField
           id="login-email"
           name="email"

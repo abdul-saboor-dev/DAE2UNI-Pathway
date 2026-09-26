@@ -25,15 +25,17 @@ export const passwordSchema = z
     message: 'Password cannot exceed 72 UTF-8 bytes.',
   })
 
+const turnstileTokenSchema = z.string({ error: 'Human verification is required.' }).trim()
+  .min(1, 'Human verification is required.')
+  .max(2048, 'Human verification token is invalid.')
+
 export const registerRequestSchema = requestSchema(
   z
     .object({
       name: nameSchema,
       email: emailSchema,
       password: passwordSchema,
-      turnstileToken: z.string({ error: 'Human verification is required.' }).trim()
-        .min(1, 'Human verification is required.')
-        .max(2048, 'Human verification token is invalid.'),
+      turnstileToken: turnstileTokenSchema,
     })
     .strict(),
 )
@@ -46,3 +48,12 @@ export const loginRequestSchema = requestSchema(
     })
     .strict(),
 )
+
+export const verifyEmailRequestSchema = requestSchema(z.object({
+  token: z.string({ error: 'Verification token is required.' }).min(32).max(128).regex(/^[A-Za-z0-9_-]+$/),
+}).strict())
+
+export const resendVerificationRequestSchema = requestSchema(z.object({
+  email: emailSchema,
+  turnstileToken: turnstileTokenSchema,
+}).strict())

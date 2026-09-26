@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import AuthShell from '../components/AuthShell.jsx'
 import FormAlert from '../components/FormAlert.jsx'
 import PasswordField from '../components/PasswordField.jsx'
@@ -8,14 +8,13 @@ import TurnstileWidget from '../components/TurnstileWidget.jsx'
 import useAuth from '../context/useAuth.js'
 import { getApiFieldErrors, getApiErrorMessage } from '../utils/apiErrors.js'
 import { validateRegistration } from '../utils/authValidation.js'
-import { getSafeDestination } from '../utils/navigation.js'
 
 const initialValues = { name: '', email: '', password: '', confirmPassword: '' }
 
 function RegisterPage() {
   const { register, authError, clearAuthError } = useAuth()
   const location = useLocation()
-  const navigate = useNavigate()
+  const [registeredEmail, setRegisteredEmail] = useState('')
   const [values, setValues] = useState(initialValues)
   const [fieldErrors, setFieldErrors] = useState({})
   const [formError, setFormError] = useState('')
@@ -49,7 +48,8 @@ function RegisterPage() {
         turnstileToken,
       })
       setTurnstileToken('')
-      navigate(getSafeDestination(location.state?.from), { replace: true })
+      setRegisteredEmail(values.email.trim().toLowerCase())
+      setValues((current) => ({ ...current, password: '', confirmPassword: '' }))
     } catch (error) {
       setFieldErrors(getApiFieldErrors(error))
       setFormError(getApiErrorMessage(error, 'Unable to create your account right now.'))
@@ -59,6 +59,15 @@ function RegisterPage() {
       setIsSubmitting(false)
     }
   }
+
+  if (registeredEmail) return <AuthShell eyebrow="Email verification" title="Check your email"
+    description="Your student account has been created, but you must verify your email before signing in.">
+    <div role="status" className="space-y-4">
+      <p className="text-sm leading-7">We sent a verification link to <strong className="break-all">{registeredEmail}</strong>. The link expires in 30 minutes.</p>
+      <p className="text-sm text-[var(--ui-muted)]">Check your inbox and spam folder. If delivery fails or the link expires, request another message.</p>
+      <div className="flex flex-wrap gap-3"><Link className="action-primary" to="/login">Go to login</Link><Link className="action-secondary" to="/resend-verification" state={{ email: registeredEmail }}>Resend verification</Link></div>
+    </div>
+  </AuthShell>
 
   return (
     <AuthShell
@@ -70,9 +79,10 @@ function RegisterPage() {
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
         <div>
           <h2 className="section-title text-2xl text-navy">Register</h2>
-          <p className="mt-1 text-sm text-ink/55">All fields are required. You will be signed in after registration.</p>
+          <p className="mt-1 text-sm text-ink/55">All fields are required. You will verify your email before signing in.</p>
         </div>
         <FormAlert message={formError || authError} />
+        {formError && <p className="text-sm"><Link className="font-bold text-academic underline" to="/resend-verification" state={{ email: values.email.trim().toLowerCase() }}>Already created an account? Request a new verification email.</Link></p>}
         <TextField
           id="register-name"
           name="name"
