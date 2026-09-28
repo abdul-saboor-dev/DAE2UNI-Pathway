@@ -82,7 +82,7 @@ The foundation currently includes:
 * Owner/Co-Owner/Admin content access and password-confirmed administrator role management
 * Explicit, password-safe CLI recovery for the existing Owner and legacy migration
 
-Refresh tokens, password recovery, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
+Refresh tokens, eligibility evaluation, merit calculation services, application tracking, and deployment are intentionally not implemented yet.
 
 The database relationships are documented in [docs/domain-model.md](docs/domain-model.md), authentication/profile endpoints in [docs/authentication-api.md](docs/authentication-api.md), the browser authentication/profile flow in [docs/frontend-authentication.md](docs/frontend-authentication.md), catalogue endpoints in [docs/catalogue-api.md](docs/catalogue-api.md), public catalogue pages in [docs/frontend-catalogue.md](docs/frontend-catalogue.md), the administrator workflow in [docs/admin-catalogue-frontend.md](docs/admin-catalogue-frontend.md), [role management](docs/role-management.md), [first-Owner setup](docs/first-administrator-setup.md), and the [frontend design system](docs/frontend-design.md).
 
@@ -160,6 +160,8 @@ JWT_EXPIRES_IN=1d
 Replace `JWT_SECRET` locally with a cryptographically random value of at least 32 varied characters; the example value is deliberately rejected at startup. `JWT_EXPIRES_IN` must use a positive duration with a unit, such as `15m`, `1h`, or `1d`. For the first Owner only, uncomment and replace the separate `ADMIN_SETUP_SECRET` placeholder with a strong random value and visit `/setup/admin`; see [the setup guide](docs/first-administrator-setup.md). Remove that variable after successful setup if desired. The local `.env` file is ignored by Git. Never commit real credentials, secrets, or production connection strings.
 
 Student registration additionally requires Cloudflare Turnstile: set the public `VITE_TURNSTILE_SITE_KEY` in an ignored client environment file and the private `TURNSTILE_SECRET_KEY` on the backend. Production also requires `TURNSTILE_ALLOWED_HOSTNAMES`. See [Turnstile registration setup](docs/turnstile-registration.md); login and Owner setup are unchanged.
+
+Password recovery reuses the same backend-only Brevo configuration as student email verification and requires a Turnstile challenge with the distinct `password_reset_request` action. Links are hash-only, single-use, expire after 30 minutes, and revoke all pre-reset access tokens after success. See [password recovery](docs/password-recovery.md).
 
 ## Start MongoDB
 
@@ -245,6 +247,7 @@ npm run check:roles-frontend
 npm run check:geographic-frontend
 npm run check:design
 npm run check:email-verification
+npm run check:password-recovery
 npm run lint
 npm run build
 
@@ -256,6 +259,7 @@ npm run check:setup
 npm run check:roles
 npm run check:geographic-catalogue
 npm run check:email-verification
+npm run check:password-recovery
 ```
 
 ## Git Workflow

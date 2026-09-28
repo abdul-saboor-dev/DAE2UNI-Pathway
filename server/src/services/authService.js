@@ -42,7 +42,7 @@ export async function registerStudent({ name, email, password, turnstileToken })
 
 export async function login({ email, password }) {
   const normalizedEmail = normalizeEmail(email)
-  const user = await User.findOne({ email: normalizedEmail }).select('+passwordHash')
+  const user = await User.findOne({ email: normalizedEmail }).select('+passwordHash +authVersion')
   const comparisonHash = user?.passwordHash || (await dummyPasswordHash)
   const passwordMatches = await bcrypt.compare(password, comparisonHash)
 

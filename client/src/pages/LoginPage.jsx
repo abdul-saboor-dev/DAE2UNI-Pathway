@@ -63,6 +63,7 @@ function LoginPage() {
           <p className="mt-1 text-sm text-ink/55">Use your DAE2UNI account email and password.</p>
         </div>
         <FormAlert message={formError || authError} />
+        <FormAlert message={location.state?.passwordResetComplete ? 'Password reset complete. Sign in with your new password.' : ''} tone="success" />
         {verificationRequired && <p className="text-sm"><Link className="font-bold text-academic underline" to="/resend-verification" state={{ email: values.email.trim().toLowerCase() }}>Request another verification email</Link></p>}
         <TextField
           id="login-email"
@@ -86,6 +87,7 @@ function LoginPage() {
           autoComplete="current-password"
           required
         />
+        <p className="text-right text-sm"><Link className="font-bold text-academic underline decoration-academic/35 underline-offset-4" to="/forgot-password">Forgot password?</Link></p>
         <button
           type="submit"
           disabled={isSubmitting}

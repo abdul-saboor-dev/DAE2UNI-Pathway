@@ -25,6 +25,7 @@ function loadScript() {
 
 const TurnstileWidget = forwardRef(function TurnstileWidget({ onTokenChange, action = 'student_register' }, ref) {
   const isResend = action === 'email_verification_resend'
+  const isPasswordReset = action === 'password_reset_request'
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY?.trim()
   const containerRef = useRef(null)
   const widgetRef = useRef(null)
@@ -85,15 +86,15 @@ const TurnstileWidget = forwardRef(function TurnstileWidget({ onTokenChange, act
 
   return <section aria-label="Human verification" className="min-w-0 border-t border-[var(--ui-border)] pt-5">
     <h3 className="text-sm font-bold text-navy">Human verification</h3>
-    <p className="mt-1 text-sm text-[var(--ui-muted)]">{isResend ? 'Complete this check before requesting another verification email.' : 'Complete this check before creating your student account.'}</p>
+    <p className="mt-1 text-sm text-[var(--ui-muted)]">{isPasswordReset ? 'Complete this check before requesting a password reset.' : isResend ? 'Complete this check before requesting another verification email.' : 'Complete this check before creating your student account.'}</p>
     {siteKey && <div ref={containerRef} className="mt-3 min-h-36 min-w-0" />}
     <p role="status" className="mt-2 text-sm text-[var(--ui-muted)]">
       {status === 'loading' && 'Loading verification…'}
       {status === 'unavailable' && (siteKey ? 'Verification is unavailable. Try again or refresh this page.' : 'Human verification is unavailable until the site key is configured.')}
       {status === 'expired' && 'Verification expired. Please complete it again.'}
       {status === 'error' && 'Verification could not complete. Please try again.'}
-      {status === 'ready' && (isResend ? 'Complete the verification widget to request an email.' : 'Complete the verification widget to enable registration.')}
-      {status === 'verified' && (isResend ? 'Verification complete. You can request an email.' : 'Verification complete. You can create your account.')}
+      {status === 'ready' && (isPasswordReset ? 'Complete the verification widget to request a reset.' : isResend ? 'Complete the verification widget to request an email.' : 'Complete the verification widget to enable registration.')}
+      {status === 'verified' && (isPasswordReset ? 'Verification complete. You can request a reset.' : isResend ? 'Verification complete. You can request an email.' : 'Verification complete. You can create your account.')}
     </p>
     {siteKey && (status === 'unavailable' || status === 'error') && <button type="button" className="action-secondary mt-3" onClick={() => {
       if (widgetRef.current !== null && window.turnstile) { window.turnstile.reset(widgetRef.current); setStatus('ready') }

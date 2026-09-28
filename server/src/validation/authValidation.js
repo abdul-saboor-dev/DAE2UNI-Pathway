@@ -57,3 +57,13 @@ export const resendVerificationRequestSchema = requestSchema(z.object({
   email: emailSchema,
   turnstileToken: turnstileTokenSchema,
 }).strict())
+
+export const forgotPasswordRequestSchema = requestSchema(z.object({
+  email: emailSchema,
+  turnstileToken: turnstileTokenSchema,
+}).strict())
+
+export const resetPasswordRequestSchema = requestSchema(z.object({
+  token: z.string({ error: 'Reset token is required.' }).max(128, 'Reset token is invalid.'),
+  password: passwordSchema,
+}).strict())

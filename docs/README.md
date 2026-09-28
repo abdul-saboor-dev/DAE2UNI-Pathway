@@ -16,5 +16,6 @@ This directory contains DAE2UNI Pathway architecture notes, data-source guidance
 * [Frontend design system](./frontend-design.md) — academic-editorial tokens, responsive components, university media fallback, campus map-search links, and accessibility rules
 * [Turnstile registration protection](./turnstile-registration.md) — local/deployed widget keys, mandatory backend verification, testing, and secret rotation
 * [Student email verification](./email-verification.md) — Brevo configuration, one-use links, login gate, resend limits, and legacy-account compatibility
+* [Password recovery](./password-recovery.md) — enumeration-resistant reset requests, one-use links, session revocation, and operational testing
 
 Calculation services, broader administrator workflows, and deployment remain future milestones.

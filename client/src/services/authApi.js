@@ -24,3 +24,15 @@ export async function resendVerificationEmail({ email, turnstileToken }) {
   const { data } = await api.post('/auth/resend-verification', { email, turnstileToken })
   return data.data
 }
+
+export async function requestPasswordReset({ email, turnstileToken }) {
+  // Siteverify and transactional delivery are sequential server operations, so
+  // this public request needs more time than ordinary API calls.
+  const { data } = await api.post('/auth/forgot-password', { email, turnstileToken }, { timeout: 15000 })
+  return data.data
+}
+
+export async function resetPassword({ token, password }) {
+  const { data } = await api.post('/auth/reset-password', { token, password })
+  return data.data
+}

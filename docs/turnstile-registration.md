@@ -1,6 +1,6 @@
 # Student-registration Turnstile setup
 
-Public `POST /api/auth/register` and `POST /api/auth/resend-verification` use Cloudflare Turnstile. Registration requires the `student_register` action; resend requires `email_verification_resend`. Backend [Siteverify](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/) is mandatory; client widget state is never proof by itself. Login, Owner setup, role management, profiles, and catalogue endpoints do not use Turnstile.
+Public `POST /api/auth/register`, `POST /api/auth/resend-verification`, and `POST /api/auth/forgot-password` use Cloudflare Turnstile. Registration requires `student_register`, verification resend requires `email_verification_resend`, and recovery requires `password_reset_request`. Backend [Siteverify](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/) is mandatory; client widget state is never proof by itself. Login, password-reset token consumption, Owner setup, role management, profiles, and catalogue endpoints do not use Turnstile.
 
 ## Cloudflare dashboard and deployment
 

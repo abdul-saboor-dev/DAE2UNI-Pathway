@@ -15,6 +15,7 @@
     "check:design": "node scripts/validateDesignFrontend.js",
     "check:turnstile": "node scripts/validateTurnstileFrontend.js",
     "check:email-verification": "node scripts/validateEmailVerificationFrontend.js",
+    "check:password-recovery": "node scripts/validatePasswordRecoveryFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

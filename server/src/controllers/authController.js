@@ -4,6 +4,7 @@ import toSafeUser from '../utils/safeUser.js'
 import { resendStudentVerification, verifyStudentEmail } from '../services/emailVerificationService.js'
 import { normalizeEmail } from '../services/authService.js'
 import { verifyTurnstile } from '../services/turnstileService.js'
+import { PASSWORD_RESET_GENERIC_MESSAGE, requestPasswordReset, resetPassword } from '../services/passwordRecoveryService.js'
 
 export const register = asyncHandler(async (request, response) => {
   const user = await registerStudent(request.validated.body)
@@ -24,6 +25,22 @@ export const resendVerification = asyncHandler(async (request, response) => {
   const { email, turnstileToken } = request.validated.body
   await verifyTurnstile(turnstileToken, { expectedAction: 'email_verification_resend' })
   const message = await resendStudentVerification(normalizeEmail(email))
+  response.status(200).json({ status: 'success', data: { message } })
+})
+
+export const forgotPassword = asyncHandler(async (request, response) => {
+  const { email, turnstileToken } = request.validated.body
+  await verifyTurnstile(turnstileToken, { expectedAction: 'password_reset_request' })
+  const startedAt = Date.now()
+  await requestPasswordReset(email)
+  const minimumResponseMs = 350
+  const remainingDelay = minimumResponseMs - (Date.now() - startedAt)
+  if (remainingDelay > 0) await new Promise((resolve) => setTimeout(resolve, remainingDelay))
+  response.status(200).json({ status: 'success', data: { message: PASSWORD_RESET_GENERIC_MESSAGE } })
+})
+
+export const completePasswordReset = asyncHandler(async (request, response) => {
+  const message = await resetPassword(request.validated.body.token, request.validated.body.password)
   response.status(200).json({ status: 'success', data: { message } })
 })
 

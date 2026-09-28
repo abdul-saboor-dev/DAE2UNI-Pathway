@@ -33,12 +33,16 @@ export const authenticate = asyncHandler(async (request, _response, next) => {
     throw new ApiError(401, 'Authentication token is invalid.', 'INVALID_TOKEN')
   }
 
-  const user = await User.findById(payload.sub)
+  const user = await User.findById(payload.sub).select('+authVersion')
   if (!user) {
     throw new ApiError(401, 'Authentication token is invalid.', 'INVALID_TOKEN')
   }
   if (user.accountStatus !== 'active') {
     throw new ApiError(403, 'This account is not active.', 'ACCOUNT_DISABLED')
+  }
+  const tokenVersion = payload.ver ?? 0
+  if (!Number.isSafeInteger(tokenVersion) || tokenVersion !== (user.authVersion ?? 0)) {
+    throw new ApiError(401, 'Authentication token is invalid.', 'INVALID_TOKEN')
   }
 
   request.user = user

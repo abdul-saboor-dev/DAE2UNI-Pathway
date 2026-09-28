@@ -8,6 +8,7 @@ export function signAccessToken(user) {
   return jwt.sign(
     {
       role: user.role,
+      ver: user.authVersion ?? 0,
     },
     process.env.JWT_SECRET,
     {

@@ -1,6 +1,6 @@
 # Authentication and Student-Profile API
 
-The API implements Student registration, email verification, login, JWT authentication, role authorization, and student-owned profile access. First-Owner setup and focused administrator role management are documented separately in [the setup guide](./first-administrator-setup.md) and [role management](./role-management.md). Refresh tokens, password recovery, and OAuth are not implemented. See [student email verification](./email-verification.md) for provider setup and resend behavior.
+The API implements Student registration, email verification, password recovery, login, JWT authentication, role authorization, and student-owned profile access. First-Owner setup and focused administrator role management are documented separately in [the setup guide](./first-administrator-setup.md) and [role management](./role-management.md). Refresh tokens and OAuth are not implemented. See [student email verification](./email-verification.md) and [password recovery](./password-recovery.md) for provider setup and security behavior.
 
 ## Environment Variables
 
@@ -131,6 +131,12 @@ Response — `200 OK`:
 ```
 
 Unknown emails and incorrect passwords both return the same `401 INVALID_CREDENTIALS` response. Successful login updates `lastLoginAt`.
+
+## Password recovery
+
+`POST /api/auth/forgot-password` accepts only normalized `email` and a fresh Turnstile token for action `password_reset_request`. It always returns: “If an eligible account exists for this email, a reset message has been sent.” Active verified Students and active Owner, Co-Owner, and Admin accounts are eligible. Unknown, inactive, unverified, cooling-down, and hourly-limited accounts receive the same response and no usable token.
+
+`POST /api/auth/reset-password` accepts only a one-use reset `token` and a new `password` that meets the registration password policy. Valid tokens expire after 30 minutes. Success changes only the password hash and internal authentication version; it preserves identity, role, status, profile, Owner protection, and verification state. Every access token issued before the reset is rejected on its next authenticated request. See [the recovery guide](./password-recovery.md) for operational details.
 
 ## GET `/api/auth/me`
 

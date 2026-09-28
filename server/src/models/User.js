@@ -5,6 +5,7 @@ function removeSensitiveFields(_document, returnedObject) {
   delete returnedObject.passwordHash
   delete returnedObject.ownerMarker
   delete returnedObject.roleAudit
+  delete returnedObject.authVersion
   return returnedObject
 }
 
@@ -59,6 +60,7 @@ const userSchema = new Schema(
     // Missing on pre-verification accounts means trusted legacy behavior.
     emailVerificationRequired: { type: Boolean, default: false, required: true },
     emailVerifiedAt: Date,
+    authVersion: { type: Number, default: 0, min: 0, select: false },
     ownerMarker: { type: String, enum: ['permanent_owner'], select: false },
     roleAudit: { type: [roleAuditSchema], select: false, default: undefined },
   },

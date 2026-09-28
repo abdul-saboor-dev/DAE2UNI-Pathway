@@ -44,3 +44,18 @@ export function validateRegistration(values) {
 
   return errors
 }
+
+export function validateNewPassword(values) {
+  const errors = {}
+  const password = values.password
+  if (!password) errors.password = 'Password is required.'
+  else if (password.length < 8) errors.password = 'Password must contain at least 8 characters.'
+  else if (password.length > 72) errors.password = 'Password cannot exceed 72 characters.'
+  else if (utf8Length(password) > 72) errors.password = 'Password cannot exceed 72 UTF-8 bytes.'
+  else if (!/[a-z]/.test(password)) errors.password = 'Password must contain a lowercase letter.'
+  else if (!/[A-Z]/.test(password)) errors.password = 'Password must contain an uppercase letter.'
+  else if (!/[0-9]/.test(password)) errors.password = 'Password must contain a number.'
+  if (!values.confirmPassword) errors.confirmPassword = 'Confirm your password.'
+  else if (values.confirmPassword !== password) errors.confirmPassword = 'Passwords do not match.'
+  return errors
+}
