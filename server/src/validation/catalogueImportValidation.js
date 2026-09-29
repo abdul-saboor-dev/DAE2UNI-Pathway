@@ -63,7 +63,7 @@ export const importUniversitySchema = z.object({
 })
 
 const topLevel = (confirmed) => z.object({
-  strategy: z.enum(['skip', 'update_drafts']),
+  strategy: z.enum(['skip', 'update_drafts', 'programs_only']),
   universities: z.array(z.unknown()).min(1).max(50),
   ...(confirmed && { confirmed: z.literal(true) }),
 }).strict().superRefine((value, context) => {

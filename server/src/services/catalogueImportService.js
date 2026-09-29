@@ -5,6 +5,8 @@ import University from '../models/University.js'
 import { importUniversitySchema } from '../validation/catalogueImportValidation.js'
 
 const blankTotals = () => ({ created: 0, updated: 0, skipped: 0, conflicted: 0, invalid: 0 })
+const blankProgramSummary = () => ({ matchedUniversities: 0, programsToCreate: 0,
+  existingProgramsSkipped: 0, missingUniversities: 0, campusConflicts: 0, invalidPrograms: 0 })
 const source = (officialUrl) => ({ officialUrl, verificationStatus: 'pending_review' })
 const universityFields = ['name', 'slug', 'abbreviation', 'sector', 'institutionType', 'provinceOrTerritory', 'charterAuthority', 'hecProfileUrl']
 const programFields = ['name', 'slug', 'degreeTitle', 'credentialType', 'department', 'disciplineCode', 'duration', 'studyMode']
@@ -15,15 +17,32 @@ function campusDocument(input, id) {
     isMainCampus: input.isMainCampus, isActive: input.isActive }
 }
 
-function classifyGroup(group, outcome, message, issues = [], programOutcomes) {
-  return { universitySlug: group?.slug || null, outcome, message, issues,
+function classifyGroup(group, outcome, message, issues = [], programOutcomes, code) {
+  return { universitySlug: group?.slug || null, outcome, message, issues, ...(code && { code }),
     programs: Array.isArray(group?.programs) ? group.programs.map((item, index) => ({ slug: item?.slug || null,
       outcome: programOutcomes?.[index] || outcome })) : [] }
 }
 
 function countEntry(totals, entry) {
-  totals[entry.outcome] += 1
-  for (const program of entry.programs) totals[program.outcome] += 1
+  if (Object.hasOwn(totals, entry.outcome)) totals[entry.outcome] += 1
+  for (const program of entry.programs) if (Object.hasOwn(totals, program.outcome)) totals[program.outcome] += 1
+}
+
+function summarizeProgramsOnly(entries) {
+  const summary = blankProgramSummary()
+  for (const entry of entries) {
+    if (entry.outcome === 'matched') summary.matchedUniversities += 1
+    if (entry.code === 'MISSING_UNIVERSITY') summary.missingUniversities += 1
+    if (entry.code === 'CAMPUS_CONFLICT') {
+      summary.campusConflicts += Math.max(1, entry.programs.filter((item) => item.outcome === 'conflicted').length)
+    }
+    for (const program of entry.programs) {
+      if (program.outcome === 'created') summary.programsToCreate += 1
+      if (program.outcome === 'skipped') summary.existingProgramsSkipped += 1
+      if (program.outcome === 'invalid') summary.invalidPrograms += 1
+    }
+  }
+  return summary
 }
 
 function safeDraft(record) {
@@ -96,6 +115,67 @@ async function prepareGroup(input, strategy) {
   return { outcome: existing ? 'updated' : 'created', university, existed: Boolean(existing), programs }
 }
 
+async function prepareProgramsOnlyGroup(input) {
+  const matches = await University.find({ slug: input.slug }).limit(2)
+  if (matches.length === 0) {
+    return { outcome: 'conflicted', code: 'MISSING_UNIVERSITY',
+      message: 'Programs-only import requires an existing university with this slug.' }
+  }
+  if (matches.length !== 1) {
+    return { outcome: 'conflicted', code: 'AMBIGUOUS_UNIVERSITY',
+      message: 'University identity is ambiguous; no programs were planned.' }
+  }
+
+  const university = matches[0]
+  const current = university.campuses.map((item) => item.toObject())
+  const byId = new Map(current.map((item) => [item._id.toString(), item]))
+  const keyed = current.filter((item) => item.importKey)
+  const byKey = new Map(keyed.map((item) => [item.importKey, item]))
+  if (byKey.size !== keyed.length) {
+    return { outcome: 'conflicted', code: 'CAMPUS_CONFLICT',
+      message: 'Existing campus import keys are ambiguous; no programs were planned.' }
+  }
+
+  const resolvedCampusIds = new Map()
+  for (const item of input.campuses) {
+    const keyMatch = byKey.get(item.key)
+    const idMatch = item.id ? byId.get(item.id.toLowerCase()) : null
+    if ((item.id && !idMatch) || (!item.id && !keyMatch) ||
+      (idMatch && keyMatch && idMatch._id.toString() !== keyMatch._id.toString())) {
+      return { outcome: 'conflicted', code: 'CAMPUS_CONFLICT',
+        message: 'A submitted campus key or ID does not identify a campus on the matched university.' }
+    }
+    resolvedCampusIds.set(item.key, (idMatch || keyMatch)._id)
+  }
+
+  const existingPrograms = await Program.find({ university: university._id,
+    slug: { $in: input.programs.map((item) => item.slug) } })
+  const bySlug = new Map(existingPrograms.map((item) => [item.slug, item]))
+  const programs = []
+  try {
+    for (const item of input.programs) {
+      const existing = bySlug.get(item.slug)
+      if (existing) {
+        programs.push({ record: existing, existed: true })
+        continue
+      }
+      const record = new Program({ university: university._id })
+      for (const key of programFields) if (item[key] !== undefined) record.set(key, item[key])
+      record.set('degreeLevel', 'undergraduate')
+      record.set('campusIds', item.campusKeys.map((key) => resolvedCampusIds.get(key)))
+      record.set('source', source(item.source.officialUrl))
+      record.set('recordStatus', 'draft')
+      await record.validate()
+      programs.push({ record, existed: false })
+    }
+  } catch (error) {
+    return { outcome: 'invalid', code: 'INVALID_PROGRAM', message: 'A program does not satisfy the catalogue model.',
+      issues: Object.values(error.errors || {}).map((item) => ({ path: item.path, message: item.message })) }
+  }
+  return { outcome: 'matched', university, programs,
+    message: 'Existing university matched; university and campuses will remain unchanged.' }
+}
+
 async function writeGroup(plan, session) {
   const options = session ? { session } : {}
   const before = session ? null : {
@@ -146,6 +226,30 @@ async function writeGroup(plan, session) {
   }
 }
 
+async function writeProgramsOnlyGroup(plan, session) {
+  const options = session ? { session } : {}
+  const created = []
+  try {
+    for (const item of plan.programs.filter((candidate) => !candidate.existed)) {
+      await item.record.save(options)
+      created.push(item.record._id)
+    }
+  } catch (error) {
+    if (!session) {
+      let rollbackIncomplete = false
+      for (const id of created.reverse()) {
+        try {
+          const result = await Program.deleteOne({ _id: id, recordStatus: 'draft',
+            'source.verificationStatus': 'pending_review' })
+          if (result.deletedCount !== 1) rollbackIncomplete = true
+        } catch { rollbackIncomplete = true }
+      }
+      if (rollbackIncomplete) throw new Error('IMPORT_ROLLBACK_INCOMPLETE')
+    }
+    throw error
+  }
+}
+
 async function supportsTransactions() {
   const hello = await mongoose.connection.db.admin().command({ hello: 1 })
   return Boolean(hello.setName || hello.msg === 'isdbgrid')
@@ -154,12 +258,11 @@ async function supportsTransactions() {
 export async function processCatalogueImport(body, actorId, dryRun) {
   const result = { dryRun, strategy: body.strategy, totals: blankTotals(), entries: [] }
   const seenSlugs = new Set()
-  const transactional = dryRun ? false : await supportsTransactions()
-  // A run stores responsibility and counts, never the uploaded JSON or credentials.
-  const run = dryRun ? null : await CatalogueImportRun.create({ actor: actorId, strategy: body.strategy, totals: blankTotals() })
+  const plans = []
   for (const raw of body.universities) {
     const parsed = importUniversitySchema.safeParse(raw)
     let entry
+    let plan
     if (!parsed.success) {
       entry = classifyGroup(raw, 'invalid', 'Import record failed strict validation.',
         parsed.error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })))
@@ -167,27 +270,46 @@ export async function processCatalogueImport(body, actorId, dryRun) {
       entry = classifyGroup(parsed.data, 'invalid', 'University slug occurs more than once in the import.')
     } else {
       seenSlugs.add(parsed.data.slug)
-      const plan = await prepareGroup(parsed.data, body.strategy)
-      entry = classifyGroup(parsed.data, plan.outcome, plan.message || (dryRun ? 'Ready for import.' : 'Imported.'), [],
-        plan.programs?.map((item) => item.existed ? 'updated' : 'created'))
-      if (!dryRun && ['created', 'updated'].includes(plan.outcome)) {
-        try {
-          if (transactional) {
-            const session = await mongoose.startSession()
-            try { await session.withTransaction(() => writeGroup(plan, session)) }
-            finally { await session.endSession() }
-          } else await writeGroup(plan)
-        } catch (error) {
-          entry = classifyGroup(parsed.data, 'conflicted', error.message === 'IMPORT_ROLLBACK_INCOMPLETE'
-            ? 'A concurrent change prevented complete rollback. Stop importing and review this group manually.'
-            : error.code === 11000 ? 'A matching slug was created concurrently.'
-              : 'This group could not be imported; no other group was removed.')
-        }
+      plan = body.strategy === 'programs_only'
+        ? await prepareProgramsOnlyGroup(parsed.data)
+        : await prepareGroup(parsed.data, body.strategy)
+      const programOutcomes = plan.programs?.map((item) => item.existed
+        ? (body.strategy === 'programs_only' ? 'skipped' : 'updated')
+        : 'created')
+      entry = classifyGroup(parsed.data, plan.outcome, plan.message || (dryRun ? 'Ready for import.' : 'Imported.'),
+        plan.issues || [], programOutcomes, plan.code)
+    }
+    plans.push({ entry, plan, parsed: parsed.success ? parsed.data : null })
+  }
+
+  const transactional = dryRun ? false : await supportsTransactions()
+  // A run stores responsibility and counts, never the uploaded JSON or credentials.
+  const run = dryRun ? null : await CatalogueImportRun.create({ actor: actorId, strategy: body.strategy, totals: blankTotals() })
+  for (const item of plans) {
+    let { entry } = item
+    const { plan, parsed } = item
+    const writable = plan && (body.strategy === 'programs_only'
+      ? plan.outcome === 'matched' && plan.programs.some((program) => !program.existed)
+      : ['created', 'updated'].includes(plan.outcome))
+    if (!dryRun && writable) {
+      try {
+        const write = body.strategy === 'programs_only' ? writeProgramsOnlyGroup : writeGroup
+        if (transactional) {
+          const session = await mongoose.startSession()
+          try { await session.withTransaction(() => write(plan, session)) }
+          finally { await session.endSession() }
+        } else await write(plan)
+      } catch (error) {
+        entry = classifyGroup(parsed, 'conflicted', error.message === 'IMPORT_ROLLBACK_INCOMPLETE'
+          ? 'A concurrent change prevented complete rollback. Stop importing and review this group manually.'
+          : error.code === 11000 ? 'A matching program or university was created concurrently.'
+            : 'This group could not be imported; no other group was removed.', [], undefined, 'WRITE_CONFLICT')
       }
     }
     result.entries.push(entry)
     countEntry(result.totals, entry)
   }
+  if (body.strategy === 'programs_only') result.programSummary = summarizeProgramsOnly(result.entries)
   if (run) {
     run.totals = result.totals
     await run.save()

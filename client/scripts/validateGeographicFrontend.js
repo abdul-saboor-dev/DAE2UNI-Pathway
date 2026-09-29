@@ -30,6 +30,11 @@ check(importApi.includes('requiresAuth: true') && verificationApi.includes('requ
 check(importPage.includes('type="file"') && importPage.includes('JSON.parse(text)'), 'File and paste JSON both supported')
 check(importPage.includes('Dry-run preview') && importPage.includes('confirmed'), 'Preview and confirmation precede writes')
 check(importPage.includes('role="alert"') && importPage.includes('disabled={busy'), 'Import error and busy states are accessible')
+check(importPage.includes('programs_only') && importPage.includes('Add programs to existing universities'), 'Programs-only mode is explicitly selectable')
+for (const label of ['Programs to create', 'Existing programs to skip', 'Missing universities', 'Campus conflicts', 'Invalid programs']) {
+  check(importPage.includes(label), `Programs-only preview shows ${label.toLowerCase()}`)
+}
+check(importPage.includes('universities, campuses, and existing programs will not be modified'), 'Programs-only confirmation explains immutable records')
 check(queuePage.includes('Pagination') && queuePage.includes('AdminState') && queuePage.includes('retry'), 'Queue has pagination and recoverable states')
 check(queuePage.includes('getSafeExternalUrl') && queuePage.includes('rel="noopener noreferrer"'), 'Queue external links are guarded')
 check(verifyDialog.includes('showModal()') && verifyDialog.includes('onCancel=') && verifyDialog.includes('previous.focus()'), 'Manual verification dialog manages keyboard focus')

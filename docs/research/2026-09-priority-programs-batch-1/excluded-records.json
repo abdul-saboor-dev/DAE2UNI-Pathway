@@ -1,0 +1,118 @@
+{
+  "batch": "2026-09-priority-programs-batch-1",
+  "reviewedOn": "2026-09-28",
+  "records": [
+    {
+      "university": "University of the Punjab",
+      "proposedProgram": "BS Computer Science (Specialization in Information Technology)",
+      "campus": "Allama Iqbal Campus and Gujranwala Campus",
+      "reason": "The current notice labels the supported offerings as Self-Supporting, while the import contract requires a morning/evening/weekend/multiple studyMode. No safe mapping was inferred.",
+      "officialSourcesReviewed": ["https://pu.edu.pk/home/admission_notice/698"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "University of the Punjab",
+      "proposedProgram": "BS Computer Science (Specialization in Information Technology)",
+      "campus": "Pothohar Campus",
+      "reason": "The current notice lists an offering, but no Pothohar campus exists in the stored university record; no new university campus may be created in this program-only batch.",
+      "officialSourcesReviewed": ["https://pu.edu.pk/home/admission_notice/719"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "Government College University Lahore",
+      "proposedProgram": "BS Artificial Intelligence",
+      "campus": "Lahore Main Campus",
+      "reason": "Official material establishes continuing older cohorts, but the current 2026 undergraduate admissions list does not list a new BS Artificial Intelligence intake.",
+      "officialSourcesReviewed": ["https://gcu.edu.pk/admissions.php?pg=bs-program", "https://gcu.edu.pk/uploads/updates/1771561532_Fee-Notice-11022026.pdf"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "Government College University Lahore",
+      "proposedProgram": "BS Software Engineering",
+      "campus": "Lahore Main Campus",
+      "reason": "Official material establishes continuing older cohorts, but the current 2026 undergraduate admissions list does not list a new BS Software Engineering intake.",
+      "officialSourcesReviewed": ["https://gcu.edu.pk/admissions.php?pg=bs-program", "https://gcu.edu.pk/uploads/updates/1771561532_Fee-Notice-11022026.pdf"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "Government College University Lahore",
+      "proposedProgram": "BS Computer Science",
+      "campus": "Kala Shah Kaku Campus",
+      "reason": "The current campus announcement supports an Associate Degree in Computer Science, not the four-year BS Computer Science proposed here.",
+      "officialSourcesReviewed": ["https://gcu.edu.pk/NewsMore.php?id=501"],
+      "manualClarificationRequired": false
+    },
+    {
+      "university": "Information Technology University of the Punjab",
+      "proposedProgram": "BS Computer Science / BS Software Engineering / BS Artificial Intelligence",
+      "campus": "Main Barki Campus and Arfa Tower Campus",
+      "reason": "Current official sources confirm the programs and both locations, but do not unambiguously assign each program's degree teaching to a specific campus. Programs are retained without campus IDs rather than guessed.",
+      "officialSourcesReviewed": ["https://itu.edu.pk/admissions/", "https://itu.edu.pk/up-events/itu-job-fair-2026-is-coming/", "https://itu.edu.pk/itu-sparkup-innovation-summit-2026/", "https://newitu2.itu.edu.pk/admissions/faqs/"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "University of Engineering and Technology, Taxila",
+      "proposedProgram": "B.Sc. Cyber Security Engineering Technology",
+      "campus": "Taxila Campus",
+      "reason": "The current admissions list confirms the title, but the reviewed current official material did not establish the duration required by the import contract.",
+      "officialSourcesReviewed": ["https://admissions.uettaxila.edu.pk/ProgramsOffered.php", "https://www.uettaxila.edu.pk/UGprogram.aspx"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "University of Engineering and Technology, Taxila",
+      "proposedProgram": "B.Sc. Software Engineering Technology",
+      "campus": "Taxila Campus",
+      "reason": "The current admissions list confirms the title, but the reviewed current official material did not establish the duration required by the import contract.",
+      "officialSourcesReviewed": ["https://admissions.uettaxila.edu.pk/ProgramsOffered.php", "https://www.uettaxila.edu.pk/UGprogram.aspx"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "University of Engineering and Technology, Taxila",
+      "proposedProgram": "BS Artificial Intelligence Technology",
+      "campus": "Taxila Campus",
+      "reason": "Departmental/timetable evidence exists, but the program is absent from the current Fall 2026 programs-offered page; current intake is unresolved.",
+      "officialSourcesReviewed": ["https://admissions.uettaxila.edu.pk/ProgramsOffered.php", "https://www.uettaxila.edu.pk/CPED/courses_UG.asp"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "Bahauddin Zakariya University",
+      "proposedProgram": "BS Artificial Intelligence",
+      "campus": "Main Campus",
+      "reason": "The current program list supports the title and mode, but the reviewed current source does not state the duration required by the import contract.",
+      "officialSourcesReviewed": ["https://bzu.edu.pk/programs.php?did=41&ptype=1"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "Bahauddin Zakariya University",
+      "proposedProgram": "BS Data Science",
+      "campus": "Main Campus",
+      "reason": "The current program list supports the title and mode, but the reviewed current source does not state the duration required by the import contract.",
+      "officialSourcesReviewed": ["https://bzu.edu.pk/programs.php?did=41&ptype=1"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "Bahauddin Zakariya University",
+      "proposedProgram": "BS Software Engineering",
+      "campus": "Main Campus",
+      "reason": "Current official material confirms the program is operational, but the reviewed source does not state the duration required by the import contract.",
+      "officialSourcesReviewed": ["https://bzu.edu.pk/programs.php?did=42&ptype=1", "https://bzu.edu.pk/news.php?newsID=1258"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "Bahauddin Zakariya University",
+      "proposedProgram": "BS Information Technology",
+      "campus": "Vehari Sub-Campus",
+      "reason": "No sufficiently current official 2026 evidence was found for campus-level delivery at Vehari. The same program is retained only for campuses supported by reviewed evidence.",
+      "officialSourcesReviewed": ["https://bzu.edu.pk/"],
+      "manualClarificationRequired": true
+    },
+    {
+      "university": "University of Engineering and Technology Lahore",
+      "proposedProgram": null,
+      "campus": "Taxila",
+      "reason": "Read-only database review found no Taxila campus under UET Lahore. UET Taxila remains a separate university record, so no administrator correction is required for this identity boundary.",
+      "officialSourcesReviewed": ["https://www.uettaxila.edu.pk/", "https://www.uet.edu.pk/"],
+      "manualClarificationRequired": false
+    }
+  ]
+}

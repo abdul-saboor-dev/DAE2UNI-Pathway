@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose'
 
 const schema = new Schema({
   actor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  strategy: { type: String, enum: ['skip', 'update_drafts'], required: true },
+  strategy: { type: String, enum: ['skip', 'update_drafts', 'programs_only'], required: true },
   totals: {
     created: { type: Number, required: true },
     updated: { type: Number, required: true },

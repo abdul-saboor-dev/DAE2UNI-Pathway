@@ -1,0 +1,224 @@
+{
+  "strategy": "programs_only",
+  "universities": [
+    {
+      "slug": "university-of-the-punjab",
+      "name": "University of the Punjab",
+      "abbreviation": "PU",
+      "sector": "public",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://www.pu.edu.pk/page/show/AboutUs.html" },
+      "campuses": [
+        { "key": "quaid-e-azam-campus", "id": "6ab7c8614e79c3bd1a096e5d", "name": "Quaid-e-Azam Campus", "city": "Lahore", "province": "Punjab" },
+        { "key": "allama-iqbal-campus", "id": "6ab7c8614e79c3bd1a096e5e", "name": "Allama Iqbal Campus", "city": "Lahore", "province": "Punjab", "address": "Mall Road, Lahore" },
+        { "key": "gujranwala-campus", "id": "6ab7c8614e79c3bd1a096e5f", "name": "Gujranwala Campus", "city": "Gujranwala", "province": "Punjab", "address": "Near Ali Pur Chowk, Rawalpindi Bypass, Gujranwala" },
+        { "key": "jhelum-campus", "id": "6ab7c8614e79c3bd1a096e60", "name": "Jhelum Campus", "city": "Jhelum", "province": "Punjab" }
+      ],
+      "programs": [
+        {
+          "slug": "bs-computer-science",
+          "name": "BS Computer Science",
+          "degreeTitle": "Bachelor of Science in Computer Science",
+          "credentialType": "BS",
+          "department": "Faculty of Computing and Information Technology",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "multiple",
+          "campusKeys": ["quaid-e-azam-campus", "allama-iqbal-campus", "gujranwala-campus", "jhelum-campus"],
+          "source": { "officialUrl": "https://pu.edu.pk/home/admission_notice/698" }
+        },
+        {
+          "slug": "bs-computer-science-artificial-intelligence",
+          "name": "BS Computer Science (Specialization in Artificial Intelligence)",
+          "degreeTitle": "Bachelor of Science in Computer Science (Specialization in Artificial Intelligence)",
+          "credentialType": "BS",
+          "department": "Faculty of Computing and Information Technology",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "morning",
+          "campusKeys": ["quaid-e-azam-campus", "allama-iqbal-campus"],
+          "source": { "officialUrl": "https://pu.edu.pk/home/admission_notice/698" }
+        },
+        {
+          "slug": "bs-computer-science-software-engineering",
+          "name": "BS Computer Science (Specialization in Software Engineering)",
+          "degreeTitle": "Bachelor of Science in Computer Science (Specialization in Software Engineering)",
+          "credentialType": "BS",
+          "department": "Faculty of Computing and Information Technology",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "multiple",
+          "campusKeys": ["quaid-e-azam-campus", "allama-iqbal-campus"],
+          "source": { "officialUrl": "https://pu.edu.pk/home/admission_notice/698" }
+        },
+        {
+          "slug": "bs-data-science",
+          "name": "BS Data Science",
+          "degreeTitle": "Bachelor of Science in Data Science",
+          "credentialType": "BS",
+          "department": "Faculty of Computing and Information Technology",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "multiple",
+          "campusKeys": ["quaid-e-azam-campus"],
+          "source": { "officialUrl": "https://pu.edu.pk/home/admission_notice/698" }
+        }
+      ]
+    },
+    {
+      "slug": "government-college-university-lahore",
+      "name": "Government College University Lahore",
+      "abbreviation": "GCU",
+      "sector": "public",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://gcu.edu.pk/" },
+      "campuses": [
+        { "key": "lahore-main-campus", "id": "6ab7c8614e79c3bd1a096e68", "name": "Main Campus", "city": "Lahore", "province": "Punjab", "address": "Katchery Road, Lahore", "isMainCampus": true },
+        { "key": "kala-shah-kaku-campus", "id": "6ab7c8614e79c3bd1a096e69", "name": "Kala Shah Kaku Campus", "city": "Kala Shah Kaku", "district": "Sheikhupura", "province": "Punjab" }
+      ],
+      "programs": [
+        {
+          "slug": "bs-computer-science",
+          "name": "BS Computer Science",
+          "degreeTitle": "Bachelor of Science in Computer Science",
+          "credentialType": "BS",
+          "department": "Department of Computer Science",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "multiple",
+          "campusKeys": ["lahore-main-campus"],
+          "source": { "officialUrl": "https://gcu.edu.pk/admissions.php?pg=bs-program" }
+        }
+      ]
+    },
+    {
+      "slug": "information-technology-university-of-the-punjab",
+      "name": "Information Technology University of the Punjab",
+      "abbreviation": "ITU",
+      "sector": "public",
+      "institutionType": "technology",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://itu.edu.pk/itu-act/" },
+      "campuses": [
+        { "key": "main-barki-campus", "id": "6ab7c8614e79c3bd1a096e6f", "name": "Main Barki Campus", "city": "Lahore", "province": "Punjab", "address": "4-KM Main Barki Road, Lahore", "isMainCampus": true },
+        { "key": "arfa-tower-campus", "id": "6ab7c8614e79c3bd1a096e70", "name": "Arfa Tower Campus", "city": "Lahore", "province": "Punjab", "address": "Arfa Software Technology Park, 346-B, Ferozepur Road, Lahore" }
+      ],
+      "programs": [
+        {
+          "slug": "bs-computer-science",
+          "name": "BS Computer Science",
+          "degreeTitle": "Bachelor of Science in Computer Science",
+          "credentialType": "BS",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "morning",
+          "campusKeys": [],
+          "source": { "officialUrl": "https://itu.edu.pk/admissions/bs-computer-science/" }
+        },
+        {
+          "slug": "bs-software-engineering",
+          "name": "BS Software Engineering",
+          "degreeTitle": "Bachelor of Science in Software Engineering",
+          "credentialType": "BS",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "morning",
+          "campusKeys": [],
+          "source": { "officialUrl": "https://itu.edu.pk/admissions/bs-software-engineering/" }
+        },
+        {
+          "slug": "bs-artificial-intelligence",
+          "name": "BS Artificial Intelligence",
+          "degreeTitle": "Bachelor of Science in Artificial Intelligence",
+          "credentialType": "BS",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "morning",
+          "campusKeys": [],
+          "source": { "officialUrl": "https://itu.edu.pk/admissions/bs-artificial-intelligence/" }
+        }
+      ]
+    },
+    {
+      "slug": "university-of-engineering-and-technology-taxila",
+      "name": "University of Engineering and Technology, Taxila",
+      "abbreviation": "UET Taxila",
+      "sector": "public",
+      "institutionType": "engineering",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://www.uettaxila.edu.pk/" },
+      "campuses": [
+        { "key": "taxila-campus", "id": "6ab7c8614e79c3bd1a096e76", "name": "Taxila Campus", "city": "Taxila", "district": "Rawalpindi", "province": "Punjab", "isMainCampus": true }
+      ],
+      "programs": [
+        {
+          "slug": "bs-computer-science",
+          "name": "BS Computer Science",
+          "degreeTitle": "Bachelor of Science in Computer Science",
+          "credentialType": "BS",
+          "department": "Department of Computer Science",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "morning",
+          "campusKeys": ["taxila-campus"],
+          "source": { "officialUrl": "https://uettaxila.edu.pk/CS/bsCS.asp" }
+        },
+        {
+          "slug": "bsc-software-engineering",
+          "name": "B.Sc. Software Engineering",
+          "degreeTitle": "Bachelor of Science in Software Engineering",
+          "credentialType": "BSc",
+          "department": "Department of Software Engineering",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "morning",
+          "campusKeys": ["taxila-campus"],
+          "source": { "officialUrl": "https://web.uettaxila.edu.pk/SED/index.asp" }
+        },
+        {
+          "slug": "bsc-computer-engineering",
+          "name": "B.Sc. Computer Engineering",
+          "degreeTitle": "Bachelor of Science in Computer Engineering",
+          "credentialType": "BSc",
+          "department": "Department of Computer Engineering",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "morning",
+          "campusKeys": ["taxila-campus"],
+          "source": { "officialUrl": "https://www.uettaxila.edu.pk/CPED/courses_UG.asp" }
+        }
+      ]
+    },
+    {
+      "slug": "bahauddin-zakariya-university",
+      "name": "Bahauddin Zakariya University",
+      "abbreviation": "BZU",
+      "sector": "public",
+      "provinceOrTerritory": "Punjab",
+      "charterAuthority": "provincial",
+      "source": { "officialUrl": "https://bzu.edu.pk/about-bzu.php" },
+      "campuses": [
+        { "key": "multan-main-campus", "id": "6ab7c8614e79c3bd1a096e7b", "name": "Main Campus", "city": "Multan", "province": "Punjab", "address": "Bosan Road, Multan", "isMainCampus": true },
+        { "key": "vehari-sub-campus", "id": "6ab7c8614e79c3bd1a096e7c", "name": "Vehari Sub-Campus", "city": "Vehari", "province": "Punjab" },
+        { "key": "lodhran-campus", "id": "6ab7c8614e79c3bd1a096e7d", "name": "Lodhran Campus", "city": "Lodhran", "province": "Punjab" }
+      ],
+      "programs": [
+        {
+          "slug": "bs-computer-science",
+          "name": "BS Computer Science",
+          "degreeTitle": "Bachelor of Science in Computer Science",
+          "credentialType": "BS",
+          "department": "Department of Computer Science",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "multiple",
+          "campusKeys": ["multan-main-campus"],
+          "source": { "officialUrl": "https://cs.bzu.edu.pk/programs.php" }
+        },
+        {
+          "slug": "bs-information-technology",
+          "name": "BS Information Technology",
+          "degreeTitle": "Bachelor of Science in Information Technology",
+          "credentialType": "BS",
+          "department": "Department of Information and Communication Technology",
+          "duration": { "years": 4, "semesters": 8 },
+          "studyMode": "multiple",
+          "campusKeys": ["multan-main-campus", "lodhran-campus"],
+          "source": { "officialUrl": "https://bzu.edu.pk/programs.php?did=42&ptype=1" }
+        }
+      ]
+    }
+  ]
+}

@@ -10,6 +10,10 @@ import University from '../src/models/University.js'
 import Program from '../src/models/Program.js'
 import SourceVerification from '../src/models/SourceVerification.js'
 import CatalogueImportRun from '../src/models/CatalogueImportRun.js'
+import EligibilityRule from '../src/models/EligibilityRule.js'
+import MeritFormula from '../src/models/MeritFormula.js'
+import EntryTest from '../src/models/EntryTest.js'
+import AdmissionCycle from '../src/models/AdmissionCycle.js'
 import { signAccessToken } from '../src/utils/jwt.js'
 
 const unique = randomUUID().replaceAll('-', '')
@@ -27,6 +31,11 @@ function equal(actual, expected, description) {
 function check(actual, description) {
   assertions += 1
   assert.ok(actual, description)
+}
+
+function deepEqual(actual, expected, description) {
+  assertions += 1
+  assert.deepEqual(actual, expected, description)
 }
 
 async function request(path, { method = 'GET', token, body, rawBody } = {}) {
@@ -50,6 +59,23 @@ function fixture(overrides = {}) {
       source: { officialUrl: 'https://example.invalid/program' } }],
     source: { officialUrl: 'https://example.invalid/university' },
   }], ...overrides }
+}
+
+function programsOnlyFixture(campusId, programs) {
+  const body = fixture({ strategy: 'programs_only' })
+  body.universities[0].name = 'This submitted university name must never replace the stored name'
+  body.universities[0].source.officialUrl = 'https://example.invalid/ignored-university-source'
+  body.universities[0].campuses[0] = { ...body.universities[0].campuses[0], id: campusId,
+    name: 'This submitted campus name must never replace the stored campus name', isActive: false }
+  body.universities[0].programs = programs || [
+    { slug: 'temporary-cit', name: 'Existing program must not be replaced', degreeTitle: 'Existing program must not be replaced',
+      credentialType: 'BS', duration: { years: 3 }, campusKeys: ['main'], source: { officialUrl: 'https://example.invalid/existing-replacement' } },
+    { slug: 'temporary-programs-only', name: 'Temporary Programs Only', degreeTitle: 'Fictional Computing Degree',
+      credentialType: 'BS', duration: { years: 4 }, campusKeys: ['main'], source: { officialUrl: 'https://example.invalid/programs-only' } },
+    { slug: 'temporary-unresolved-campus', name: 'Temporary Unresolved Campus Program', degreeTitle: 'Fictional Unresolved Degree',
+      credentialType: 'BS', duration: { years: 4 }, campusKeys: [], source: { officialUrl: 'https://example.invalid/unresolved' } },
+  ]
+  return body
 }
 
 async function main() {
@@ -132,6 +158,137 @@ async function main() {
   equal(university.campuses[0]._id.toString(), campusId, 'Cross-workflow campus identity remains stable')
   const skipped = await request(previewPath, { method: 'POST', token: tokens.admin, body: { ...fixture(), strategy: 'skip' } })
   equal(skipped.body.data.totals.skipped, 2, 'Matching record can be skipped')
+
+  const universitySnapshot = await University.collection.findOne({ _id: university._id })
+  const existingProgramSnapshot = await Program.collection.findOne({ _id: program._id })
+  const relatedBefore = await Promise.all([SourceVerification.countDocuments(), EligibilityRule.countDocuments(),
+    MeritFormula.countDocuments(), EntryTest.countDocuments(), AdmissionCycle.countDocuments()])
+  const programsOnly = programsOnlyFixture(campusId)
+  for (const role of ['owner', 'co_owner', 'admin']) {
+    equal((await request(previewPath, { method: 'POST', token: tokens[role], body: programsOnly })).status, 200,
+      `${role} can preview programs-only imports`)
+  }
+  const programsPreview = await request(previewPath, { method: 'POST', token: tokens.admin, body: programsOnly })
+  deepEqual(programsPreview.body.data.programSummary, { matchedUniversities: 1, programsToCreate: 2,
+    existingProgramsSkipped: 1, missingUniversities: 0, campusConflicts: 0, invalidPrograms: 0 },
+  'Programs-only preview reports precise program actions')
+  equal(programsPreview.body.data.totals.created, 2, 'Preview counts only new programs as created')
+  equal(programsPreview.body.data.totals.updated, 0, 'Preview updates no university or program')
+  equal(await Program.countDocuments({ university: university._id }), 1, 'Programs-only preview writes no program')
+  deepEqual(await University.collection.findOne({ _id: university._id }), universitySnapshot,
+    'Dry run leaves the complete university document byte-equivalent')
+
+  const programsApplied = await request(applyPath, { method: 'POST', token: tokens.admin,
+    body: { ...programsOnly, confirmed: true } })
+  equal(programsApplied.status, 200, 'Programs-only apply succeeds')
+  deepEqual(programsApplied.body.data.programSummary, programsPreview.body.data.programSummary,
+    'Programs-only apply action summary matches its preview')
+  deepEqual(programsApplied.body.data.totals, programsPreview.body.data.totals,
+    'Programs-only apply totals match its preview')
+  deepEqual(await University.collection.findOne({ _id: university._id }), universitySnapshot,
+    'Programs-only apply does not change any university or campus field, order, ID, status, or timestamp')
+  deepEqual(await Program.collection.findOne({ _id: program._id }), existingProgramSnapshot,
+    'Programs-only apply does not change an existing program')
+  const createdProgram = await Program.findOne({ university: university._id, slug: 'temporary-programs-only' })
+  const unresolvedProgram = await Program.findOne({ university: university._id, slug: 'temporary-unresolved-campus' })
+  equal(createdProgram.recordStatus, 'draft', 'Programs-only record is forced to draft')
+  equal(createdProgram.source.verificationStatus, 'pending_review', 'Programs-only source awaits review')
+  equal(createdProgram.campusIds[0].toString(), campusId, 'Programs-only resolves the stored campus ID')
+  equal(unresolvedProgram.campusIds.length, 0, 'Supported unresolved campus assignment remains empty')
+  deepEqual(await Promise.all([SourceVerification.countDocuments(), EligibilityRule.countDocuments(),
+    MeritFormula.countDocuments(), EntryTest.countDocuments(), AdmissionCycle.countDocuments()]), relatedBefore,
+  'Programs-only import creates no verification, eligibility, merit, entry-test, or cycle records')
+  check(await CatalogueImportRun.exists({ actor: users[2]._id, strategy: 'programs_only' }),
+    'Programs-only apply retains actor audit attribution')
+
+  const repeated = await request(applyPath, { method: 'POST', token: tokens.admin,
+    body: { ...programsOnly, confirmed: true } })
+  equal(repeated.body.data.programSummary.programsToCreate, 0, 'Repeated programs-only import creates nothing')
+  equal(repeated.body.data.programSummary.existingProgramsSkipped, 3, 'Repeated programs-only import skips all matches')
+  equal(await Program.countDocuments({ university: university._id }), 3, 'Repeated programs-only import is idempotent')
+  deepEqual(await University.collection.findOne({ _id: university._id }), universitySnapshot,
+    'Idempotent reapply still leaves university unchanged')
+
+  const missing = programsOnlyFixture(campusId, [programsOnly.universities[0].programs[1]])
+  missing.universities[0].slug = `${slug}-missing`
+  const missingResult = await request(previewPath, { method: 'POST', token: tokens.admin, body: missing })
+  equal(missingResult.body.data.programSummary.missingUniversities, 1, 'Missing university is reported')
+  equal(missingResult.body.data.programSummary.programsToCreate, 0, 'Missing university plans no program')
+
+  const badProgramsCampus = programsOnlyFixture(new mongoose.Types.ObjectId().toString(),
+    [{ ...programsOnly.universities[0].programs[1], slug: 'temporary-bad-campus' }])
+  const badProgramsCampusResult = await request(previewPath, { method: 'POST', token: tokens.admin, body: badProgramsCampus })
+  equal(badProgramsCampusResult.body.data.programSummary.campusConflicts, 1, 'Nonexistent or foreign campus ID conflicts')
+  equal(await Program.countDocuments({ slug: 'temporary-bad-campus' }), 0, 'Campus conflict writes no program')
+  const nonexistentKeyBody = programsOnlyFixture(campusId,
+    [{ ...programsOnly.universities[0].programs[1], slug: 'temporary-nonexistent-campus-key', campusKeys: ['missing-campus'] }])
+  nonexistentKeyBody.universities[0].campuses[0].key = 'missing-campus'
+  delete nonexistentKeyBody.universities[0].campuses[0].id
+  const nonexistentKeyResult = await request(previewPath, { method: 'POST', token: tokens.admin, body: nonexistentKeyBody })
+  equal(nonexistentKeyResult.body.data.programSummary.campusConflicts, 1, 'Nonexistent stored campus key conflicts')
+  equal(await Program.countDocuments({ slug: 'temporary-nonexistent-campus-key' }), 0, 'Nonexistent campus key writes no program')
+
+  const duplicateProgramInput = programsOnlyFixture(campusId,
+    [programsOnly.universities[0].programs[1], programsOnly.universities[0].programs[1]])
+  const duplicateProgramResult = await request(previewPath, { method: 'POST', token: tokens.admin, body: duplicateProgramInput })
+  check(duplicateProgramResult.body.data.totals.invalid > 0, 'Duplicate program slugs in one group are rejected')
+  const protectedStateInput = programsOnlyFixture(campusId,
+    [{ ...programsOnly.universities[0].programs[1], slug: 'temporary-state-injection', recordStatus: 'published' }])
+  const protectedStateResult = await request(previewPath, { method: 'POST', token: tokens.admin, body: protectedStateInput })
+  check(protectedStateResult.body.data.totals.invalid > 0, 'Submitted publication or verification state is rejected')
+  equal(protectedStateResult.body.data.programSummary.invalidPrograms, 1, 'Invalid program summary is precise')
+
+  const concurrentProgram = { ...programsOnly.universities[0].programs[1], slug: 'temporary-concurrent-program' }
+  const concurrentBody = programsOnlyFixture(campusId, [concurrentProgram])
+  const concurrentResults = await Promise.all([1, 2].map(() => request(applyPath, { method: 'POST', token: tokens.admin,
+    body: { ...concurrentBody, confirmed: true } })))
+  equal(await Program.countDocuments({ university: university._id, slug: concurrentProgram.slug }), 1,
+    'Concurrent programs-only applies cannot create duplicates')
+  equal(concurrentResults.reduce((total, item) => total + item.body.data.totals.created, 0), 1,
+    'Only one concurrent apply reports a created program')
+  deepEqual(await University.collection.findOne({ _id: university._id }), universitySnapshot,
+    'Concurrent applies leave university and campuses unchanged')
+
+  const ambiguitySlug = `${slug}-ambiguous`
+  const ambiguousA = await University.create({ name: 'Temporary Ambiguous A', slug: `${ambiguitySlug}-a`, sector: 'private',
+    provinceOrTerritory: 'Punjab', charterAuthority: 'provincial', campuses: [{ importKey: 'main', name: 'A', city: 'Lahore', province: 'Punjab' }],
+    source: { officialUrl: 'https://example.invalid/a', verificationStatus: 'pending_review' }, recordStatus: 'draft' })
+  const ambiguousB = await University.create({ name: 'Temporary Ambiguous B', slug: `${ambiguitySlug}-b`, sector: 'private',
+    provinceOrTerritory: 'Punjab', charterAuthority: 'provincial', campuses: [{ importKey: 'main', name: 'B', city: 'Lahore', province: 'Punjab' }],
+    source: { officialUrl: 'https://example.invalid/b', verificationStatus: 'pending_review' }, recordStatus: 'draft' })
+  const crossUniversityBody = programsOnlyFixture(ambiguousA.campuses[0]._id.toString(),
+    [{ ...programsOnly.universities[0].programs[1], slug: 'temporary-cross-university-campus' }])
+  const crossUniversityResult = await request(previewPath, { method: 'POST', token: tokens.admin, body: crossUniversityBody })
+  equal(crossUniversityResult.body.data.programSummary.campusConflicts, 1, 'Another university campus ID conflicts')
+  equal(await Program.countDocuments({ slug: 'temporary-cross-university-campus' }), 0, 'Cross-university campus writes no program')
+  const legacyCampusUniversity = await University.create({ name: 'Legacy Campus Identity University', slug: `${slug}-legacy-campus`, sector: 'private',
+    provinceOrTerritory: 'Punjab', charterAuthority: 'provincial', campuses: [{ name: 'Legacy Campus', city: 'Lahore', province: 'Punjab' }],
+    source: { officialUrl: 'https://example.invalid/legacy', verificationStatus: 'pending_review' }, recordStatus: 'draft' })
+  const legacySnapshot = await University.collection.findOne({ _id: legacyCampusUniversity._id })
+  const legacyCampusBody = programsOnlyFixture(legacyCampusUniversity.campuses[0]._id.toString(),
+    [{ ...programsOnly.universities[0].programs[1], slug: 'temporary-explicit-campus-id' }])
+  legacyCampusBody.universities[0].slug = legacyCampusUniversity.slug
+  legacyCampusBody.universities[0].campuses[0].key = 'request-local-campus-reference'
+  legacyCampusBody.universities[0].programs[0].campusKeys = ['request-local-campus-reference']
+  const legacyCampusResult = await request(applyPath, { method: 'POST', token: tokens.admin,
+    body: { ...legacyCampusBody, confirmed: true } })
+  equal(legacyCampusResult.body.data.programSummary.programsToCreate, 1,
+    'Explicit stored campus ID supports an older campus without an import key')
+  deepEqual(await University.collection.findOne({ _id: legacyCampusUniversity._id }), legacySnapshot,
+    'Programs-only does not add an import key or otherwise change a legacy campus')
+  await Program.deleteMany({ university: legacyCampusUniversity._id })
+  await University.deleteOne({ _id: legacyCampusUniversity._id })
+  await University.collection.dropIndex('slug_1')
+  await University.collection.updateMany({ _id: { $in: [ambiguousA._id, ambiguousB._id] } }, { $set: { slug: ambiguitySlug } })
+  const ambiguousBody = programsOnlyFixture(ambiguousA.campuses[0]._id.toString(),
+    [{ ...programsOnly.universities[0].programs[1], slug: 'temporary-ambiguous-program' }])
+  ambiguousBody.universities[0].slug = ambiguitySlug
+  const ambiguousResult = await request(previewPath, { method: 'POST', token: tokens.admin, body: ambiguousBody })
+  equal(ambiguousResult.body.data.entries[0].code, 'AMBIGUOUS_UNIVERSITY', 'Ambiguous university identity conflicts')
+  equal(await Program.countDocuments({ slug: 'temporary-ambiguous-program' }), 0, 'Ambiguous identity writes no program')
+  await University.deleteMany({ _id: { $in: [ambiguousA._id, ambiguousB._id] } })
+  await University.collection.createIndex({ slug: 1 }, { unique: true })
+
   const queue = await request(`${queuePath}?entityType=university&verificationStatus=pending_review&search=Temporary&page=1&pageSize=1`, { token: tokens.admin })
   equal(queue.status, 200, 'Queue filtering works')
   equal(queue.body.data.pagination.totalRecords, 1, 'Queue filtered total is correct')

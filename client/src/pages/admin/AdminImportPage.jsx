@@ -6,11 +6,18 @@ import { getApiErrorMessage } from '../../utils/apiErrors.js'
 
 const maximumBytes = 512 * 1024
 const emptyTotals = { created: 0, updated: 0, skipped: 0, conflicted: 0, invalid: 0 }
+const strategies = new Set(['skip', 'update_drafts', 'programs_only'])
+const programSummaryLabels = {
+  matchedUniversities: 'Universities matched', programsToCreate: 'Programs to create',
+  existingProgramsSkipped: 'Existing programs to skip', missingUniversities: 'Missing universities',
+  campusConflicts: 'Campus conflicts', invalidPrograms: 'Invalid programs',
+}
 
 function ImportReport({ result, heading }) {
   if (!result) return null
   return <section aria-label={heading} className="mt-7 space-y-5">
     <h2 className="text-xl font-black">{heading}</h2>
+    {result.strategy === 'programs_only' && result.programSummary && <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{Object.entries(programSummaryLabels).map(([key, label]) => <div key={key} className="rounded-xl border border-slate-200 bg-white p-4"><p className="text-sm font-semibold">{label}</p><p className="mt-2 text-2xl font-black">{result.programSummary[key] ?? 0}</p></div>)}</div>}
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">{Object.entries(result.totals || emptyTotals).map(([key, value]) => <div key={key} className="rounded-xl border border-slate-200 bg-white p-4"><p className="text-sm font-semibold capitalize">{key}</p><p className="mt-2 text-2xl font-black">{value}</p></div>)}</div>
     <div className="space-y-3">{(result.entries || []).map((entry, index) => <article key={`${entry.universitySlug || 'invalid'}-${index}`} className="min-w-0 rounded-xl border border-slate-200 bg-white p-4">
       <h3 className="break-words font-black">{entry.universitySlug || `Record ${index + 1}`} · {entry.outcome}</h3>
@@ -25,6 +32,7 @@ export default function AdminImportPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const [text, setText] = useState('')
+  const [strategy, setStrategy] = useState('')
   const [fileName, setFileName] = useState('')
   const [document, setDocument] = useState(null)
   const [preview, setPreview] = useState(null)
@@ -34,7 +42,25 @@ export default function AdminImportPage() {
   const [error, setError] = useState('')
   const view = location.pathname.endsWith('/results') ? 'results' : location.pathname.endsWith('/preview') ? 'preview' : 'input'
 
-  function changeText(value) { setText(value); setFileName(''); setPreview(null); setResult(null); setDocument(null); setConfirmed(false); setError('') }
+  function changeText(value) {
+    setText(value); setFileName(''); setPreview(null); setResult(null); setDocument(null); setConfirmed(false); setError('')
+    try {
+      const parsed = JSON.parse(value)
+      setStrategy(strategies.has(parsed?.strategy) ? parsed.strategy : '')
+    } catch { setStrategy('') }
+  }
+
+  function changeStrategy(value) {
+    setStrategy(value); setPreview(null); setResult(null); setDocument(null); setConfirmed(false); setError('')
+    if (!text.trim()) return
+    try {
+      const parsed = JSON.parse(text)
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        parsed.strategy = value
+        setText(JSON.stringify(parsed, null, 2))
+      }
+    } catch { setError('Correct the JSON before changing its import mode.') }
+  }
 
   async function chooseFile(event) {
     const file = event.target.files?.[0]
@@ -52,6 +78,7 @@ export default function AdminImportPage() {
     if (new Blob([text]).size > maximumBytes) { setError('JSON exceeds the 512 KB limit.'); return }
     let parsed
     try { parsed = JSON.parse(text) } catch { setError('Enter valid JSON before previewing.'); return }
+    if (!strategy || parsed.strategy !== strategy) { setError('Choose an import mode that matches the JSON strategy.'); return }
     setBusy(true)
     try {
       const response = await previewCatalogueImport(parsed)
@@ -80,12 +107,13 @@ export default function AdminImportPage() {
     {view === 'input' && <form onSubmit={previewDocument} className="paper-surface space-y-5 p-5 sm:p-7">
       <h2 className="text-xl font-black">Select or paste a JSON document</h2>
       <p className="text-sm leading-6 text-slate-600">Maximum 512 KB, 50 universities, 30 campuses per university, 100 programs per university and 500 programs total. Each campus has a stable key; programs refer only to keys in their own university. Only draft updates are allowed with the explicit update strategy.</p>
+      <div><label htmlFor="import-strategy" className="block text-sm font-bold">Import mode</label><select id="import-strategy" className={`${adminInputClass} mt-2`} value={strategy} onChange={(event) => changeStrategy(event.target.value)} aria-describedby="import-strategy-help"><option value="">Choose the mode declared by the JSON</option><option value="skip">Skip matching universities</option><option value="update_drafts">Update eligible drafts</option><option value="programs_only">Add programs to existing universities</option></select><p id="import-strategy-help" className="mt-1 text-xs leading-5 text-slate-600">{strategy === 'programs_only' ? 'Programs-only mode matches existing universities and campuses but never modifies them. Existing programs are skipped.' : 'The selected mode must match the document strategy. Preview remains write-free.'}</p></div>
       <a href="/catalogue-import-example.json" download className="inline-flex min-h-11 items-center text-academic underline focus-visible:ring-4 focus-visible:ring-academic">Download fictional example template</a>
       <div><label htmlFor="import-file" className="block text-sm font-bold">Choose JSON file</label><input id="import-file" type="file" accept=".json,application/json" onChange={chooseFile} className="mt-2 block max-w-full text-sm" />{fileName && <p className="mt-1 break-all text-xs text-slate-600">Selected: {fileName}</p>}</div>
-      <div><label htmlFor="import-json" className="block text-sm font-bold">Or paste JSON</label><textarea id="import-json" rows={14} spellCheck={false} className={`${adminInputClass} mt-2 font-mono text-xs`} value={text} onChange={(event) => changeText(event.target.value)} aria-describedby="import-json-help" /><p id="import-json-help" className="mt-1 text-xs text-slate-600">Root fields: strategy (skip or update_drafts) and universities. Unknown fields are rejected. Files are read in this browser only and sent as JSON; no file is stored on the server.</p></div>
+      <div><label htmlFor="import-json" className="block text-sm font-bold">Or paste JSON</label><textarea id="import-json" rows={14} spellCheck={false} className={`${adminInputClass} mt-2 font-mono text-xs`} value={text} onChange={(event) => changeText(event.target.value)} aria-describedby="import-json-help" /><p id="import-json-help" className="mt-1 text-xs text-slate-600">Root fields: strategy (`skip`, `update_drafts`, or `programs_only`) and universities. Unknown fields are rejected. Files are read in this browser only and sent as JSON; no file is stored on the server.</p></div>
       <button type="submit" disabled={busy || !text.trim()} className={adminButtonClass}>{busy ? 'Previewing…' : 'Dry-run preview'}</button>
     </form>}
-    {view === 'preview' && (preview ? <><ImportReport result={preview} heading="Dry-run preview — no writes performed" /><div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5"><h2 className="font-black">Confirm before writing</h2><p className="mt-2 text-sm">A fresh server-side check runs when you apply. Conflicts and invalid groups remain unchanged; other valid groups may be imported. New and updated records remain draft and pending review.</p><label className="mt-4 flex min-h-11 items-center gap-3 text-sm font-bold"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />I reviewed the preview and authorize these draft changes.</label><button type="button" className={`${adminButtonClass} mt-4`} disabled={!confirmed || busy || preview.totals.created + preview.totals.updated === 0} onClick={apply}>{busy ? 'Importing…' : 'Apply import'}</button></div></> : <p role="status">No preview is available in this tab. <Link to="/admin/import" className="text-academic underline">Start a new import</Link>.</p>)}
+    {view === 'preview' && (preview ? <><ImportReport result={preview} heading="Dry-run preview — no writes performed" /><div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5"><h2 className="font-black">Confirm before writing</h2><p className="mt-2 text-sm">A fresh server-side check runs when you apply. Conflicts and invalid groups remain unchanged; other valid groups may be imported. {preview.strategy === 'programs_only' ? 'Only new draft programs will be created; universities, campuses, and existing programs will not be modified.' : 'New and updated records remain draft and pending review.'}</p><label className="mt-4 flex min-h-11 items-center gap-3 text-sm font-bold"><input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />I reviewed the preview and authorize these draft changes.</label><button type="button" className={`${adminButtonClass} mt-4`} disabled={!confirmed || busy || preview.totals.created + preview.totals.updated === 0} onClick={apply}>{busy ? 'Importing…' : 'Apply import'}</button></div></> : <p role="status">No preview is available in this tab. <Link to="/admin/import" className="text-academic underline">Start a new import</Link>.</p>)}
     {view === 'results' && (result ? <ImportReport result={result} heading="Import results" /> : <p role="status">No import result is available in this tab. <Link to="/admin/import" className="text-academic underline">Start a new import</Link>.</p>)}
     {view !== 'input' && <Link to="/admin/import" className="mt-6 inline-flex min-h-11 items-center text-academic underline">Start another import</Link>}
   </div>
