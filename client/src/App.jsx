@@ -12,6 +12,7 @@ import AdminProgramsPage from './pages/admin/AdminProgramsPage.jsx'
 import AdminProgramFormPage from './pages/admin/AdminProgramFormPage.jsx'
 import MainLayout from './layouts/MainLayout.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
+import EligibilityPage from './pages/EligibilityPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
@@ -63,6 +64,7 @@ function App() {
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['student']} />}>
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="eligibility" element={<EligibilityPage />} />
           <Route path="profile" element={<StudentProfilePage />} />
         </Route>
         <Route path="unauthorized" element={<UnauthorizedPage />} />
