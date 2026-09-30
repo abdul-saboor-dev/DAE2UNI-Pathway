@@ -17,6 +17,7 @@
     "check:password-recovery": "node scripts/validatePasswordRecovery.js",
     "check:setup": "node scripts/validateAdminSetup.js",
     "check:roles": "node scripts/validateRoleManagement.js",
+    "check:merit-management": "node scripts/validateMeritManagement.js",
     "provision:admin": "node scripts/provisionAdmin.js"
   },
   "dependencies": {

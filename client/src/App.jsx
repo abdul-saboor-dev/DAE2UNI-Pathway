@@ -27,6 +27,9 @@ import VerifyEmailPage from './pages/VerifyEmailPage.jsx'
 import ResendVerificationPage from './pages/ResendVerificationPage.jsx'
 import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
+import { AdminEntryTestsPage, AdminMeritFormulasPage } from './pages/admin/AdminMeritRecordsPage.jsx'
+import AdminEntryTestFormPage from './pages/admin/AdminEntryTestFormPage.jsx'
+import AdminMeritFormulaFormPage from './pages/admin/AdminMeritFormulaFormPage.jsx'
 
 function App() {
   return (
@@ -42,6 +45,12 @@ function App() {
           <Route path="programs/:programId/edit" element={<AdminProgramFormPage />} />
           <Route path="import/*" element={<AdminImportPage />} />
           <Route path="verification-queue" element={<AdminVerificationQueuePage />} />
+          <Route path="entry-tests" element={<AdminEntryTestsPage />} />
+          <Route path="entry-tests/new" element={<AdminEntryTestFormPage />} />
+          <Route path="entry-tests/:entryTestId/edit" element={<AdminEntryTestFormPage />} />
+          <Route path="merit-formulas" element={<AdminMeritFormulasPage />} />
+          <Route path="merit-formulas/new" element={<AdminMeritFormulaFormPage />} />
+          <Route path="merit-formulas/:meritFormulaId/edit" element={<AdminMeritFormulaFormPage />} />
           <Route element={<TeamRouteGuard />}>
             <Route path="administrators" element={<AdminTeamPage />} />
           </Route>

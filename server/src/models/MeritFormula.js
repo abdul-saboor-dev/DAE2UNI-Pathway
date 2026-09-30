@@ -31,7 +31,12 @@ const meritComponentSchema = new Schema({
     default: 'weighted_percentage',
     required: true,
   },
-  weightPercentage: { type: Number, min: 0, max: 100 },
+  weightPercentage: {
+    type: Number,
+    min: 0,
+    max: 100,
+    validate: { validator: (value) => value == null || Number.isFinite(value), message: 'Weight must be finite.' },
+  },
   maximumInput: { type: Number, min: 1 },
   fixedValue: { type: Number, min: 0 },
   capContributionAt: { type: Number, min: 0 },
@@ -113,6 +118,11 @@ meritFormulaSchema.pre('validate', function validateFormula() {
   const componentKeys = this.components.map((component) => component.key)
   if (new Set(componentKeys).size !== componentKeys.length) {
     this.invalidate('components', 'Merit component keys must be unique within a formula.')
+  }
+
+  const componentSources = this.components.map((component) => component.inputSource)
+  if (new Set(componentSources).size !== componentSources.length) {
+    this.invalidate('components', 'Merit component bases must be unique within a formula.')
   }
 
   for (const component of this.components) {

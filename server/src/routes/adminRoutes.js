@@ -34,6 +34,16 @@ import { teamThrottle } from '../middleware/teamThrottle.js'
 import { changeCoOwnerSchema, listTeamSchema, promoteStudentSchema, revokeAdminSchema } from '../validation/teamValidation.js'
 import { getVerificationQueue, postVerifySource } from '../controllers/verificationQueueController.js'
 import { listVerificationQueueSchema, verifyCatalogueSourceSchema } from '../validation/verificationQueueValidation.js'
+import {
+  getEntryTestById, getEntryTests, getMeritFormulaById, getMeritFormulas,
+  postEntryTest, postMeritFormula, putEntryTest, putMeritFormula,
+  removeEntryTest, removeMeritFormula,
+} from '../controllers/meritManagementController.js'
+import {
+  createEntryTestSchema, createMeritFormulaSchema, entryTestByIdSchema,
+  listEntryTestsSchema, listMeritFormulasSchema, meritFormulaByIdSchema,
+  updateEntryTestSchema, updateMeritFormulaSchema,
+} from '../validation/meritManagementValidation.js'
 
 const router = Router()
 
@@ -70,5 +80,21 @@ router
   .get(validateRequest(getAdminProgramRequestSchema), getProgramRecord)
   .put(validateRequest(updateProgramRequestSchema), updateProgramRecord)
   .delete(validateRequest(deleteProgramRequestSchema), deleteProgramRecord)
+
+router.route('/entry-tests')
+  .get(validateRequest(listEntryTestsSchema), getEntryTests)
+  .post(validateRequest(createEntryTestSchema), postEntryTest)
+router.route('/entry-tests/:entryTestId')
+  .get(validateRequest(entryTestByIdSchema), getEntryTestById)
+  .put(validateRequest(updateEntryTestSchema), putEntryTest)
+  .delete(validateRequest(entryTestByIdSchema), removeEntryTest)
+
+router.route('/merit-formulas')
+  .get(validateRequest(listMeritFormulasSchema), getMeritFormulas)
+  .post(validateRequest(createMeritFormulaSchema), postMeritFormula)
+router.route('/merit-formulas/:meritFormulaId')
+  .get(validateRequest(meritFormulaByIdSchema), getMeritFormulaById)
+  .put(validateRequest(updateMeritFormulaSchema), putMeritFormula)
+  .delete(validateRequest(meritFormulaByIdSchema), removeMeritFormula)
 
 export default router
