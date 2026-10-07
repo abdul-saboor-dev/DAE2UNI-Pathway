@@ -76,6 +76,7 @@ const eligibilityRuleSchema = new Schema(
     },
     program: { type: Schema.Types.ObjectId, ref: 'Program' },
     admissionCycle: { type: Schema.Types.ObjectId, ref: 'AdmissionCycle' },
+    eligibilityResearch: { type: Schema.Types.ObjectId, ref: 'EligibilityResearch' },
     scope: {
       type: String,
       enum: ['university', 'program'],

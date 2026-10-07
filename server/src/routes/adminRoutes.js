@@ -58,6 +58,22 @@ import {
   listEligibilityResearchSchema,
   updateEligibilityResearchSchema,
 } from '../validation/eligibilityResearchValidation.js'
+import {
+  getEligibilityRuleOptionRecords,
+  getEligibilityRuleRecord,
+  getEligibilityRules,
+  postEligibilityRule,
+  putEligibilityRule,
+  removeEligibilityRule,
+} from '../controllers/eligibilityRuleManagementController.js'
+import {
+  createEligibilityRuleSchema,
+  deleteEligibilityRuleSchema,
+  eligibilityRuleOptionsSchema,
+  getEligibilityRuleSchema,
+  listEligibilityRulesSchema,
+  updateEligibilityRuleSchema,
+} from '../validation/eligibilityRuleManagementValidation.js'
 
 const router = Router()
 
@@ -76,6 +92,17 @@ router
   .route('/eligibility-research/:researchId')
   .get(validateRequest(getEligibilityResearchSchema), getEligibilityResearchRecord)
   .put(validateRequest(updateEligibilityResearchSchema), putEligibilityResearchRecord)
+
+router.get('/eligibility-rules/options', validateRequest(eligibilityRuleOptionsSchema), getEligibilityRuleOptionRecords)
+router
+  .route('/eligibility-rules')
+  .get(validateRequest(listEligibilityRulesSchema), getEligibilityRules)
+  .post(validateRequest(createEligibilityRuleSchema), postEligibilityRule)
+router
+  .route('/eligibility-rules/:ruleId')
+  .get(validateRequest(getEligibilityRuleSchema), getEligibilityRuleRecord)
+  .put(validateRequest(updateEligibilityRuleSchema), putEligibilityRule)
+  .delete(validateRequest(deleteEligibilityRuleSchema), removeEligibilityRule)
 
 router.get('/administrators', authorize(...ROLE_MANAGER_ROLES), validateRequest(listTeamSchema), listAdministrators)
 router.post('/administrators/promote', authorize(...ROLE_MANAGER_ROLES), teamThrottle, validateRequest(promoteStudentSchema), promote)

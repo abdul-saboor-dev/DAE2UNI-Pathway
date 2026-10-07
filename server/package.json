@@ -20,6 +20,7 @@
     "check:merit-management": "node scripts/validateMeritManagement.js",
     "check:merit-calculator": "node scripts/validateMeritCalculator.js",
     "check:eligibility-research": "node scripts/validateEligibilityResearch.js",
+    "check:eligibility-rules": "node scripts/validateEligibilityRuleManagement.js",
     "provision:admin": "node scripts/provisionAdmin.js"
   },
   "dependencies": {
