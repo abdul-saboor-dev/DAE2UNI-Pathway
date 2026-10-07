@@ -44,6 +44,20 @@ import {
   listEntryTestsSchema, listMeritFormulasSchema, meritFormulaByIdSchema,
   updateEntryTestSchema, updateMeritFormulaSchema,
 } from '../validation/meritManagementValidation.js'
+import {
+  getEligibilityResearchOptionRecords,
+  getEligibilityResearchRecord,
+  getEligibilityResearchRecords,
+  postEligibilityResearchRecord,
+  putEligibilityResearchRecord,
+} from '../controllers/eligibilityResearchController.js'
+import {
+  createEligibilityResearchSchema,
+  eligibilityResearchOptionsSchema,
+  getEligibilityResearchSchema,
+  listEligibilityResearchSchema,
+  updateEligibilityResearchSchema,
+} from '../validation/eligibilityResearchValidation.js'
 
 const router = Router()
 
@@ -52,6 +66,16 @@ router.use(authenticate, authorize(...CONTENT_MANAGER_ROLES))
 router.get('/ping', validateRequest(emptyRequestSchema), getAdminPing)
 router.get('/verification-queue', validateRequest(listVerificationQueueSchema), getVerificationQueue)
 router.post('/verification-queue/:entityType/:recordId/verify', validateRequest(verifyCatalogueSourceSchema), postVerifySource)
+
+router.get('/eligibility-research/options', validateRequest(eligibilityResearchOptionsSchema), getEligibilityResearchOptionRecords)
+router
+  .route('/eligibility-research')
+  .get(validateRequest(listEligibilityResearchSchema), getEligibilityResearchRecords)
+  .post(validateRequest(createEligibilityResearchSchema), postEligibilityResearchRecord)
+router
+  .route('/eligibility-research/:researchId')
+  .get(validateRequest(getEligibilityResearchSchema), getEligibilityResearchRecord)
+  .put(validateRequest(updateEligibilityResearchSchema), putEligibilityResearchRecord)
 
 router.get('/administrators', authorize(...ROLE_MANAGER_ROLES), validateRequest(listTeamSchema), listAdministrators)
 router.post('/administrators/promote', authorize(...ROLE_MANAGER_ROLES), teamThrottle, validateRequest(promoteStudentSchema), promote)

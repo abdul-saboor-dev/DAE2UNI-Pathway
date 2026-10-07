@@ -31,6 +31,7 @@ import { AdminEntryTestsPage, AdminMeritFormulasPage } from './pages/admin/Admin
 import AdminEntryTestFormPage from './pages/admin/AdminEntryTestFormPage.jsx'
 import AdminMeritFormulaFormPage from './pages/admin/AdminMeritFormulaFormPage.jsx'
 import MeritCalculatorPage from './pages/MeritCalculatorPage.jsx'
+import AdminEligibilityResearchPage from './pages/admin/AdminEligibilityResearchPage.jsx'
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
           <Route path="programs/:programId/edit" element={<AdminProgramFormPage />} />
           <Route path="import/*" element={<AdminImportPage />} />
           <Route path="verification-queue" element={<AdminVerificationQueuePage />} />
+          <Route path="eligibility-research" element={<AdminEligibilityResearchPage />} />
           <Route path="entry-tests" element={<AdminEntryTestsPage />} />
           <Route path="entry-tests/new" element={<AdminEntryTestFormPage />} />
           <Route path="entry-tests/:entryTestId/edit" element={<AdminEntryTestFormPage />} />

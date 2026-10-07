@@ -18,6 +18,7 @@
     "check:password-recovery": "node scripts/validatePasswordRecoveryFrontend.js",
     "check:merit-management": "node scripts/validateMeritManagementFrontend.js",
     "check:merit-calculator": "node scripts/validateMeritCalculatorFrontend.js",
+    "check:eligibility-research": "node scripts/validateEligibilityResearchFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
