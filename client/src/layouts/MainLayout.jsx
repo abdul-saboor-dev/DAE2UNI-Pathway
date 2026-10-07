@@ -16,6 +16,7 @@ function NavigationLinks({ user, isLoading, onLogout }) {
     {!isLoading && user?.role === 'student' && <>
       <NavLink to="/dashboard" className={navigationClass}>Dashboard</NavLink>
       <NavLink to="/eligibility" className={navigationClass}>Eligibility</NavLink>
+      <NavLink to="/merit-calculator" className={navigationClass}>Merit calculator</NavLink>
       <NavLink to="/profile" className={navigationClass}>Profile</NavLink>
       <button type="button" onClick={onLogout} className="action-secondary">Logout</button>
     </>}

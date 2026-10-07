@@ -52,8 +52,10 @@ const form = {
   daeBoardName: 'PBTE',
   daeInstituteName: 'GCT',
   daePassingYear: '2026',
-  daeTotalMarks: '3450',
-  daeObtainedMarks: '2760',
+  daeYear1TotalMarks: '1150',
+  daeYear1ObtainedMarks: '920',
+  daeYear2TotalMarks: '1150',
+  daeYear2ObtainedMarks: '920',
   matricBoardName: 'BISE Lahore',
   matricGroup: 'Science',
   matricPassingYear: '2023',
@@ -67,22 +69,26 @@ const form = {
 const payload = buildProfilePayload(form, 'complete')
 check(payload.profileStatus === 'complete', 'profile status')
 check(payload.dae.passingYear === 2026, 'numeric DAE year')
-check(payload.dae.marks.totalMarks === 3450, 'numeric DAE marks')
+check(payload.dae.year1.totalMarks === 1150 && payload.dae.year2.obtainedMarks === 920, 'numeric DAE year marks')
+check(payload.dae.year3 === null, 'missing Year 3 stays absent rather than zero')
 check(payload.interests.preferredCities.length === 2, 'city parsing')
 check(payload.interests.preferredDegreeFields.length === 2, 'field parsing')
 check(!('user' in payload) && !('userId' in payload), 'no owner identifier')
 check(Object.keys(validateProfile(form, 'complete')).length === 0, 'valid complete profile')
 check(Boolean(validateProfile({ ...form, daeBoardName: '' }, 'complete').daeBoardName), 'completion requirement')
-check(Boolean(validateProfile({ ...form, daeObtainedMarks: '4000' }, 'draft').daeObtainedMarks), 'marks relationship')
+check(Boolean(validateProfile({ ...form, daeYear1ObtainedMarks: '4000' }, 'draft').daeYear1ObtainedMarks), 'marks relationship')
+check(Boolean(validateProfile({ ...form, daeYear3ObtainedMarks: '600' }, 'draft').daeYear3TotalMarks), 'partial Year 3 rejected')
+check(Object.keys(validateProfile({ ...form, daeYear3TotalMarks: '1150', daeYear3ObtainedMarks: '900' }, 'complete')).length === 0, 'complete Year 3 accepted')
 const emptyDraft = buildProfilePayload(emptyProfileForm, 'draft')
 assert.deepEqual(emptyDraft, { profileStatus: 'draft' })
 checks += 1
 
 const restored = profileToForm({
-  dae: { boardName: 'PBTE', marks: { totalMarks: 3450, obtainedMarks: 2760 } },
+  dae: { boardName: 'PBTE', year1: { totalMarks: 1150, obtainedMarks: 920 }, year2: { totalMarks: 1150, obtainedMarks: 920 } },
   interests: { preferredCities: ['Lahore', 'Faisalabad'] },
 })
 check(restored.daeBoardName === 'PBTE', 'profile field restoration')
+check(restored.daeYear1TotalMarks === '1150' && restored.daeYear3TotalMarks === '', 'year marks restoration')
 check(restored.preferredCities === 'Lahore, Faisalabad', 'list restoration')
 
 console.log(`Validated ${checks} frontend authentication, redirect, and profile safeguards.`)

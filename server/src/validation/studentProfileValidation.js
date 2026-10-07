@@ -42,11 +42,16 @@ const daeSchema = z
     instituteName: nonEmptyTrimmedString(200).optional(),
     registrationNumber: nonEmptyTrimmedString(80).optional(),
     passingYear: yearSchema.optional(),
-    marks: partialMarksSchema.optional(),
+    year1: partialMarksSchema.optional(),
+    year2: partialMarksSchema.optional(),
+    year3: partialMarksSchema.nullable().optional(),
     subjects: z.array(subjectSchema).max(40).optional(),
   })
   .strict()
   .refine((dae) => Object.keys(dae).length > 0, 'DAE update cannot be empty.')
+  .refine((dae) => dae.year3 == null ||
+    (dae.year3.totalMarks !== undefined && dae.year3.obtainedMarks !== undefined),
+  { path: ['year3'], message: 'DAE Year 3 obtained and total marks must be provided together.' })
 
 const matricSchema = z
   .object({

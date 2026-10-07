@@ -15,8 +15,13 @@ const profileFieldMap = {
   'dae.boardName': 'daeBoardName',
   'dae.instituteName': 'daeInstituteName',
   'dae.passingYear': 'daePassingYear',
-  'dae.marks.totalMarks': 'daeTotalMarks',
-  'dae.marks.obtainedMarks': 'daeObtainedMarks',
+  'dae.year1.totalMarks': 'daeYear1TotalMarks',
+  'dae.year1.obtainedMarks': 'daeYear1ObtainedMarks',
+  'dae.year2.totalMarks': 'daeYear2TotalMarks',
+  'dae.year2.obtainedMarks': 'daeYear2ObtainedMarks',
+  'dae.year3': 'daeYear3TotalMarks',
+  'dae.year3.totalMarks': 'daeYear3TotalMarks',
+  'dae.year3.obtainedMarks': 'daeYear3ObtainedMarks',
   'matric.boardName': 'matricBoardName',
   'matric.group': 'matricGroup',
   'matric.passingYear': 'matricPassingYear',
@@ -141,16 +146,21 @@ function StudentProfilePage() {
       <div className="mt-7"><FormAlert message={message.text} tone={message.tone} /></div>
 
       <form className="mt-7 space-y-6" onSubmit={(event) => event.preventDefault()} noValidate>
-        <Section eyebrow="DAE CIT" title="Diploma details" description="This version is designed for Computer Information Technology students. Percentages are calculated by the server from your marks.">
+        <Section eyebrow="DAE CIT" title="Diploma details" description="Year 1 and Year 2 marks are required to complete your profile. Year 3 is optional if its result is unavailable. The server calculates the DAE percentage.">
           <div className="rounded-xl border border-academic/10 bg-bluewash/35 px-4 py-3 text-sm"><span className="text-ink/50">Technology</span><p className="mt-1 font-bold">Computer Information Technology (CIT)</p></div>
           <TextField id="dae-registration" name="daeRegistrationNumber" label="Registration number" value={form.daeRegistrationNumber} onChange={updateField} error={fieldErrors.daeRegistrationNumber} autoComplete="off" maxLength={80} />
           <TextField id="dae-board" name="daeBoardName" label="DAE board name" value={form.daeBoardName} onChange={updateField} error={fieldErrors.daeBoardName} placeholder="Punjab Board of Technical Education" autoComplete="organization" maxLength={160} />
           <TextField id="dae-institute" name="daeInstituteName" label="Institute name" value={form.daeInstituteName} onChange={updateField} error={fieldErrors.daeInstituteName} autoComplete="organization" maxLength={200} />
           <TextField id="dae-year" name="daePassingYear" label="DAE passing year" type="number" min="1950" max="2100" inputMode="numeric" value={form.daePassingYear} onChange={updateField} error={fieldErrors.daePassingYear} />
           <div className="hidden sm:block" />
-          <TextField id="dae-total" name="daeTotalMarks" label="DAE total marks" type="number" min="1" step="any" inputMode="decimal" value={form.daeTotalMarks} onChange={updateField} error={fieldErrors.daeTotalMarks} />
-          <TextField id="dae-obtained" name="daeObtainedMarks" label="DAE obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.daeObtainedMarks} onChange={updateField} error={fieldErrors.daeObtainedMarks} />
-          {profile?.dae?.marks?.percentage != null && <p className="sm:col-span-2 rounded-xl bg-bluewash px-4 py-3 text-sm font-bold text-navy">Server-calculated DAE percentage: {profile.dae.marks.percentage}%</p>}
+          <TextField id="dae-year1-total" name="daeYear1TotalMarks" label="DAE Year 1 total marks" type="number" min="1" step="any" inputMode="decimal" value={form.daeYear1TotalMarks} onChange={updateField} error={fieldErrors.daeYear1TotalMarks} />
+          <TextField id="dae-year1-obtained" name="daeYear1ObtainedMarks" label="DAE Year 1 obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.daeYear1ObtainedMarks} onChange={updateField} error={fieldErrors.daeYear1ObtainedMarks} />
+          <TextField id="dae-year2-total" name="daeYear2TotalMarks" label="DAE Year 2 total marks" type="number" min="1" step="any" inputMode="decimal" value={form.daeYear2TotalMarks} onChange={updateField} error={fieldErrors.daeYear2TotalMarks} />
+          <TextField id="dae-year2-obtained" name="daeYear2ObtainedMarks" label="DAE Year 2 obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.daeYear2ObtainedMarks} onChange={updateField} error={fieldErrors.daeYear2ObtainedMarks} />
+          <p className="sm:col-span-2 text-sm text-ink/65">Year 3 is optional. Enter both obtained and total marks when the result is available; leave both blank otherwise.</p>
+          <TextField id="dae-year3-total" name="daeYear3TotalMarks" label="DAE Year 3 total marks (optional)" type="number" min="1" step="any" inputMode="decimal" value={form.daeYear3TotalMarks} onChange={updateField} error={fieldErrors.daeYear3TotalMarks} />
+          <TextField id="dae-year3-obtained" name="daeYear3ObtainedMarks" label="DAE Year 3 obtained marks (optional)" type="number" min="0" step="any" inputMode="decimal" value={form.daeYear3ObtainedMarks} onChange={updateField} error={fieldErrors.daeYear3ObtainedMarks} />
+          {profile?.dae?.marks?.percentage != null && profile?.dae?.marks?.status && <p className="sm:col-span-2 rounded-xl bg-bluewash px-4 py-3 text-sm font-bold text-navy">Server-calculated {profile.dae.marks.status} DAE percentage: {profile.dae.marks.percentage}%</p>}
         </Section>
 
         <Section eyebrow="Matric" title="Secondary education" description="Enter the marks and passing information shown on your Matric certificate.">
@@ -182,7 +192,7 @@ function StudentProfilePage() {
         </Section>
 
         <div className="sticky bottom-2 z-10 flex flex-col gap-3 border-t-4 border-gold bg-[var(--ui-paper)] p-4 shadow-lg sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-5 text-ink/55">Completing the profile requires DAE, Matric, and domicile fields. Drafts can remain partial.</p>
+          <p className="text-xs leading-5 text-ink/55">Completing the profile requires DAE Years 1 and 2, Matric, and domicile fields. Year 3 may be added later.</p>
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
             <button type="button" disabled={isSaving} onClick={() => saveProfile('draft')} className="action-secondary">{isSaving ? 'Saving…' : 'Save draft'}</button>
             <button type="button" disabled={isSaving} onClick={() => saveProfile('complete')} className="action-primary">{isSaving ? 'Saving…' : 'Complete profile'}</button>

@@ -30,6 +30,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 import { AdminEntryTestsPage, AdminMeritFormulasPage } from './pages/admin/AdminMeritRecordsPage.jsx'
 import AdminEntryTestFormPage from './pages/admin/AdminEntryTestFormPage.jsx'
 import AdminMeritFormulaFormPage from './pages/admin/AdminMeritFormulaFormPage.jsx'
+import MeritCalculatorPage from './pages/MeritCalculatorPage.jsx'
 
 function App() {
   return (
@@ -74,6 +75,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={['student']} />}>
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="eligibility" element={<EligibilityPage />} />
+          <Route path="merit-calculator" element={<MeritCalculatorPage />} />
           <Route path="profile" element={<StudentProfilePage />} />
         </Route>
         <Route path="unauthorized" element={<UnauthorizedPage />} />

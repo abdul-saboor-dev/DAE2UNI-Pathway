@@ -17,6 +17,7 @@
     "check:email-verification": "node scripts/validateEmailVerificationFrontend.js",
     "check:password-recovery": "node scripts/validatePasswordRecoveryFrontend.js",
     "check:merit-management": "node scripts/validateMeritManagementFrontend.js",
+    "check:merit-calculator": "node scripts/validateMeritCalculatorFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

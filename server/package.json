@@ -18,6 +18,7 @@
     "check:setup": "node scripts/validateAdminSetup.js",
     "check:roles": "node scripts/validateRoleManagement.js",
     "check:merit-management": "node scripts/validateMeritManagement.js",
+    "check:merit-calculator": "node scripts/validateMeritCalculator.js",
     "provision:admin": "node scripts/provisionAdmin.js"
   },
   "dependencies": {

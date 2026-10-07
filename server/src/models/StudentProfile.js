@@ -15,6 +15,7 @@ const marksSchema = new Schema(
       },
     },
     percentage: { type: Number, min: 0, max: 100 },
+    status: { type: String, enum: ['provisional', 'final'] },
   },
   { _id: false },
 )
@@ -69,6 +70,9 @@ const studentProfileSchema = new Schema(
       registrationNumber: { type: String, trim: true, maxlength: 80 },
       passingYear: { type: Number, min: 1950, max: 2100 },
       marks: { type: marksSchema },
+      year1: { type: marksSchema },
+      year2: { type: marksSchema },
+      year3: { type: marksSchema },
       subjects: { type: [subjectSchema], default: undefined },
     },
     matric: {
@@ -103,13 +107,33 @@ const studentProfileSchema = new Schema(
 studentProfileSchema.index({ user: 1 }, { unique: true })
 studentProfileSchema.index({ 'dae.technologyCode': 1, 'dae.marks.percentage': -1 })
 studentProfileSchema.pre('validate', function setCompletionDate() {
+  const year1 = this.dae?.year1
+  const year2 = this.dae?.year2
+  const year3 = this.dae?.year3
+  const validYear = (year) => Number.isFinite(year?.totalMarks) && year.totalMarks > 0 &&
+    Number.isFinite(year?.obtainedMarks) && year.obtainedMarks >= 0 && year.obtainedMarks <= year.totalMarks
+  const year3HasTotal = year3?.totalMarks != null
+  const year3HasObtained = year3?.obtainedMarks != null
+  if (year3HasTotal !== year3HasObtained) {
+    this.invalidate('dae.year3', 'DAE Year 3 obtained and total marks must be provided together.')
+  }
+  if (validYear(year1) && validYear(year2) && (!year3HasTotal || validYear(year3))) {
+    const years = year3HasTotal ? [year1, year2, year3] : [year1, year2]
+    this.dae.marks = {
+      totalMarks: years.reduce((sum, year) => sum + year.totalMarks, 0),
+      obtainedMarks: years.reduce((sum, year) => sum + year.obtainedMarks, 0),
+      status: year3HasTotal ? 'final' : 'provisional',
+    }
+  }
   if (this.profileStatus === 'complete') {
     const requiredFields = [
       'dae.boardName',
       'dae.instituteName',
       'dae.passingYear',
-      'dae.marks.totalMarks',
-      'dae.marks.obtainedMarks',
+      'dae.year1.totalMarks',
+      'dae.year1.obtainedMarks',
+      'dae.year2.totalMarks',
+      'dae.year2.obtainedMarks',
       'matric.boardName',
       'matric.group',
       'matric.passingYear',

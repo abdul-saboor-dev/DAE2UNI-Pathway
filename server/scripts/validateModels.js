@@ -12,6 +12,7 @@ import {
   University,
   User,
 } from '../src/models/index.js'
+import { updateStudentProfileRequestSchema } from '../src/validation/studentProfileValidation.js'
 
 const ids = {
   user: new mongoose.Types.ObjectId(),
@@ -42,7 +43,8 @@ const documents = [
       boardName: 'Punjab Board of Technical Education',
       instituteName: 'Example Institute of Technology',
       passingYear: 2026,
-      marks: { totalMarks: 3450, obtainedMarks: 2760 },
+      year1: { totalMarks: 1150, obtainedMarks: 920 },
+      year2: { totalMarks: 1150, obtainedMarks: 920 },
     },
     matric: {
       boardName: 'Example BISE',
@@ -205,7 +207,8 @@ const invalidCompleteProfile = new StudentProfile({
     boardName: 'Punjab Board of Technical Education',
     instituteName: 'Example Institute',
     passingYear: 2026,
-    marks: { totalMarks: 3450, obtainedMarks: 2760 },
+    year1: { totalMarks: 1150, obtainedMarks: 920 },
+    year2: { totalMarks: 1150, obtainedMarks: 920 },
   },
 })
 
@@ -218,6 +221,33 @@ const draftProfile = new StudentProfile({
 })
 
 await draftProfile.validate()
+const provisionalProfile = documents[1]
+assert.equal(provisionalProfile.dae.marks.percentage, 80)
+assert.equal(provisionalProfile.dae.marks.status, 'provisional')
+provisionalProfile.dae.year3 = { totalMarks: 1150, obtainedMarks: 690 }
+await provisionalProfile.validate()
+assert.equal(provisionalProfile.dae.marks.percentage, 73.3333)
+assert.equal(provisionalProfile.dae.marks.status, 'final')
+const incompleteYear3 = new StudentProfile({
+  user: new mongoose.Types.ObjectId(), profileStatus: 'draft',
+  dae: { year3: { totalMarks: 1150 } },
+})
+await assert.rejects(incompleteYear3.validate(), /Year 3 obtained and total marks must be provided together/)
+assert.equal(updateStudentProfileRequestSchema.safeParse({
+  body: { dae: { year3: { totalMarks: 1150 } } }, params: {}, query: {},
+}).success, false, 'profile request rejects a partial Year 3 pair')
+assert.equal(updateStudentProfileRequestSchema.safeParse({
+  body: { dae: { year3: { totalMarks: 1150, obtainedMarks: 900 } } }, params: {}, query: {},
+}).success, true, 'profile request accepts a complete Year 3 pair')
+const missingYear2 = new StudentProfile({
+  user: new mongoose.Types.ObjectId(), profileStatus: 'complete',
+  dae: { boardName: 'PBTE', instituteName: 'Example', passingYear: 2026,
+    year1: { totalMarks: 1150, obtainedMarks: 920 } },
+  matric: { boardName: 'BISE', group: 'Science', passingYear: 2023,
+    marks: { totalMarks: 1100, obtainedMarks: 880 } },
+  domicile: { district: 'Lahore' },
+})
+await assert.rejects(missingYear2.validate(), /dae\.year2\.totalMarks is required/)
 assert.equal(documents.length, 9)
 
 console.log('Validated all 9 domain models and cross-field safeguards.')
