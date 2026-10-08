@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import BrandLogo from '../components/BrandLogo.jsx'
 import useAuth from '../context/useAuth.js'
 import { canManageContent } from '../utils/roles.js'
 
@@ -41,8 +42,8 @@ export default function MainLayout() {
     <header className="site-header relative z-20">
       <div className="site-container flex min-h-20 items-center justify-between gap-5 py-3">
         <Link to="/" className="flex min-w-0 items-center gap-3 focus-visible:outline-3" aria-label="DAE2UNI Pathway home">
-          <span className="grid size-11 shrink-0 place-items-center bg-navy text-[.8rem] font-black tracking-[-.08em] text-white">D2U</span>
-          <span className="min-w-0 leading-tight"><strong className="block text-lg tracking-[-.04em] text-navy">DAE2UNI</strong><span className="block text-[.62rem] font-bold uppercase tracking-[.14em] text-academic">Pathway</span></span>
+          <BrandLogo variant="navigation" />
+          <span className="text-[.68rem] font-bold uppercase tracking-[.16em] text-academic">Pathway</span>
         </Link>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation"><NavigationLinks user={user} isLoading={isLoading} onLogout={handleLogout} /></nav>
         <details key={location.pathname} className="group relative lg:hidden">

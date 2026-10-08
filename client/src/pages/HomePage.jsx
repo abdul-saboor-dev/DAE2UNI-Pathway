@@ -13,7 +13,7 @@ export default function HomePage() {
   const { user } = useAuth()
   const primary = canManageContent(user?.role) ? ['/admin', 'Open operations workspace'] : user?.role === 'student' ? ['/dashboard', 'Open your dashboard'] : ['/register', 'Create a student account']
   return <>
-    <section className="border-b border-[var(--ui-border)] bg-navy text-white">
+    <section className="landing-hero border-b border-[var(--ui-border)] bg-navy text-white">
       <div className="site-container grid gap-10 py-12 sm:py-16 lg:grid-cols-[minmax(0,1.25fr)_minmax(18rem,.75fr)] lg:gap-16 lg:py-20">
         <div>
           <p className="text-xs font-black uppercase tracking-[.2em] text-[#d9b56e]">DAE CIT · Undergraduate pathways</p>

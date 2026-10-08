@@ -7,7 +7,9 @@
   --color-cream: #f7f4ed;
   --color-navy: #102a43;
   --color-gold: #c9963b;
-  --font-sans: "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-body: "DM Sans", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-heading: "Nunito Sans", "Segoe UI", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-sans: var(--font-body);
 }
 
 :root {
@@ -35,18 +37,19 @@ body { min-width: 320px; min-height: 100vh; margin: 0; }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a, button, summary { text-underline-offset: .2em; }
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
 :focus-visible { outline: 3px solid var(--color-academic); outline-offset: 3px; scroll-margin: 1rem; }
 ::selection { background: var(--color-bluewash); color: var(--color-navy); }
 
-.display-type { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: -.035em; line-height: 1.05; text-wrap: balance; }
-.page-title { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: -.025em; line-height: 1.12; text-wrap: balance; }
-.section-title { font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; }
-.eyebrow { color: var(--color-academic); font-size: .72rem; font-weight: 800; letter-spacing: .16em; line-height: 1.4; text-transform: uppercase; }
+.display-type { font-family: var(--font-heading); font-weight: 800; letter-spacing: -.035em; line-height: 1.05; text-wrap: balance; }
+.page-title { font-family: var(--font-heading); font-weight: 800; letter-spacing: -.025em; line-height: 1.12; text-wrap: balance; }
+.section-title { font-family: var(--font-heading); font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
+.eyebrow { color: var(--color-academic); font-family: var(--font-heading); font-size: .72rem; font-weight: 800; letter-spacing: .16em; line-height: 1.4; text-transform: uppercase; }
 .body-copy { color: var(--ui-muted); line-height: 1.7; }
 .site-container { width: min(100% - 2rem, 78rem); margin-inline: auto; }
 .editorial-rule { border-top: 1px solid var(--ui-border); }
 .paper-surface { border: 1px solid var(--ui-border); border-radius: var(--ui-radius); background: var(--ui-paper); box-shadow: var(--ui-shadow); }
-.action-primary, .action-secondary { display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; gap: .5rem; padding: .7rem 1.15rem; border-radius: .45rem; font-size: .875rem; font-weight: 800; line-height: 1.3; transition: background-color .16s ease, border-color .16s ease, color .16s ease; }
+.action-primary, .action-secondary { display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; gap: .5rem; padding: .7rem 1.15rem; border-radius: .45rem; font-family: var(--font-heading); font-size: .875rem; font-weight: 800; line-height: 1.3; transition: background-color .16s ease, border-color .16s ease, color .16s ease; }
 .action-primary { background: var(--color-academic); color: #fff; }
 .action-primary:hover:not(:disabled) { background: var(--academic-hover); }
 .action-primary:active:not(:disabled) { background: var(--academic-pressed); }
@@ -64,6 +67,14 @@ a, button, summary { text-underline-offset: .2em; }
 .site-nav-link:hover { color: var(--color-academic); }
 .site-nav-link[aria-current="page"] { border-bottom-color: var(--color-gold); color: var(--color-academic); }
 .site-footer { border-top: 1px solid var(--ui-border); color: var(--ui-muted); }
+.landing-hero { display: flex; min-height: calc(100vh - 5rem); align-items: center; }
+@supports (height: 100dvh) {
+  .landing-hero { min-height: calc(100dvh - 5rem); }
+}
+
+.brand-logo { position: relative; isolation: isolate; display: inline-grid; max-width: 100%; flex: none; place-items: center; }
+.brand-logo__image { position: relative; z-index: 1; display: block; width: 100%; height: auto; max-width: 100%; }
+.brand-logo--navigation { width: 7rem; margin-block: -1.7rem; }
 
 .admin-workspace { color: var(--color-ink); background: #f3f1eb; }
 .admin-sidebar { background: var(--color-navy); color: #fff; }
