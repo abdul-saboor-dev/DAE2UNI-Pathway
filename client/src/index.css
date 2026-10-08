@@ -68,6 +68,11 @@ a, button, summary { text-underline-offset: .2em; }
 .admin-workspace { color: var(--color-ink); background: #f3f1eb; }
 .admin-sidebar { background: var(--color-navy); color: #fff; }
 .admin-sidebar :focus-visible { outline-color: var(--academic-focus-inverse); }
+.admin-sidebar-scroll { scrollbar-width: thin; scrollbar-color: rgb(196 215 230 / .72) rgb(255 255 255 / .08); }
+.admin-sidebar-scroll::-webkit-scrollbar { width: .55rem; }
+.admin-sidebar-scroll::-webkit-scrollbar-track { background: rgb(255 255 255 / .08); }
+.admin-sidebar-scroll::-webkit-scrollbar-thumb { border: 2px solid var(--color-navy); border-radius: 999px; background: rgb(196 215 230 / .72); }
+.admin-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgb(255 255 255 / .88); }
 .admin-nav-link { display: flex; min-height: 2.75rem; align-items: center; border-left: 3px solid transparent; padding: .55rem .85rem; color: #dce7e9; font-size: .875rem; font-weight: 700; }
 .admin-nav-link:hover { background: #183a54; color: #fff; }
 .admin-nav-link[aria-current="page"] { border-left-color: var(--color-gold); background: #1d4059; color: #fff; }
