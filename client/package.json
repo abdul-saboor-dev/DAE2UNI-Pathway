@@ -20,6 +20,7 @@
     "check:merit-calculator": "node scripts/validateMeritCalculatorFrontend.js",
     "check:eligibility-research": "node scripts/validateEligibilityResearchFrontend.js",
     "check:eligibility-rules": "node scripts/validateEligibilityRuleManagementFrontend.js",
+    "check:eligibility-frontend": "node scripts/validateEligibilityFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },

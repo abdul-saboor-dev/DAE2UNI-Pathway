@@ -1,202 +1,142 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import FormAlert from '../components/FormAlert.jsx'
 import LoadingScreen from '../components/LoadingScreen.jsx'
-import { getStudentProfile } from '../services/profileApi.js'
-import { getApiErrorMessage, isApiError } from '../utils/apiErrors.js'
+import { getStudentEligibility } from '../services/eligibilityApi.js'
+import { getApiErrorMessage } from '../utils/apiErrors.js'
+import { getSafeExternalUrl } from '../utils/externalLinks.js'
 
-function readableDiscipline(profile) {
-  if (!profile?.dae) return null
-
-  const value = [
-    profile.dae.technologyName,
-    profile.dae.technology,
-    profile.dae.technologyCode,
-  ].find((item) => typeof item === 'string' && item.trim())
-
-  if (!value || value.trim().toUpperCase() === 'CIT') {
-    return 'Computer Information Technology (CIT)'
-  }
-  return value.trim()
+const statePresentation = {
+  eligible: {
+    label: 'Meets verified criteria',
+    className: 'bg-emerald-100 text-emerald-900',
+    guidance: 'Your saved profile matches the criteria this verified rule can evaluate. This does not guarantee admission.',
+  },
+  not_eligible: {
+    label: 'Does not meet criteria',
+    className: 'bg-rose-100 text-rose-900',
+    guidance: 'Your saved profile does not meet one or more explicit conditions in this verified rule.',
+  },
+  needs_information: {
+    label: 'More information needed',
+    className: 'bg-amber-100 text-amber-950',
+    guidance: 'Complete the missing profile information before relying on this result.',
+  },
+  needs_manual_review: {
+    label: 'Manual review needed',
+    className: 'bg-bluewash text-navy',
+    guidance: 'Some official criteria cannot be interpreted safely by the automated evaluator and need manual confirmation.',
+  },
+  unavailable: {
+    label: 'Rule unavailable',
+    className: 'bg-slate-100 text-slate-800',
+    guidance: 'No verified eligibility rule is available yet. This is not a rejection.',
+  },
 }
 
-function marksSummary(marks) {
-  const percentage = Number(marks?.percentage)
-  if (!Number.isFinite(percentage)) return null
-
-  const obtained = Number(marks?.obtainedMarks)
-  const total = Number(marks?.totalMarks)
-  const markPair = Number.isFinite(obtained) && Number.isFinite(total)
-    ? `${obtained} of ${total} marks · `
-    : ''
-
-  return `${markPair}${percentage}%`
-}
-
-function locationSummary(profile) {
-  const district = typeof profile?.domicile?.district === 'string'
-    ? profile.domicile.district.trim()
-    : ''
-  if (!district) return null
-
-  const province = typeof profile?.domicile?.province === 'string'
-    ? profile.domicile.province.trim()
-    : ''
-  const cities = Array.isArray(profile?.preferences?.cities)
-    ? profile.preferences.cities.filter((city) => typeof city === 'string' && city.trim())
-    : []
-
-  return [district, province, cities.length ? `Preferred: ${cities.join(', ')}` : '']
-    .filter(Boolean)
-    .join(' · ')
-}
-
-function ReadinessItem({ label, value }) {
-  const available = Boolean(value)
+function ResultCard({ result }) {
+  const presentation = statePresentation[result.state]
+  const sourceUrl = getSafeExternalUrl(result.source?.officialUrl)
+  const heading = [result.university?.name, result.program?.name].filter(Boolean).join(' — ') || 'Eligibility information'
 
   return (
-    <div className="min-w-0 border-t border-[var(--ui-border)] py-4 first:border-t-0">
-      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-5">
+    <article className="paper-surface min-w-0 p-5 focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-academic sm:p-7" tabIndex={0}>
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <dt className="text-sm font-bold text-navy">{label}</dt>
-          <dd className="mt-1 break-words text-sm leading-6 text-[var(--ui-muted)]">
-            {value || 'Not available in your profile'}
-          </dd>
+          <p className="eyebrow">{result.rule?.name || 'Verified-rule availability'}</p>
+          <h2 className="section-title mt-2 break-words text-2xl text-navy">{heading}</h2>
+          {result.rule?.code && <p className="mt-2 break-all text-xs font-bold uppercase tracking-wider text-[var(--ui-muted)]">Rule {result.rule.code}</p>}
         </div>
-        <span className={`w-fit shrink-0 rounded-md px-2.5 py-1 text-xs font-black uppercase tracking-wide ${available ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}`}>
-          {available ? 'Available' : 'Missing'}
+        <span className={`w-fit shrink-0 rounded-md px-3 py-1.5 text-xs font-black uppercase tracking-wide ${presentation.className}`}>
+          {presentation.label}
         </span>
       </div>
-    </div>
+
+      <div className="mt-5 border-l-4 border-academic bg-bluewash p-4">
+        <p className="font-bold text-navy">{result.message}</p>
+        <p className="mt-2 text-sm leading-6 text-[var(--ui-muted)]">{presentation.guidance}</p>
+      </div>
+
+      {result.reasons.length > 0 && (
+        <section className="mt-6" aria-label={`Explanation for ${heading}`}>
+          <h3 className="font-black text-navy">Explanation</h3>
+          <ul className="mt-3 space-y-3">
+            {result.reasons.map((item, index) => (
+              <li key={`${item.code}-${index}`} className="grid min-w-0 grid-cols-[0.65rem_minmax(0,1fr)] gap-3 text-sm leading-6">
+                <span className="mt-2 size-2 bg-gold" aria-hidden="true" />
+                <span className="min-w-0 break-words">{item.message}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div className="mt-6 flex flex-wrap items-center gap-4 border-t border-[var(--ui-border)] pt-5">
+        {result.state === 'needs_information' && <Link to="/profile" className="action-primary">Complete your profile</Link>}
+        {sourceUrl && <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="font-bold text-academic underline underline-offset-4">Open official source</a>}
+      </div>
+    </article>
   )
 }
 
 export default function EligibilityPage() {
-  const [profileState, setProfileState] = useState({ status: 'loading', profile: null, error: '' })
-  const [requestVersion, setRequestVersion] = useState(0)
+  const [state, setState] = useState('loading')
+  const [results, setResults] = useState([])
+  const [error, setError] = useState('')
+  const [revision, setRevision] = useState(0)
 
   useEffect(() => {
-    let active = true
     const controller = new AbortController()
+    let active = true
+    setState('loading')
+    setError('')
+    getStudentEligibility(controller.signal)
+      .then((records) => {
+        if (!active) return
+        setResults(records)
+        setState('ready')
+      })
+      .catch((caught) => {
+        if (!active || caught.name === 'CanceledError' || caught.response?.status === 401) return
+        setError(getApiErrorMessage(caught, 'Could not load your eligibility results.'))
+        setState('error')
+      })
+    return () => { active = false; controller.abort() }
+  }, [revision])
 
-    async function loadProfile() {
-      setProfileState((current) => ({ ...current, status: 'loading', error: '' }))
-      try {
-        const profile = await getStudentProfile(controller.signal)
-        if (active) setProfileState({ status: 'ready', profile, error: '' })
-      } catch (error) {
-        if (!active || error.name === 'CanceledError') return
-        if (isApiError(error, 404, 'PROFILE_NOT_FOUND')) {
-          setProfileState({ status: 'empty', profile: null, error: '' })
-        } else if (error.response?.status !== 401) {
-          setProfileState({
-            status: 'error',
-            profile: null,
-            error: getApiErrorMessage(error, 'Unable to load your profile for eligibility readiness.'),
-          })
-        }
-      }
-    }
-
-    loadProfile()
-    return () => {
-      active = false
-      controller.abort()
-    }
-  }, [requestVersion])
-
-  const summary = useMemo(() => {
-    const profile = profileState.profile
-    return {
-      discipline: readableDiscipline(profile),
-      daeMarks: marksSummary(profile?.dae?.marks),
-      matricMarks: marksSummary(profile?.matric?.marks),
-      location: locationSummary(profile),
-    }
-  }, [profileState.profile])
-
-  const missingItems = Object.values(summary).filter((value) => !value).length
-  const needsProfile = profileState.status === 'empty' || missingItems > 0
-
-  if (profileState.status === 'loading') {
-    return <LoadingScreen label="Checking your eligibility readiness…" />
-  }
+  if (state === 'loading') return <LoadingScreen label="Loading verified eligibility guidance…" />
 
   return (
     <section className="site-container max-w-6xl py-10 lg:py-14">
       <header className="max-w-3xl">
-        <p className="eyebrow">Eligibility groundwork</p>
-        <h1 className="page-title mt-3 text-4xl text-navy sm:text-5xl">Check your profile readiness</h1>
-        <p className="body-copy mt-4">
-          Review the academic and domicile information that a future eligibility check will use. This page does not calculate eligibility or merit.
-        </p>
+        <p className="eyebrow">Student eligibility guidance</p>
+        <h1 className="page-title mt-3 text-4xl text-navy sm:text-5xl">Eligibility results</h1>
+        <p className="body-copy mt-4">Compare your saved student profile with eligibility rules that have been reviewed, verified, and published.</p>
       </header>
 
-      {profileState.status === 'error' ? (
-        <div className="mt-8 max-w-2xl">
-          <FormAlert message={profileState.error} />
-          <button
-            type="button"
-            className="action-primary mt-5"
-            onClick={() => setRequestVersion((current) => current + 1)}
-          >
-            Try again
-          </button>
-        </div>
-      ) : (
-        <div className="mt-8 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(17rem,0.85fr)]">
-          <article className="paper-surface min-w-0 p-5 sm:p-7">
-            <p className="eyebrow">Profile summary</p>
-            <h2 className="section-title mt-2 text-2xl text-navy">Information available for checking</h2>
-            <dl className="mt-5">
-              <ReadinessItem label="DAE discipline" value={summary.discipline} />
-              <ReadinessItem label="DAE marks and percentage" value={summary.daeMarks} />
-              <ReadinessItem label="Matric marks and percentage" value={summary.matricMarks} />
-              <ReadinessItem label="Domicile and preferred cities" value={summary.location} />
-            </dl>
-          </article>
+      <aside className="mt-7 border-l-4 border-gold bg-[var(--ui-paper)] p-4 text-sm font-bold leading-6 text-navy">
+        Eligibility guidance is based on verified published criteria and does not guarantee admission.
+      </aside>
 
-          <aside className="min-w-0 border-l-4 border-gold bg-[var(--ui-paper)] p-5 sm:p-7">
-            {needsProfile ? (
-              <>
-                <p className="eyebrow">Action needed</p>
-                <h2 className="section-title mt-2 text-2xl text-navy">Complete your profile</h2>
-                <p className="body-copy mt-3 text-sm">
-                  Add the missing DAE, Matric, and domicile information before future verified rules can be compared with your record.
-                </p>
-                <Link to="/profile" className="action-primary mt-6">Complete your profile</Link>
-              </>
-            ) : (
-              <>
-                <p className="eyebrow">Current status</p>
-                <h2 className="section-title mt-2 text-2xl text-navy">Research is still in progress</h2>
-                <p className="body-copy mt-3 text-sm">
-                  Eligibility rules are being verified. No confirmed pathway result is available yet.
-                </p>
-                <Link to="/programs" className="action-secondary mt-6">Browse draft-free public programs</Link>
-              </>
-            )}
-          </aside>
+      {state === 'error' && (
+        <div className="mt-8 max-w-2xl">
+          <FormAlert message={error} />
+          <button type="button" className="action-primary mt-5" onClick={() => setRevision((value) => value + 1)}>Try again</button>
         </div>
       )}
 
-      <section className="mt-8 border-t border-[var(--ui-border)] pt-8" aria-labelledby="eligibility-process-title">
-        <p className="eyebrow">How it will work</p>
-        <h2 id="eligibility-process-title" className="section-title mt-2 text-2xl text-navy">Evidence before conclusions</h2>
-        <div className="mt-5 grid gap-5 md:grid-cols-3">
-          {[
-            ['1', 'Use your profile', 'DAE, Matric, and domicile details provide the student-side facts.'],
-            ['2', 'Compare verified rules', 'Only reviewed university criteria and official sources will be used.'],
-            ['3', 'Explain the outcome', 'Future results will show the matched criteria and any missing information without guessing.'],
-          ].map(([number, title, description]) => (
-            <article key={number} className="min-w-0 border-t-4 border-academic bg-[var(--ui-paper)] p-5">
-              <span className="text-xs font-black uppercase tracking-[.18em] text-academic">Step {number}</span>
-              <h3 className="mt-2 font-bold text-navy">{title}</h3>
-              <p className="mt-2 text-sm leading-6 text-[var(--ui-muted)]">{description}</p>
-            </article>
-          ))}
+      {state === 'ready' && results.length === 0 && (
+        <div className="empty-state mt-8" role="status">
+          <h2 className="section-title text-2xl text-navy">No eligibility results are available.</h2>
+          <p className="body-copy mt-3 text-sm">No verified eligibility rule is available yet. This is not an eligibility rejection.</p>
         </div>
-      </section>
+      )}
+
+      {state === 'ready' && results.length > 0 && (
+        <div className="mt-8 grid min-w-0 gap-6 lg:grid-cols-2" aria-live="polite">
+          {results.map((result, index) => <ResultCard key={`${result.program?.id || 'unavailable'}-${result.rule?.code || 'none'}-${index}`} result={result} />)}
+        </div>
+      )}
     </section>
   )
 }
