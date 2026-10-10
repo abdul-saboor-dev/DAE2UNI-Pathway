@@ -23,6 +23,7 @@
     "check:eligibility-rules": "node scripts/validateEligibilityRuleManagement.js",
     "check:eligibility-evaluation": "node scripts/validateEligibilityEvaluation.js",
     "check:campus-locations": "node scripts/validateCampusLocations.js",
+    "check:deployment-network": "node scripts/validateDeploymentNetwork.js",
     "provision:admin": "node scripts/provisionAdmin.js"
   },
   "dependencies": {

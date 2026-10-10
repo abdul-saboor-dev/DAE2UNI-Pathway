@@ -11,10 +11,12 @@ import universityRoutes from './routes/universityRoutes.js'
 import { errorHandler, notFoundHandler } from './middleware/errorMiddleware.js'
 import { authenticate, authorize } from './middleware/authMiddleware.js'
 import { CONTENT_MANAGER_ROLES } from './utils/roles.js'
+import { configureProxyTrust } from './config/network.js'
 
 const app = express()
 
 app.disable('x-powered-by')
+configureProxyTrust(app)
 app.use(
   cors({
     origin: process.env.CLIENT_URL || 'http://localhost:5173',

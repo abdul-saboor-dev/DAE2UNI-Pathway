@@ -1,11 +1,12 @@
 import ApiError from '../utils/ApiError.js'
+import { getClientAddress } from '../config/network.js'
 
 const attempts = new Map()
 const WINDOW_MS = 15 * 60 * 1000
 const MAX_ATTEMPTS = 60
 
 export function teamThrottle(request, _response, next) {
-  const key = `${request.user?._id || 'unknown'}:${request.socket.remoteAddress || 'unknown'}`
+  const key = `${request.user?._id || 'unknown'}:${getClientAddress(request)}`
   const now = Date.now()
   const previous = attempts.get(key)
   const entry = !previous || previous.until <= now ? { count: 0, until: now + WINDOW_MS } : previous

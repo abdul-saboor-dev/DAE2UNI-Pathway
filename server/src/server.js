@@ -3,21 +3,24 @@ import mongoose from 'mongoose'
 import app from './app.js'
 import connectDatabase from './config/database.js'
 import validateEnvironment from './config/environment.js'
+import { getServerBinding } from './config/network.js'
 import { isOwnerSetupRequired } from './services/adminSetupService.js'
 
-const port = Number(process.env.PORT) || 5000
 let httpServer
 let isShuttingDown = false
 
 async function startServer() {
   validateEnvironment()
+  const binding = getServerBinding()
 
   await connectDatabase(process.env.MONGODB_URI)
   // Persist the completed lock for databases with a pre-existing administrator.
   await isOwnerSetupRequired()
 
-  httpServer = app.listen(port, () => {
-    console.log(`DAE2UNI API listening on http://localhost:${port}`)
+  httpServer = app.listen(binding, () => {
+    const address = binding.host || 'localhost'
+    const displayAddress = address.includes(':') ? `[${address}]` : address
+    console.log(`DAE2UNI API listening on http://${displayAddress}:${binding.port}`)
   })
 }
 

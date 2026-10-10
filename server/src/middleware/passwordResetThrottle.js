@@ -1,12 +1,12 @@
 import { PASSWORD_RESET_GENERIC_MESSAGE } from '../services/passwordRecoveryService.js'
+import { getClientAddress } from '../config/network.js'
 
 const attempts = new Map()
 const WINDOW_MS = 15 * 60 * 1000
 const MAX_ATTEMPTS = 20
 
 export function passwordResetIpThrottle(request, response, next) {
-  // Express trust proxy remains disabled, so spoofed forwarded headers are ignored.
-  const address = request.socket.remoteAddress || 'unknown'
+  const address = getClientAddress(request)
   const now = Date.now()
   const previous = attempts.get(address)
   const entry = !previous || previous.until <= now ? { count: 0, until: now + WINDOW_MS } : previous

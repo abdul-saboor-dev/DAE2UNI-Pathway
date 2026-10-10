@@ -1,3 +1,5 @@
+import { validateNetworkEnvironment } from './network.js'
+
 const MINIMUM_JWT_SECRET_LENGTH = 32
 const JWT_EXPIRATION_PATTERN = /^[1-9]\d*(?:ms|s|m|h|d|w|y)$/
 const INSECURE_SECRET_MARKERS = ['replace-with-', 'change-me', 'changeme']
@@ -69,6 +71,7 @@ function isWeakJwtSecret(secret) {
 }
 
 export default function validateEnvironment() {
+  validateNetworkEnvironment(process.env)
   const requiredVariables = ['MONGODB_URI', 'JWT_SECRET', 'JWT_EXPIRES_IN']
   const missingVariables = requiredVariables.filter((name) => !process.env[name])
 
