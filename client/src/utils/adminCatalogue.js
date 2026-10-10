@@ -72,6 +72,10 @@ export function buildUniversityPayload(form, original, isNew) {
       name: optional(campus.name), city: optional(campus.city), province: campus.province || 'Punjab',
       ...(optional(campus.district) && { district: optional(campus.district) }),
       ...(optional(campus.address) && { address: optional(campus.address) }),
+      ...(Number.isFinite(campus.latitude) && Number.isFinite(campus.longitude) && {
+        latitude: campus.latitude,
+        longitude: campus.longitude,
+      }),
       isMainCampus: Boolean(campus.isMainCampus), isActive: Boolean(campus.isActive),
     })),
     recordStatus: form.recordStatus,

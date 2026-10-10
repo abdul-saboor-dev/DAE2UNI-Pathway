@@ -32,6 +32,10 @@ function campus(campusRecord, includeId = false) {
     district: campusRecord.district,
     province: campusRecord.province,
     address: campusRecord.address,
+    ...(Number.isFinite(campusRecord.latitude) && Number.isFinite(campusRecord.longitude) && {
+      latitude: campusRecord.latitude,
+      longitude: campusRecord.longitude,
+    }),
     isMainCampus: campusRecord.isMainCampus,
     isActive: campusRecord.isActive,
   }

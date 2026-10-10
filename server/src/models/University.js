@@ -10,8 +10,18 @@ const campusSchema = new Schema({
   province: { type: String, enum: PHYSICAL_LOCATIONS, default: 'Punjab', required: true },
   importKey: { type: String, trim: true, lowercase: true, match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/ },
   address: { type: String, trim: true, maxlength: 300 },
+  latitude: { type: Number, min: -90, max: 90 },
+  longitude: { type: Number, min: -180, max: 180 },
   isMainCampus: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
+})
+
+campusSchema.pre('validate', function validateCoordinates() {
+  const hasLatitude = this.latitude !== undefined && this.latitude !== null
+  const hasLongitude = this.longitude !== undefined && this.longitude !== null
+  if (hasLatitude !== hasLongitude) {
+    this.invalidate(hasLatitude ? 'longitude' : 'latitude', 'Campus latitude and longitude must be provided together.')
+  }
 })
 
 function isSafeHecProfileUrl(value) {

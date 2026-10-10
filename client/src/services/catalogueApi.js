@@ -30,6 +30,10 @@ function normalizeCampus(value) {
     district: optionalString(value.district),
     province: optionalString(value.province),
     address: optionalString(value.address),
+    ...(Number.isFinite(value.latitude) && Number.isFinite(value.longitude) && {
+      latitude: value.latitude,
+      longitude: value.longitude,
+    }),
     isMainCampus: value.isMainCampus === true,
     isActive: value.isActive !== false,
   }

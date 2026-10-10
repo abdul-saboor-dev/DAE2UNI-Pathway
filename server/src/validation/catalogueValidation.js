@@ -76,14 +76,27 @@ const campusBaseShape = {
   district: optionalTrimmedString(100),
   province: z.enum(PHYSICAL_LOCATIONS).default('Punjab'),
   address: optionalTrimmedString(300),
+  latitude: z.number().finite().min(-90).max(90).optional(),
+  longitude: z.number().finite().min(-180).max(180).optional(),
   isMainCampus: z.boolean().default(false),
   isActive: z.boolean().default(true),
 }
 
-const campusCreateSchema = z.object(campusBaseShape).strict()
+function validateCoordinatePair(campus, context) {
+  if ((campus.latitude === undefined) !== (campus.longitude === undefined)) {
+    context.addIssue({
+      code: 'custom',
+      path: [campus.latitude === undefined ? 'latitude' : 'longitude'],
+      message: 'Campus latitude and longitude must be provided together.',
+    })
+  }
+}
+
+const campusCreateSchema = z.object(campusBaseShape).strict().superRefine(validateCoordinatePair)
 const campusUpdateSchema = z
   .object({ id: objectIdSchema.optional(), ...campusBaseShape })
   .strict()
+  .superRefine(validateCoordinatePair)
 
 const contactCreateSchema = z
   .object({

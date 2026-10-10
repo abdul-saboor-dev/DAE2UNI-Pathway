@@ -93,6 +93,10 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); }
 .admin-workspace :is(input, select, textarea):not([type="checkbox"]):not([type="radio"]):not([type="file"]) { border-radius: .4rem; }
 .admin-workspace :is(input[type="checkbox"], input[type="radio"]) { accent-color: var(--color-academic); }
 .admin-workspace .rounded-full { border-radius: .4rem; }
+.campus-location-dialog { width: min(46rem, calc(100% - 1.5rem)); max-width: none; padding: 0; border: 0; background: var(--ui-paper); color: var(--color-ink); box-shadow: 0 20px 60px rgb(16 42 67 / .35); }
+.campus-location-dialog::backdrop { background: rgb(16 42 67 / .62); }
+.campus-location-map { height: min(52dvh, 28rem); min-height: 18rem; }
+.campus-location-map .leaflet-container { background: var(--color-bluewash); font-family: var(--font-body); }
 
 @media (max-width: 767px) {
   .site-container { width: min(100% - 1.5rem, 78rem); }

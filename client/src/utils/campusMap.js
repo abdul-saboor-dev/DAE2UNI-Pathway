@@ -1,9 +1,7 @@
 export function getCampusMapUrl(campus) {
-  const address = typeof campus?.address === 'string' ? campus.address.trim() : ''
-  if (!address) return null
-  const parts = [address, campus.city, campus.district, campus.province]
-    .filter((part) => typeof part === 'string' && part.trim())
-    .map((part) => part.trim())
-  const location = parts.filter((part, index) => index === 0 || part.toLowerCase() !== parts[index - 1].toLowerCase()).join(', ')
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
+  const latitude = campus?.latitude
+  const longitude = campus?.longitude
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90) return null
+  if (!Number.isFinite(longitude) || longitude < -180 || longitude > 180) return null
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${latitude},${longitude}`)}`
 }

@@ -9,8 +9,9 @@ import { toLocalDateTime } from '../../utils/adminDates.js'
 import { getApiErrorMessage, getApiFieldErrors } from '../../utils/apiErrors.js'
 import { getSafeExternalUrl } from '../../utils/externalLinks.js'
 import { charterAuthorities, hecRecognitionStatuses, physicalLocations } from '../../utils/geography.js'
+import CampusLocationPicker from '../../components/CampusLocationPicker.jsx'
 
-const blankCampus = () => ({ clientKey: crypto.randomUUID(), name: '', city: '', district: '', province: 'Punjab', address: '', isMainCampus: false, isActive: true })
+const blankCampus = () => ({ clientKey: crypto.randomUUID(), name: '', city: '', district: '', province: 'Punjab', address: '', latitude: null, longitude: null, isMainCampus: false, isActive: true })
 const blankForm = () => ({ name: '', abbreviation: '', slug: '', sector: 'public', provinceOrTerritory: 'unknown', charterAuthority: 'unknown', hecRecognitionStatus: 'unverified', hecProfileUrl: '', institutionType: 'general', establishedYear: '', recognitionBodies: '', campuses: [blankCampus()], contact: { websiteUrl: '', admissionsUrl: '', email: '', phone: '' }, source: { officialUrl: '', verificationStatus: 'unverified', lastVerifiedAt: '' }, recordStatus: 'draft' })
 function fromRecord(record) {
   return {
@@ -30,7 +31,15 @@ function validate(form) {
   if (form.source.verificationStatus === 'verified' && (!form.source.lastVerifiedAt || Number.isNaN(new Date(form.source.lastVerifiedAt).getTime()))) errors['source.lastVerifiedAt'] = 'A valid manual verification date is required.'
   if (!form.campuses.length) errors.campuses = 'At least one campus is required.'
   if (form.campuses.length > 30) errors.campuses = 'No more than 30 campuses are supported.'
-  form.campuses.forEach((campus, index) => { if (!campus.name.trim()) errors[`campuses.${index}.name`] = 'Campus name is required.'; if (!campus.city.trim()) errors[`campuses.${index}.city`] = 'City is required.' })
+  form.campuses.forEach((campus, index) => {
+    if (!campus.name.trim()) errors[`campuses.${index}.name`] = 'Campus name is required.'
+    if (!campus.city.trim()) errors[`campuses.${index}.city`] = 'City is required.'
+    const hasLatitude = Number.isFinite(campus.latitude)
+    const hasLongitude = Number.isFinite(campus.longitude)
+    if (hasLatitude !== hasLongitude) errors[`campuses.${index}.location`] = 'Select both latitude and longitude from the map.'
+    if (hasLatitude && (campus.latitude < -90 || campus.latitude > 90)) errors[`campuses.${index}.location`] = 'Latitude must be between -90 and 90.'
+    if (hasLongitude && (campus.longitude < -180 || campus.longitude > 180)) errors[`campuses.${index}.location`] = 'Longitude must be between -180 and 180.'
+  })
   if (form.recordStatus === 'published' && form.campuses.filter((campus) => campus.isMainCampus).length !== 1) errors.campuses = 'A published university requires exactly one main campus.'
   return errors
 }
@@ -65,6 +74,16 @@ export default function AdminUniversityFormPage() {
   function change(key, value) { setForm((current) => ({ ...current, [key]: value })); setErrors({}); setMessage('') }
   function changeNested(group, key, value) { setForm((current) => ({ ...current, [group]: { ...current[group], [key]: value } })); setErrors({}); setMessage('') }
   function changeCampus(index, key, value) { setForm((current) => ({ ...current, campuses: current.campuses.map((campus, campusIndex) => campusIndex === index ? { ...campus, [key]: value } : campus) })); setErrors({}); setMessage('') }
+  function changeCampusLocation(index, locationValue) {
+    setForm((current) => ({
+      ...current,
+      campuses: current.campuses.map((campus, campusIndex) => campusIndex === index
+        ? { ...campus, latitude: locationValue.latitude, longitude: locationValue.longitude }
+        : campus),
+    }))
+    setErrors({})
+    setMessage('')
+  }
 
   async function save(event) {
     event.preventDefault()
@@ -102,7 +121,12 @@ export default function AdminUniversityFormPage() {
       </div></fieldset>
       <fieldset className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6"><legend className="px-2 text-lg font-black">Campuses</legend><p className="mb-4 text-sm text-slate-600">Existing campus identities are preserved. Removing a campus used by a program will be blocked by the API.</p>{errors.campuses && <p role="alert" className="mb-4 text-sm font-bold text-red-800">{errors.campuses}</p>}
         <div className="space-y-4">{form.campuses.map((campus, index) => <fieldset key={campus.clientKey} className="min-w-0 rounded-xl border border-slate-200 p-4"><legend className="px-1 text-sm font-black">Campus {index + 1}</legend><div className="grid min-w-0 gap-4 md:grid-cols-2">
-          {[["name", "Campus name"], ["city", "City"], ["district", "District"], ["address", "Address"]].map(([key, label]) => <AdminField key={key} id={`campus-${index}-${key}`} label={label} error={errors[`campuses.${index}.${key}`]}><input id={`campus-${index}-${key}`} className={adminInputClass} value={campus[key] || ''} onChange={(event) => changeCampus(index, key, event.target.value)} aria-invalid={Boolean(errors[`campuses.${index}.${key}`])} aria-describedby={fieldDescription(`campus-${index}-${key}`, errors[`campuses.${index}.${key}`])} /></AdminField>)}
+          {[["name", "Campus name"], ["city", "City"], ["district", "District"]].map(([key, label]) => <AdminField key={key} id={`campus-${index}-${key}`} label={label} error={errors[`campuses.${index}.${key}`]}><input id={`campus-${index}-${key}`} className={adminInputClass} value={campus[key] || ''} onChange={(event) => changeCampus(index, key, event.target.value)} aria-invalid={Boolean(errors[`campuses.${index}.${key}`])} aria-describedby={fieldDescription(`campus-${index}-${key}`, errors[`campuses.${index}.${key}`])} /></AdminField>)}
+          <div className="grid min-w-0 gap-3 md:col-span-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+            <AdminField id={`campus-${index}-address`} label="Address" error={errors[`campuses.${index}.address`]}><input id={`campus-${index}-address`} className={adminInputClass} value={campus.address || ''} onChange={(event) => changeCampus(index, 'address', event.target.value)} aria-invalid={Boolean(errors[`campuses.${index}.address`])} aria-describedby={fieldDescription(`campus-${index}-address`, errors[`campuses.${index}.address`])} /></AdminField>
+            <CampusLocationPicker campusName={campus.name} initialSearchQuery={[form.name, campus.name, campus.city].filter(Boolean).join(', ')} latitude={campus.latitude} longitude={campus.longitude} onChange={(locationValue) => changeCampusLocation(index, locationValue)} />
+          </div>
+          {errors[`campuses.${index}.location`] && <p role="alert" className="md:col-span-2 text-sm font-bold text-red-800">{errors[`campuses.${index}.location`]}</p>}
         </div><div className="mt-4"><AdminField id={`campus-${index}-province`} label="Province or territory"><select id={`campus-${index}-province`} className={adminInputClass} value={campus.province || 'Punjab'} onChange={(event) => changeCampus(index, 'province', event.target.value)}>{physicalLocations.map((value) => <option key={value} value={value}>{value}</option>)}</select></AdminField></div><div className="mt-4 flex flex-wrap gap-5"><label className="inline-flex min-h-11 items-center gap-2 text-sm font-bold"><input type="checkbox" checked={campus.isMainCampus} onChange={(event) => change('campuses', form.campuses.map((item, itemIndex) => ({ ...item, isMainCampus: itemIndex === index ? event.target.checked : false })))} />Main campus</label><label className="inline-flex min-h-11 items-center gap-2 text-sm font-bold"><input type="checkbox" checked={campus.isActive} onChange={(event) => changeCampus(index, 'isActive', event.target.checked)} />Active</label><button type="button" className="min-h-11 text-sm font-bold text-red-800 underline" onClick={() => change('campuses', form.campuses.filter((_, itemIndex) => itemIndex !== index))}>Remove campus</button></div></fieldset>)}</div>
         <button type="button" disabled={form.campuses.length >= 30} className="mt-4 min-h-11 rounded-xl border border-slate-300 px-4 text-sm font-bold focus:outline-none focus-visible:ring-4 focus-visible:ring-academic/50 disabled:opacity-50" onClick={() => change('campuses', [...form.campuses, blankCampus()])}>Add campus</button>
       </fieldset>

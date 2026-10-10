@@ -32,7 +32,7 @@ const universityCard = read('src/components/UniversityCard.jsx')
 const ui = read('src/components/AdminUi.jsx')
 const roleDialog = read('src/components/RoleActionDialog.jsx')
 const verifyDialog = read('src/components/VerifySourceDialog.jsx')
-check(campus.includes('getCampusMapUrl') && campus.includes('{mapUrl &&'), 'Map action only appears for a usable address')
+check(campus.includes('getCampusMapUrl') && campus.includes('{mapUrl &&'), 'Map action only appears for usable coordinates')
 check(campus.includes('target="_blank" rel="noopener noreferrer"'), 'Map link opens safely')
 check(campus.includes('isMainCampus') && campus.includes('isActive'), 'Campus state is described in text')
 check(universityCard.includes('universityMonogram') && universityCard.includes("data-image-state={safeImageUrl ? 'image' : 'fallback'}"), 'University media has a branded fallback')
@@ -42,9 +42,9 @@ check(ui.includes('showModal()') && ui.includes('focusAfterCloseId'), 'Confirmat
 check(roleDialog.includes('showModal()') && roleDialog.includes('focusTarget.focus()'), 'Role dialog retains focus restoration')
 check(verifyDialog.includes('showModal()') && verifyDialog.includes('previous.focus()'), 'Verification dialog retains focus restoration')
 
-equal(getCampusMapUrl({ address: '  ' }), null, 'Missing address has no Maps link')
-equal(getCampusMapUrl({ address: 'Main Road #1', city: 'Lahore', province: 'Punjab' }),
-  'https://www.google.com/maps/search/?api=1&query=Main%20Road%20%231%2C%20Lahore%2C%20Punjab', 'Address is encoded as a search query')
+equal(getCampusMapUrl({ address: 'Main Road #1', city: 'Lahore', province: 'Punjab' }), null, 'Address alone does not create an imprecise Maps link')
+equal(getCampusMapUrl({ latitude: 31.5204, longitude: 74.3587 }),
+  'https://www.google.com/maps/search/?api=1&query=31.5204%2C74.3587', 'Coordinates are encoded as a search query')
 equal(universityMonogram({ name: 'Fictional Institute of Technology' }), 'FIT', 'Name-based monogram works')
 equal(universityMonogram({ abbreviation: 'UIT' }), 'UIT', 'Abbreviation takes priority')
 equal(getSafeExternalUrl('javascript:alert(1)'), null, 'Unsafe URL cannot become clickable')

@@ -21,13 +21,16 @@
     "check:eligibility-research": "node scripts/validateEligibilityResearchFrontend.js",
     "check:eligibility-rules": "node scripts/validateEligibilityRuleManagementFrontend.js",
     "check:eligibility-frontend": "node scripts/validateEligibilityFrontend.js",
+    "check:campus-locations": "node scripts/validateCampusLocationsFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "axios": "^1.8.4",
+    "leaflet": "^1.9.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.5.0"
   },
   "devDependencies": {
