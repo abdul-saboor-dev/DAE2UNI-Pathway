@@ -1,0 +1,135 @@
+name: Deploy backend to alwaysdata
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'server/**'
+      - '.github/workflows/deploy-backend.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dae2uni-production-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'abdul-saboor-dev/DAE2UNI-Pathway'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      DEPLOY_HOST: ssh-dae2uni.alwaysdata.net
+      DEPLOY_USER: dae2uni
+      DEPLOY_PATH: /home/dae2uni/DAE2UNI-Pathway
+      HEALTH_URL: https://dae2uni.alwaysdata.net/api/health
+      ALWAYSDATA_ACCOUNT: dae2uni
+      ALWAYSDATA_SITE_ID: ${{ vars.ALWAYSDATA_SITE_ID }}
+
+    steps:
+      - name: Check out the verified commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Run deployment preflight
+        working-directory: server
+        run: |
+          npm ci
+          npm run check:deployment-network
+          node -e "import('./src/app.js')"
+
+      - name: Configure pinned SSH access
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.ALWAYSDATA_SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.ALWAYSDATA_SSH_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+
+      - name: Deploy exact main commit
+        run: |
+          set -Eeuo pipefail
+          ssh -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "bash -s -- '$GITHUB_SHA' '$DEPLOY_PATH'" <<'REMOTE_SCRIPT'
+          set -Eeuo pipefail
+
+          expected_sha="$1"
+          deploy_path="$2"
+
+          [[ "$expected_sha" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$deploy_path" == /home/dae2uni/DAE2UNI-Pathway ]]
+
+          cd "$deploy_path"
+          test -f server/.env
+          test "$(stat -c '%a' server/.env)" = '600'
+          test -z "$(git status --porcelain --untracked-files=no)"
+
+          git fetch --quiet origin main
+          test "$(git rev-parse origin/main)" = "$expected_sha"
+          previous_sha="$(git rev-parse HEAD)"
+          git checkout --quiet main
+          git merge --ff-only "$expected_sha"
+
+          cd server
+          npm ci --omit=dev --no-audit --no-fund
+          test "$(stat -c '%a' .env)" = '600'
+
+          printf '%s\n' "$previous_sha" > "$HOME/.dae2uni-previous-sha"
+          printf '%s\n' "$expected_sha" > "$HOME/.dae2uni-current-sha"
+          REMOTE_SCRIPT
+
+      - name: Restart managed production site
+        env:
+          ALWAYSDATA_API_TOKEN: ${{ secrets.ALWAYSDATA_API_TOKEN }}
+        run: |
+          set -Eeuo pipefail
+          test -n "$ALWAYSDATA_API_TOKEN"
+          [[ "$ALWAYSDATA_SITE_ID" =~ ^[0-9]+$ ]]
+
+          curl_config="$(mktemp)"
+          trap 'rm -f "$curl_config"' EXIT
+          chmod 600 "$curl_config"
+          printf 'user = "%s account=%s:"\n' \
+            "$ALWAYSDATA_API_TOKEN" "$ALWAYSDATA_ACCOUNT" > "$curl_config"
+
+          curl --silent --show-error --fail \
+            --config "$curl_config" \
+            --request POST \
+            --output /dev/null \
+            "https://api.alwaysdata.com/v1/site/$ALWAYSDATA_SITE_ID/restart/"
+
+      - name: Verify production health
+        run: |
+          set -Eeuo pipefail
+          health_file="$(mktemp)"
+          trap 'rm -f "$health_file"' EXIT
+
+          for attempt in $(seq 1 12); do
+            if curl --silent --show-error --fail \
+              --max-time 15 --output "$health_file" "$HEALTH_URL" &&
+              jq -e \
+                '.status == "ok" and .services.api == "up" and .services.database == "connected"' \
+                "$health_file" > /dev/null; then
+              echo 'Production health verification passed.'
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo 'Production health verification failed.' >&2
+          exit 1
