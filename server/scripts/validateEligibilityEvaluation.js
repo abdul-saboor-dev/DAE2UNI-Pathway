@@ -131,6 +131,9 @@ try {
   const eligible = await request(`/api/student/eligibility?programId=${program.id}`, { token: studentToken })
   equal(eligible.body.data.results[0].state, 'eligible', 'matching DAE CIT and minimum percentage produces eligible')
   check(eligible.body.data.results[0].reasons.some((item) => item.code === 'DAE_PERCENTAGE_MEETS_MINIMUM'), 'eligible response has a machine-readable reason')
+  await StudentProfile.updateOne({ user: student._id }, { $set: { 'dae.academicStage': 'third_year' } })
+  equal((await request(`/api/student/eligibility?programId=${program.id}`, { token: studentToken })).body.data.results[0].state, 'needs_information', 'an incomplete DAE stage never uses preserved final marks')
+  await StudentProfile.updateOne({ user: student._id }, { $set: { 'dae.academicStage': 'pass_out' } })
 
   await EligibilityRule.updateOne({ _id: activeRule._id }, { $set: { 'qualificationCriteria.0.minimumPercentage': 80 } })
   equal((await request(`/api/student/eligibility?programId=${program.id}`, { token: studentToken })).body.data.results[0].state, 'not_eligible', 'failed minimum percentage produces not eligible')

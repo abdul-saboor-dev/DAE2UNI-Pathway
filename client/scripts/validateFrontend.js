@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import { validateLogin, validateRegistration } from '../src/utils/authValidation.js'
 import { getRoleDestination, getSafeDestination } from '../src/utils/navigation.js'
 import {
@@ -13,6 +14,12 @@ function check(condition, message) {
   assert.ok(condition, message)
   checks += 1
 }
+
+const profilePage = readFileSync(new URL('../src/pages/StudentProfilePage.jsx', import.meta.url), 'utf8')
+for (const stageLabel of ['First Year DAE', 'Second Year DAE', 'Third Year DAE', 'DAE Pass-out']) {
+  check(profilePage.includes(stageLabel), `${stageLabel} option exists`)
+}
+check(profilePage.includes('type="radio"') && !profilePage.includes('Registration number'), 'academic stage is single-choice and registration number is removed')
 
 const validRegistration = {
   name: 'Ayesha Khan',
@@ -49,13 +56,12 @@ check(getRoleDestination('//example.com', 'admin') === '/admin', 'administrator 
 
 const form = {
   ...emptyProfileForm,
+  academicStage: 'pass_out',
   daeBoardName: 'PBTE',
   daeInstituteName: 'GCT',
   daePassingYear: '2026',
-  daeYear1TotalMarks: '1150',
-  daeYear1ObtainedMarks: '920',
-  daeYear2TotalMarks: '1150',
-  daeYear2ObtainedMarks: '920',
+  daeCompleteTotalMarks: '3450',
+  daeCompleteObtainedMarks: '2760',
   matricBoardName: 'BISE Lahore',
   matricGroup: 'Science',
   matricPassingYear: '2023',
@@ -69,26 +75,31 @@ const form = {
 const payload = buildProfilePayload(form, 'complete')
 check(payload.profileStatus === 'complete', 'profile status')
 check(payload.dae.passingYear === 2026, 'numeric DAE year')
-check(payload.dae.year1.totalMarks === 1150 && payload.dae.year2.obtainedMarks === 920, 'numeric DAE year marks')
-check(payload.dae.year3 === null, 'missing Year 3 stays absent rather than zero')
+check(payload.dae.academicStage === 'pass_out', 'academic stage is explicit')
+check(payload.dae.marks.totalMarks === 3450 && payload.dae.marks.obtainedMarks === 2760, 'complete DAE marks are numeric')
+check(!('registrationNumber' in payload.dae) && !('year3' in payload.dae), 'removed registration and annual pass-out fields are not submitted')
 check(payload.interests.preferredCities.length === 2, 'city parsing')
 check(payload.interests.preferredDegreeFields.length === 2, 'field parsing')
 check(!('user' in payload) && !('userId' in payload), 'no owner identifier')
 check(Object.keys(validateProfile(form, 'complete')).length === 0, 'valid complete profile')
 check(Boolean(validateProfile({ ...form, daeBoardName: '' }, 'complete').daeBoardName), 'completion requirement')
-check(Boolean(validateProfile({ ...form, daeYear1ObtainedMarks: '4000' }, 'draft').daeYear1ObtainedMarks), 'marks relationship')
-check(Boolean(validateProfile({ ...form, daeYear3ObtainedMarks: '600' }, 'draft').daeYear3TotalMarks), 'partial Year 3 rejected')
-check(Object.keys(validateProfile({ ...form, daeYear3TotalMarks: '1150', daeYear3ObtainedMarks: '900' }, 'complete')).length === 0, 'complete Year 3 accepted')
+check(Boolean(validateProfile({ ...form, daeCompleteObtainedMarks: '4000' }, 'draft').daeCompleteObtainedMarks), 'marks relationship')
+const secondYear = { ...form, academicStage: 'second_year', daeYear1TotalMarks: '1150', daeYear1ObtainedMarks: '920' }
+check(Object.keys(validateProfile(secondYear, 'complete')).length === 0, 'Second Year needs only first-year DAE marks')
+const thirdYear = { ...secondYear, academicStage: 'third_year', daeYear2TotalMarks: '1150', daeYear2ObtainedMarks: '900' }
+check(Object.keys(validateProfile(thirdYear, 'complete')).length === 0, 'Third Year needs first- and second-year DAE marks')
+const firstYear = { ...form, academicStage: 'first_year' }
+check(Object.keys(validateProfile(firstYear, 'complete')).length === 0, 'First Year needs no DAE result')
 const emptyDraft = buildProfilePayload(emptyProfileForm, 'draft')
-assert.deepEqual(emptyDraft, { profileStatus: 'draft' })
+assert.deepEqual(emptyDraft, { profileStatus: 'draft', dae: { academicStage: 'first_year' } })
 checks += 1
 
 const restored = profileToForm({
-  dae: { boardName: 'PBTE', year1: { totalMarks: 1150, obtainedMarks: 920 }, year2: { totalMarks: 1150, obtainedMarks: 920 } },
+  dae: { academicStage: 'third_year', boardName: 'PBTE', year1: { totalMarks: 1150, obtainedMarks: 920 }, year2: { totalMarks: 1150, obtainedMarks: 920 } },
   interests: { preferredCities: ['Lahore', 'Faisalabad'] },
 })
 check(restored.daeBoardName === 'PBTE', 'profile field restoration')
-check(restored.daeYear1TotalMarks === '1150' && restored.daeYear3TotalMarks === '', 'year marks restoration')
+check(restored.academicStage === 'third_year' && restored.daeYear1TotalMarks === '1150', 'stage and year marks restoration')
 check(restored.preferredCities === 'Lahore, Faisalabad', 'list restoration')
 
 console.log(`Validated ${checks} frontend authentication, redirect, and profile safeguards.`)

@@ -21,15 +21,6 @@ function rawPercentage(marks) {
   return (marks.obtainedMarks / marks.totalMarks) * 100
 }
 
-function daeCalculation(marks) {
-  if (!marks || !validMarks(marks.year1) || !validMarks(marks.year2) ||
-    (marks.year3 !== undefined && !validMarks(marks.year3))) return null
-  const years = marks.year3 ? [marks.year1, marks.year2, marks.year3] : [marks.year1, marks.year2]
-  const obtained = years.reduce((sum, year) => sum + year.obtainedMarks, 0)
-  const total = years.reduce((sum, year) => sum + year.totalMarks, 0)
-  return { percentage: (obtained / total) * 100, status: marks.year3 ? 'final' : 'provisional' }
-}
-
 function roundForDisplay(value) {
   return Number(value.toFixed(2))
 }
@@ -108,7 +99,7 @@ export async function getAvailableMeritFormulas() {
 
 export async function calculateStudentMerit(userId, input) {
   const [profile, options] = await Promise.all([
-    StudentProfile.findOne({ user: userId }).select('matric.marks').lean(),
+    StudentProfile.findOne({ user: userId }).select('matric.marks dae.academicStage dae.marks').lean(),
     getAvailableMeritFormulas(),
   ])
   const formula = options.find((item) => item.id === input.formulaId)
@@ -116,13 +107,13 @@ export async function calculateStudentMerit(userId, input) {
   if (formula.components.some((component) => component.basis === 'matric') && !validMarks(profile?.matric?.marks)) {
     throw new ApiError(409, 'Complete your saved Matric marks before calculating merit.', 'PROFILE_MARKS_REQUIRED')
   }
-  const dae = formula.components.some((component) => component.basis === 'dae')
-    ? daeCalculation(input.daeMarks) : null
-  if (formula.components.some((component) => component.basis === 'dae') && !dae) {
-    throw new ApiError(400, 'Enter valid DAE Year 1 and Year 2 marks, with a complete Year 3 pair if available.', 'DAE_MARKS_REQUIRED')
-  }
-  if (!dae && input.daeMarks) {
-    throw new ApiError(400, 'DAE marks are not required by the selected formula.', 'DAE_MARKS_UNEXPECTED')
+  const needsDae = formula.components.some((component) => component.basis === 'dae')
+  const dae = needsDae && profile?.dae?.academicStage === 'pass_out' &&
+    profile.dae.marks?.status === 'final' && validMarks(profile.dae.marks)
+    ? { percentage: rawPercentage(profile.dae.marks), status: 'final' }
+    : null
+  if (needsDae && !dae) {
+    throw new ApiError(409, 'Your complete DAE result is still needed before this merit formula can be calculated.', 'PROFILE_MARKS_REQUIRED')
   }
 
   const requiredTests = formula.components.filter((component) => component.entryTest)
@@ -168,4 +159,4 @@ export async function calculateStudentMerit(userId, input) {
   }
 }
 
-export const meritCalculatorInternals = { validMarks, validComponents, rawPercentage, roundForDisplay, daeCalculation }
+export const meritCalculatorInternals = { validMarks, validComponents, rawPercentage, roundForDisplay }

@@ -12,16 +12,17 @@ import {
 } from '../utils/profileForm.js'
 
 const profileFieldMap = {
+  'dae.academicStage': 'academicStage',
   'dae.boardName': 'daeBoardName',
   'dae.instituteName': 'daeInstituteName',
   'dae.passingYear': 'daePassingYear',
+  'dae.marks': 'daeCompleteTotalMarks',
+  'dae.marks.totalMarks': 'daeCompleteTotalMarks',
+  'dae.marks.obtainedMarks': 'daeCompleteObtainedMarks',
   'dae.year1.totalMarks': 'daeYear1TotalMarks',
   'dae.year1.obtainedMarks': 'daeYear1ObtainedMarks',
   'dae.year2.totalMarks': 'daeYear2TotalMarks',
   'dae.year2.obtainedMarks': 'daeYear2ObtainedMarks',
-  'dae.year3': 'daeYear3TotalMarks',
-  'dae.year3.totalMarks': 'daeYear3TotalMarks',
-  'dae.year3.obtainedMarks': 'daeYear3ObtainedMarks',
   'matric.boardName': 'matricBoardName',
   'matric.group': 'matricGroup',
   'matric.passingYear': 'matricPassingYear',
@@ -146,21 +147,43 @@ function StudentProfilePage() {
       <div className="mt-7"><FormAlert message={message.text} tone={message.tone} /></div>
 
       <form className="mt-7 space-y-6" onSubmit={(event) => event.preventDefault()} noValidate>
-        <Section eyebrow="DAE CIT" title="Diploma details" description="Year 1 and Year 2 marks are required to complete your profile. Year 3 is optional if its result is unavailable. The server calculates the DAE percentage.">
+        <Section eyebrow="DAE CIT" title="Diploma details" description="Choose your current academic stage. Only results available at that stage are required, and previously saved marks remain preserved as you progress.">
           <div className="rounded-xl border border-academic/10 bg-bluewash/35 px-4 py-3 text-sm"><span className="text-ink/50">Technology</span><p className="mt-1 font-bold">Computer Information Technology (CIT)</p></div>
-          <TextField id="dae-registration" name="daeRegistrationNumber" label="Registration number" value={form.daeRegistrationNumber} onChange={updateField} error={fieldErrors.daeRegistrationNumber} autoComplete="off" maxLength={80} />
+          <div className="sm:col-span-2" role="radiogroup" aria-labelledby="academic-stage-label" aria-describedby={fieldErrors.academicStage ? 'academic-stage-error' : 'academic-stage-description'}>
+            <p id="academic-stage-label" className="text-sm font-bold text-navy">Current DAE academic stage</p>
+            <p id="academic-stage-description" className="mt-1 text-sm text-ink/65">Select one stage. You can advance it when your next result becomes available.</p>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {[
+                ['first_year', 'First Year DAE'],
+                ['second_year', 'Second Year DAE'],
+                ['third_year', 'Third Year DAE'],
+                ['pass_out', 'DAE Pass-out'],
+              ].map(([value, label]) => (
+                <label key={value} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-bold text-navy focus-within:ring-2 focus-within:ring-academic focus-within:ring-offset-2">
+                  <input type="radio" name="academicStage" value={value} checked={form.academicStage === value} onChange={updateField} />
+                  {label}
+                </label>
+              ))}
+            </div>
+            {fieldErrors.academicStage && <p id="academic-stage-error" className="mt-2 text-sm font-semibold text-[#8b2525]">{fieldErrors.academicStage}</p>}
+          </div>
           <TextField id="dae-board" name="daeBoardName" label="DAE board name" value={form.daeBoardName} onChange={updateField} error={fieldErrors.daeBoardName} placeholder="Punjab Board of Technical Education" autoComplete="organization" maxLength={160} />
           <TextField id="dae-institute" name="daeInstituteName" label="Institute name" value={form.daeInstituteName} onChange={updateField} error={fieldErrors.daeInstituteName} autoComplete="organization" maxLength={200} />
-          <TextField id="dae-year" name="daePassingYear" label="DAE passing year" type="number" min="1950" max="2100" inputMode="numeric" value={form.daePassingYear} onChange={updateField} error={fieldErrors.daePassingYear} />
-          <div className="hidden sm:block" />
-          <TextField id="dae-year1-total" name="daeYear1TotalMarks" label="DAE Year 1 total marks" type="number" min="1" step="any" inputMode="decimal" value={form.daeYear1TotalMarks} onChange={updateField} error={fieldErrors.daeYear1TotalMarks} />
-          <TextField id="dae-year1-obtained" name="daeYear1ObtainedMarks" label="DAE Year 1 obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.daeYear1ObtainedMarks} onChange={updateField} error={fieldErrors.daeYear1ObtainedMarks} />
-          <TextField id="dae-year2-total" name="daeYear2TotalMarks" label="DAE Year 2 total marks" type="number" min="1" step="any" inputMode="decimal" value={form.daeYear2TotalMarks} onChange={updateField} error={fieldErrors.daeYear2TotalMarks} />
-          <TextField id="dae-year2-obtained" name="daeYear2ObtainedMarks" label="DAE Year 2 obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.daeYear2ObtainedMarks} onChange={updateField} error={fieldErrors.daeYear2ObtainedMarks} />
-          <p className="sm:col-span-2 text-sm text-ink/65">Year 3 is optional. Enter both obtained and total marks when the result is available; leave both blank otherwise.</p>
-          <TextField id="dae-year3-total" name="daeYear3TotalMarks" label="DAE Year 3 total marks (optional)" type="number" min="1" step="any" inputMode="decimal" value={form.daeYear3TotalMarks} onChange={updateField} error={fieldErrors.daeYear3TotalMarks} />
-          <TextField id="dae-year3-obtained" name="daeYear3ObtainedMarks" label="DAE Year 3 obtained marks (optional)" type="number" min="0" step="any" inputMode="decimal" value={form.daeYear3ObtainedMarks} onChange={updateField} error={fieldErrors.daeYear3ObtainedMarks} />
-          {profile?.dae?.marks?.percentage != null && profile?.dae?.marks?.status && <p className="sm:col-span-2 rounded-xl bg-bluewash px-4 py-3 text-sm font-bold text-navy">Server-calculated {profile.dae.marks.status} DAE percentage: {profile.dae.marks.percentage}%</p>}
+          {(form.academicStage === 'second_year' || form.academicStage === 'third_year') && <>
+            <TextField id="dae-year1-total" name="daeYear1TotalMarks" label="DAE 1st-year total marks" type="number" min="1" step="any" inputMode="decimal" value={form.daeYear1TotalMarks} onChange={updateField} error={fieldErrors.daeYear1TotalMarks} />
+            <TextField id="dae-year1-obtained" name="daeYear1ObtainedMarks" label="DAE 1st-year obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.daeYear1ObtainedMarks} onChange={updateField} error={fieldErrors.daeYear1ObtainedMarks} />
+          </>}
+          {form.academicStage === 'third_year' && <>
+            <TextField id="dae-year2-total" name="daeYear2TotalMarks" label="DAE 2nd-year total marks" type="number" min="1" step="any" inputMode="decimal" value={form.daeYear2TotalMarks} onChange={updateField} error={fieldErrors.daeYear2TotalMarks} />
+            <TextField id="dae-year2-obtained" name="daeYear2ObtainedMarks" label="DAE 2nd-year obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.daeYear2ObtainedMarks} onChange={updateField} error={fieldErrors.daeYear2ObtainedMarks} />
+          </>}
+          {form.academicStage === 'pass_out' && <>
+            <TextField id="dae-complete-total" name="daeCompleteTotalMarks" label="Complete DAE total marks" type="number" min="1" step="any" inputMode="decimal" value={form.daeCompleteTotalMarks} onChange={updateField} error={fieldErrors.daeCompleteTotalMarks} />
+            <TextField id="dae-complete-obtained" name="daeCompleteObtainedMarks" label="Complete DAE obtained marks" type="number" min="0" step="any" inputMode="decimal" value={form.daeCompleteObtainedMarks} onChange={updateField} error={fieldErrors.daeCompleteObtainedMarks} />
+            <TextField id="dae-year" name="daePassingYear" label="DAE passing year" type="number" min="1950" max="2100" inputMode="numeric" value={form.daePassingYear} onChange={updateField} error={fieldErrors.daePassingYear} />
+          </>}
+          {form.academicStage === 'first_year' && <p className="sm:col-span-2 rounded-xl bg-bluewash px-4 py-3 text-sm font-semibold text-navy">No DAE result is required while you are in First Year. Add your Matric record below.</p>}
+          {form.academicStage === 'pass_out' && profile?.dae?.marks?.percentage != null && profile?.dae?.marks?.status === 'final' && <p className="sm:col-span-2 rounded-xl bg-bluewash px-4 py-3 text-sm font-bold text-navy">Server-calculated final DAE percentage: {profile.dae.marks.percentage}%</p>}
         </Section>
 
         <Section eyebrow="Matric" title="Secondary education" description="Enter the marks and passing information shown on your Matric certificate.">

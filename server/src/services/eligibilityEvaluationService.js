@@ -1,6 +1,6 @@
 import EligibilityRule from '../models/EligibilityRule.js'
 import Program from '../models/Program.js'
-import StudentProfile from '../models/StudentProfile.js'
+import StudentProfile, { inferDaeAcademicStage } from '../models/StudentProfile.js'
 import University from '../models/University.js'
 import ApiError from '../utils/ApiError.js'
 
@@ -36,6 +36,7 @@ function evaluateCriterion(criterion, profile) {
   let failed = false
   let manual = false
   const dae = profile?.dae
+  const academicStage = inferDaeAcademicStage(dae)
 
   if (criterion.qualificationType !== 'DAE') {
     return { matched: false, missing: false, failed: false, manual: true, reasons: [reason('UNSUPPORTED_QUALIFICATION', 'manual_review', 'This qualification criterion requires manual review.')] }
@@ -52,9 +53,9 @@ function evaluateCriterion(criterion, profile) {
   }
 
   if (Number.isFinite(criterion.minimumPercentage)) {
-    if (!Number.isFinite(dae?.marks?.percentage)) {
+    if (academicStage !== 'pass_out' || dae?.marks?.status !== 'final' || !Number.isFinite(dae?.marks?.percentage)) {
       missing = true
-      reasons.push(reason('DAE_PERCENTAGE_REQUIRED', 'missing', 'Complete your saved DAE marks.'))
+      reasons.push(reason('DAE_PERCENTAGE_REQUIRED', 'missing', 'Your complete DAE result is required for this criterion.'))
     } else if (dae.marks.percentage < criterion.minimumPercentage) {
       failed = true
       reasons.push(reason('DAE_PERCENTAGE_BELOW_MINIMUM', 'failed', `Your saved DAE percentage is below the required ${criterion.minimumPercentage}%.`))
@@ -64,9 +65,9 @@ function evaluateCriterion(criterion, profile) {
   }
 
   if (Number.isInteger(criterion.minimumPassingYear)) {
-    if (!Number.isInteger(dae?.passingYear)) {
+    if (academicStage !== 'pass_out' || !Number.isInteger(dae?.passingYear)) {
       missing = true
-      reasons.push(reason('DAE_PASSING_YEAR_REQUIRED', 'missing', 'Add your DAE passing year to your profile.'))
+      reasons.push(reason('DAE_PASSING_YEAR_REQUIRED', 'missing', 'Your DAE passing year is required after completing the diploma.'))
     } else if (dae.passingYear < criterion.minimumPassingYear) {
       failed = true
       reasons.push(reason('DAE_PASSING_YEAR_TOO_EARLY', 'failed', `The rule requires a DAE passing year of ${criterion.minimumPassingYear} or later.`))
@@ -207,7 +208,7 @@ async function findVisibleProgram(programId) {
 export async function evaluateStudentEligibility(userId, { programId } = {}) {
   const now = new Date()
   const profilePromise = StudentProfile.findOne({ user: userId })
-    .select('dae.technologyCode dae.boardName dae.passingYear dae.marks.percentage dae.subjects domicile.province domicile.district')
+    .select('dae.academicStage dae.technologyCode dae.boardName dae.passingYear dae.marks dae.year1 dae.year2 dae.year3 dae.subjects domicile.province domicile.district')
     .lean()
 
   if (programId) {

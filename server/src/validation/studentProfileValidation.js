@@ -36,12 +36,13 @@ const subjectSchema = z
 
 const daeSchema = z
   .object({
+    academicStage: z.enum(['first_year', 'second_year', 'third_year', 'pass_out']).optional(),
     technologyCode: z.literal('CIT').optional(),
     technologyName: z.literal('Computer Information Technology').optional(),
     boardName: nonEmptyTrimmedString(160).optional(),
     instituteName: nonEmptyTrimmedString(200).optional(),
-    registrationNumber: nonEmptyTrimmedString(80).optional(),
     passingYear: yearSchema.optional(),
+    marks: partialMarksSchema.optional(),
     year1: partialMarksSchema.optional(),
     year2: partialMarksSchema.optional(),
     year3: partialMarksSchema.nullable().optional(),
@@ -49,9 +50,21 @@ const daeSchema = z
   })
   .strict()
   .refine((dae) => Object.keys(dae).length > 0, 'DAE update cannot be empty.')
-  .refine((dae) => dae.year3 == null ||
-    (dae.year3.totalMarks !== undefined && dae.year3.obtainedMarks !== undefined),
-  { path: ['year3'], message: 'DAE Year 3 obtained and total marks must be provided together.' })
+  .superRefine((dae, context) => {
+    for (const field of ['year1', 'year2', 'year3']) {
+      const marks = dae[field]
+      if (marks != null && (marks.totalMarks === undefined || marks.obtainedMarks === undefined)) {
+        context.addIssue({
+          code: 'custom',
+          path: [field],
+          message: `${field.replace('year', 'DAE Year ')} obtained and total marks must be provided together.`,
+        })
+      }
+    }
+    if (dae.marks != null && (dae.marks.totalMarks === undefined || dae.marks.obtainedMarks === undefined)) {
+      context.addIssue({ code: 'custom', path: ['marks'], message: 'Complete DAE obtained and total marks must be provided together.' })
+    }
+  })
 
 const matricSchema = z
   .object({

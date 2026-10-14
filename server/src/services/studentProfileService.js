@@ -1,4 +1,4 @@
-import StudentProfile from '../models/StudentProfile.js'
+import StudentProfile, { inferDaeAcademicStage } from '../models/StudentProfile.js'
 import ApiError from '../utils/ApiError.js'
 
 function isPlainObject(value) {
@@ -22,6 +22,9 @@ export async function getProfileForUser(userId) {
   const profile = await StudentProfile.findOne({ user: userId })
   if (!profile) {
     throw new ApiError(404, 'Student profile has not been created yet.', 'PROFILE_NOT_FOUND')
+  }
+  if (!profile.dae?.academicStage) {
+    profile.set('dae.academicStage', inferDaeAcademicStage(profile.dae), { strict: false })
   }
   return profile
 }

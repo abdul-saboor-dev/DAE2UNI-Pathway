@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { buildMeritCalculationPayload, profileDaeToTemporaryMarks, validateTemporaryDaeMarks } from '../src/utils/meritCalculator.js'
+import { buildMeritCalculationPayload } from '../src/utils/meritCalculator.js'
 
 const root = resolve(import.meta.dirname, '..')
 const read = (path) => readFileSync(resolve(root, path), 'utf8')
@@ -21,16 +21,9 @@ const payload = buildMeritCalculationPayload('0123456789abcdef01234567', { fedcb
 assert.deepEqual(Object.keys(payload).sort(), ['entryTestScores', 'formulaId']); checks += 1
 assert.deepEqual(Object.keys(payload.entryTestScores[0]).sort(), ['entryTestId', 'obtainedMarks']); checks += 1
 check(page.includes('getStudentProfile') && page.includes('Complete your profile') && page.includes('to="/profile"'), 'missing profile guidance exists')
-const saved = profileDaeToTemporaryMarks({ dae: { year1: { totalMarks: 100, obtainedMarks: 80 }, year2: { totalMarks: 100, obtainedMarks: 70 } } })
-check(saved.year1ObtainedMarks === '80' && saved.year3TotalMarks === '', 'saved marks prefill without invented Year 3')
-check(Object.keys(validateTemporaryDaeMarks(saved)).length === 0, 'Years 1 and 2 alone are valid')
-check(Boolean(validateTemporaryDaeMarks({ ...saved, year3TotalMarks: '100' }).year3ObtainedMarks), 'partial Year 3 is rejected')
-check(Boolean(validateTemporaryDaeMarks({ ...saved, year2TotalMarks: '0' }).year2TotalMarks), 'nonpositive total is rejected')
-check(Boolean(validateTemporaryDaeMarks({ ...saved, year1ObtainedMarks: 'Infinity' }).year1ObtainedMarks), 'nonfinite marks are rejected')
-const temporary = buildMeritCalculationPayload('0123456789abcdef01234567', {}, saved, true)
-check(temporary.daeMarks.year1.obtainedMarks === 80 && !('year3' in temporary.daeMarks), 'temporary DAE payload omits missing Year 3')
-check(!('daeMarks' in payload), 'non-DAE formula payload omits DAE marks')
-check(page.includes('Temporary DAE year marks') && page.includes('daeResultStatus'), 'temporary inputs and server status are shown')
+check(!('daeMarks' in payload), 'calculator payload never submits DAE marks')
+check(page.includes("academicStage === 'pass_out'") && page.includes('Complete DAE result needed'), 'incomplete DAE stages receive profile guidance')
+check(!page.includes('Temporary DAE year marks') && page.includes('daeResultStatus'), 'temporary DAE mark entry was removed')
 check(page.includes('No verified merit formula is available yet.'), 'exact no-formula state exists')
 check(page.includes('Official maximum:') && page.includes('type="number"'), 'dynamic obtained-score inputs show official maximum')
 check(page.includes('This is a merit calculation, not an eligibility or admission decision.'), 'required disclaimer exists')
