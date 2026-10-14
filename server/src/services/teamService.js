@@ -1,10 +1,14 @@
-import { randomUUID } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
 import bcrypt from 'bcryptjs'
+import mongoose from 'mongoose'
+import EmailVerificationToken from '../models/EmailVerificationToken.js'
+import PasswordResetToken from '../models/PasswordResetToken.js'
 import RoleOperationLock from '../models/RoleOperationLock.js'
+import StudentProfile from '../models/StudentProfile.js'
 import User from '../models/User.js'
 import ApiError from '../utils/ApiError.js'
 import { CONTENT_MANAGER_ROLES, OWNER_ONLY_ROLES, ROLE_MANAGER_ROLES } from '../utils/roles.js'
-import { normalizeEmail } from './authService.js'
+import { BCRYPT_ROUNDS, normalizeEmail } from './authService.js'
 
 const LOCK_ID = 'role-management'
 const LEASE_MS = 3 * 60 * 1000
@@ -35,6 +39,86 @@ export async function listTeamMembers({ page, pageSize, search, sort }) {
   return { users: users.map(toTeamMember), pagination: {
     page, pageSize, totalRecords, totalPages: Math.ceil(totalRecords / pageSize),
   } }
+}
+
+export async function listStudentAccounts({ page, pageSize, search, sort }) {
+  const filter = { role: 'student', accountStatus: { $ne: 'archived' } }
+  if (search) {
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    filter.$or = [{ name: new RegExp(escaped, 'i') }, { email: new RegExp(escaped, 'i') }]
+  }
+  const descending = sort.startsWith('-')
+  const field = descending ? sort.slice(1) : sort
+  const direction = descending ? -1 : 1
+  const [users, totalRecords] = await Promise.all([
+    User.find(filter).select('name email role accountStatus createdAt lastLoginAt')
+      .sort({ [field]: direction, _id: 1 }).skip((page - 1) * pageSize).limit(pageSize).lean(),
+    User.countDocuments(filter),
+  ])
+  return { users: users.map(toTeamMember), pagination: {
+    page, pageSize, totalRecords, totalPages: Math.ceil(totalRecords / pageSize),
+  } }
+}
+
+export async function deleteStudentAccount(actorId, targetId, { currentPassword, confirmEmail }) {
+  const actor = await verifyActor(actorId, currentPassword, OWNER_ONLY_ROLES)
+  const tombstone = randomUUID()
+  const unusablePasswordHash = await bcrypt.hash(randomBytes(32).toString('base64url'), BCRYPT_ROUNDS)
+
+  const applyDeletion = async (session = null) => {
+    const queryOptions = session ? { session } : undefined
+    const targetQuery = User.findOne({ _id: targetId, role: 'student', accountStatus: { $ne: 'archived' } })
+      .select('email role accountStatus')
+    if (session) targetQuery.session(session)
+    const target = await targetQuery
+    if (!target) throw new ApiError(404, 'The student account was not found.', 'STUDENT_NOT_FOUND')
+    if (normalizeEmail(confirmEmail) !== target.email) {
+      throw new ApiError(400, 'Typed email does not match the student account.', 'EMAIL_CONFIRMATION_MISMATCH')
+    }
+
+    const archived = await User.findOneAndUpdate(
+      { _id: target._id, role: 'student', accountStatus: { $ne: 'archived' }, email: target.email },
+      {
+        $set: {
+          name: 'Deleted student',
+          email: `deleted-${tombstone}@example.invalid`,
+          passwordHash: unusablePasswordHash,
+          accountStatus: 'archived',
+          emailVerificationRequired: false,
+        },
+        $inc: { authVersion: 1 },
+        $unset: { emailVerifiedAt: 1, lastLoginAt: 1 },
+      },
+      { new: true, runValidators: true, ...(session && { session }) },
+    )
+    if (!archived) throw new ApiError(409, 'The student account changed before deletion. Refresh and try again.', 'STUDENT_DELETE_CONFLICT')
+    const audit = {
+      operationId: randomUUID(), actor: actor._id, actorRole: actor.role, target: target._id,
+      action: 'student_account_deleted', previousRole: 'student', newRole: 'student', occurredAt: new Date(),
+    }
+    const auditResult = await User.updateOne({ _id: actor._id, role: 'owner', accountStatus: 'active' },
+      { $push: { roleAudit: audit } }, queryOptions)
+    if (!auditResult.matchedCount) throw new ApiError(409, 'Owner authorization changed before deletion.', 'STUDENT_DELETE_CONFLICT')
+    await Promise.all([
+      StudentProfile.deleteMany({ user: target._id }, queryOptions),
+      EmailVerificationToken.deleteMany({ user: target._id }, queryOptions),
+      PasswordResetToken.deleteMany({ user: target._id }, queryOptions),
+    ])
+  }
+
+  const topologyType = mongoose.connection.client?.topology?.description?.type
+  if (topologyType === 'Single') {
+    // Local standalone MongoDB has no transaction support; the account is revoked before dependent cleanup.
+    await applyDeletion()
+  } else {
+    const session = await mongoose.startSession()
+    try {
+      await session.withTransaction(() => applyDeletion(session))
+    } finally {
+      await session.endSession()
+    }
+  }
+  return { deleted: true }
 }
 
 async function withRoleLock(operation) {

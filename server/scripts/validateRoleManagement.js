@@ -4,6 +4,8 @@ import { randomBytes, randomUUID } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import mongoose from 'mongoose'
 import app from '../src/app.js'
+import EmailVerificationToken from '../src/models/EmailVerificationToken.js'
+import PasswordResetToken from '../src/models/PasswordResetToken.js'
 import User from '../src/models/User.js'
 import StudentProfile from '../src/models/StudentProfile.js'
 import { signAccessToken } from '../src/utils/jwt.js'
@@ -45,9 +47,21 @@ async function main() {
     { name: 'Temporary Student B', email: `${prefix}-student-b@example.invalid`, passwordHash: hash, role: 'student', accountStatus: 'active' },
     { name: 'Temporary Student C', email: `${prefix}-student-c@example.invalid`, passwordHash: hash, role: 'student', accountStatus: 'active' },
     { name: 'Temporary Inactive', email: `${prefix}-inactive@example.invalid`, passwordHash: hash, role: 'student', accountStatus: 'suspended' },
+    { name: 'Temporary Delete Target', email: `${prefix}-delete@example.invalid`, passwordHash: hash, role: 'student', accountStatus: 'active' },
   ])
-  const [owner, coOwner, admin, studentA, studentB, studentC, inactive] = records
+  const [owner, coOwner, admin, studentA, studentB, studentC, inactive, deleteTarget] = records
   const profile = await StudentProfile.create({ user: studentA._id, profileStatus: 'draft' })
+  const deleteTargetProfile = await StudentProfile.create({ user: deleteTarget._id, profileStatus: 'draft' })
+  const tokenNow = new Date()
+  const tokenLater = new Date(tokenNow.getTime() + 30 * 60 * 1000)
+  await EmailVerificationToken.create({
+    user: deleteTarget._id, tokenHash: 'a'.repeat(64), expiresAt: tokenLater, sentAt: tokenNow,
+    lastAttemptAt: tokenNow, windowStartedAt: tokenNow, sendCount: 1, purgeAt: tokenLater,
+  })
+  await PasswordResetToken.create({
+    user: deleteTarget._id, emailHash: 'b'.repeat(64), tokenHash: 'c'.repeat(64), expiresAt: tokenLater,
+    sentAt: tokenNow, lastAttemptAt: tokenNow, windowStartedAt: tokenNow, requestCount: 1, purgeAt: tokenLater,
+  })
   const tokens = Object.fromEntries(records.map((user) => [user.role === 'student' ? user.email : user.role, signAccessToken(user)]))
   const ownerToken = tokens.owner, coToken = tokens.co_owner, adminToken = tokens.admin
   const studentToken = signAccessToken(studentA)
@@ -70,6 +84,31 @@ async function main() {
   equal((await request('/api/admin/administrators?pageSize=101', { token: ownerToken })).status, 400, 'page size bounded')
   equal((await request('/api/admin/administrators?search=%24set', { token: ownerToken })).payload.data.pagination.totalRecords, 0, 'literal search')
   equal((await request('/api/admin/administrators?sort=passwordHash', { token: ownerToken })).status, 400, 'sort allowlist')
+  equal((await request('/api/admin/students')).status, 401, 'student-account list authentication')
+  equal((await request('/api/admin/students', { token: adminToken })).status, 403, 'Admin cannot list student accounts')
+  equal((await request('/api/admin/students', { token: coToken })).status, 403, 'Co-Owner cannot list student accounts')
+  const students = await request('/api/admin/students?pageSize=2&sort=name', { token: ownerToken })
+  equal(students.status, 200, 'Owner lists student accounts')
+  equal(students.payload.data.pagination.totalRecords, 5, 'student list excludes elevated accounts')
+  check(!/password|ownerMarker|roleAudit|token/i.test(JSON.stringify(students.payload)), 'student list serialization safe')
+  const deletePath = `/api/admin/students/${deleteTarget.id}`
+  const deleteBody = { currentPassword: password, confirmEmail: deleteTarget.email, confirmed: true }
+  equal((await request(deletePath, { method: 'DELETE', token: adminToken, body: deleteBody })).status, 403, 'Admin cannot delete a student')
+  equal((await request(deletePath, { method: 'DELETE', token: coToken, body: deleteBody })).status, 403, 'Co-Owner cannot delete a student')
+  equal((await request('/api/admin/students/not-an-id', { method: 'DELETE', token: ownerToken, body: deleteBody })).status, 400, 'delete validates target ID')
+  equal((await request(deletePath, { method: 'DELETE', token: ownerToken, body: { ...deleteBody, currentPassword: 'wrong' } })).status, 403, 'delete requires Owner password')
+  equal((await request(deletePath, { method: 'DELETE', token: ownerToken, body: { ...deleteBody, confirmEmail: studentA.email } })).status, 400, 'delete requires typed target email')
+  equal((await request(deletePath, { method: 'DELETE', token: ownerToken, body: { ...deleteBody, role: 'owner' } })).status, 400, 'delete rejects protected-field injection')
+  equal((await request(deletePath, { method: 'DELETE', token: ownerToken, body: deleteBody })).status, 200, 'Owner deletes student account')
+  const archivedStudent = await User.findById(deleteTarget.id).select('+authVersion').lean()
+  equal(archivedStudent.accountStatus, 'archived', 'deleted student access is archived')
+  check(archivedStudent.email.endsWith('@example.invalid') && archivedStudent.email !== deleteTarget.email, 'deleted student PII is anonymized')
+  equal(await StudentProfile.countDocuments({ user: deleteTarget._id }), 0, 'deleted student profile removed')
+  equal(await EmailVerificationToken.countDocuments({ user: deleteTarget._id }), 0, 'email verification token removed')
+  equal(await PasswordResetToken.countDocuments({ user: deleteTarget._id }), 0, 'password reset token removed')
+  equal((await request('/api/student/profile', { token: signAccessToken(deleteTarget) })).status, 403, 'deleted student session is rejected')
+  equal(await StudentProfile.countDocuments({ _id: deleteTargetProfile._id }), 0, 'only the targeted profile is removed')
+  equal((await request(deletePath, { method: 'DELETE', token: ownerToken, body: deleteBody })).status, 404, 'repeated deletion is safe')
   equal((await request('/api/setup/status')).payload.data.ownerSetupRequired, false, 'existing Owner locks setup')
 
   const promotePath = '/api/admin/administrators/promote'
@@ -138,10 +177,10 @@ async function main() {
   equal((await User.findById(studentC.id)).role, 'admin', 'concurrent target state consistent')
   const audited = await User.find({ email: new RegExp(`^${prefix}`) }).select('+roleAudit').lean()
   const audit = audited.flatMap((item) => item.roleAudit || [])
-  for (const action of ['admin_promoted', 'admin_access_revoked', 'co_owner_granted', 'co_owner_access_revoked']) {
+  for (const action of ['admin_promoted', 'admin_access_revoked', 'co_owner_granted', 'co_owner_access_revoked', 'student_account_deleted']) {
     check(audit.some((item) => item.action === action), `${action} audit persisted`)
   }
-  equal(audit.length, 7, 'only successful transitions audited')
+  equal(audit.length, 8, 'only successful transitions and deletion are audited')
   check(!/password|secret|token|authorization|header/i.test(JSON.stringify(audit)), 'audit contains no credentials')
   equal((await request('/api/admin/role-audit', { token: ownerToken })).status, 404, 'audit not publicly exposed as API')
   equal((await request('/api/setup/status')).payload.data.ownerSetupRequired, false, 'setup never reopens')

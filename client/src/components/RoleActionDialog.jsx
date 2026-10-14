@@ -6,8 +6,9 @@ const descriptions = {
   revoke: 'Remove admin access returns this person to Student. Their account, profile, and other data remain intact.',
   grant: 'Co-Owners can manage all project content and can appoint or remove regular administrators. They cannot manage the Owner or other Co-Owners.',
   revokeCoOwner: 'Remove Co-Owner access returns this person to Admin. They retain full content-management access.',
+  deleteStudent: 'This permanently revokes sign-in access, removes the student profile and active verification tokens, and anonymizes the account retained for audit integrity. This cannot be undone.',
 }
-const titles = { promote: 'Make Admin', revoke: 'Remove admin access', grant: 'Make Co-Owner', revokeCoOwner: 'Remove Co-Owner access' }
+const titles = { promote: 'Make Admin', revoke: 'Remove admin access', grant: 'Make Co-Owner', revokeCoOwner: 'Remove Co-Owner access', deleteStudent: 'Delete student account' }
 
 export default function RoleActionDialog({ action, onClose, onConfirm }) {
   const dialogRef = useRef(null)
@@ -18,7 +19,8 @@ export default function RoleActionDialog({ action, onClose, onConfirm }) {
   const [confirmEmail, setConfirmEmail] = useState('')
   const [error, setError] = useState('')
   const [pending, setPending] = useState(false)
-  const needsEmail = action.type === 'grant' || action.type === 'revokeCoOwner'
+  const needsEmail = action.type === 'grant' || action.type === 'revokeCoOwner' || action.type === 'deleteStudent'
+  const returnHeadingId = action.type === 'deleteStudent' ? 'students-page-heading' : 'team-page-heading'
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -28,9 +30,9 @@ export default function RoleActionDialog({ action, onClose, onConfirm }) {
     return () => {
       if (dialog.open) dialog.close()
       if (!completedRef.current && focusTarget?.isConnected) focusTarget.focus()
-      else document.getElementById('team-page-heading')?.focus()
+      else document.getElementById(returnHeadingId)?.focus()
     }
-  }, [])
+  }, [returnHeadingId])
 
   async function submit(event) {
     event.preventDefault()
@@ -50,7 +52,7 @@ export default function RoleActionDialog({ action, onClose, onConfirm }) {
       onClose()
       return
     } catch (caught) {
-      setError(caught.response?.data?.message || 'The role change could not be completed. Please try again.')
+      setError(caught.response?.data?.message || 'The account action could not be completed. Please try again.')
     }
     setPassword('')
     setPending(false)
@@ -65,7 +67,7 @@ export default function RoleActionDialog({ action, onClose, onConfirm }) {
       {needsEmail && <div><label htmlFor="role-confirm-email" className="block text-sm font-bold">Type the target email to confirm</label><input id="role-confirm-email" className={`${adminInputClass} mt-1`} value={confirmEmail} onChange={(event) => { setConfirmEmail(event.target.value); setError('') }} autoComplete="off" aria-describedby={error ? 'role-dialog-error' : undefined} required /></div>}
       <div><label htmlFor="role-current-password" className="block text-sm font-bold">Your current password</label><input ref={passwordRef} id="role-current-password" type="password" className={`${adminInputClass} mt-1`} value={password} onChange={(event) => { setPassword(event.target.value); setError('') }} autoComplete="current-password" aria-describedby={error ? 'role-dialog-error' : undefined} required /></div>
       {error && <p id="role-dialog-error" role="alert" className="break-words text-sm font-semibold text-red-800">{error}</p>}
-      <div className="flex flex-wrap justify-end gap-3"><button type="button" disabled={pending} onClick={onClose} className="min-h-11 rounded-xl border border-slate-300 px-4 font-bold focus-visible:ring-4 focus-visible:ring-academic/50">Cancel</button><button type="submit" disabled={pending} className={adminButtonClass}>{pending ? 'Confirming…' : titles[action.type]}</button></div>
+      <div className="flex flex-wrap justify-end gap-3"><button type="button" disabled={pending} onClick={onClose} className="min-h-11 rounded-xl border border-slate-300 px-4 font-bold focus-visible:ring-4 focus-visible:ring-academic/50">Cancel</button><button type="submit" disabled={pending} className={action.type === 'deleteStudent' ? 'min-h-11 rounded-xl bg-red-800 px-4 font-bold text-white hover:bg-red-900 focus-visible:ring-4 focus-visible:ring-red-300' : adminButtonClass}>{pending ? 'Confirming…' : titles[action.type]}</button></div>
     </form>
   </dialog>
 }

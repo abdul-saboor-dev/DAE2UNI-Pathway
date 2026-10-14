@@ -14,7 +14,7 @@ const roleAuditSchema = new Schema({
   actor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   actorRole: { type: String, enum: ['owner', 'co_owner'], required: true },
   target: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  action: { type: String, enum: ['admin_promoted', 'admin_access_revoked', 'co_owner_granted', 'co_owner_access_revoked'], required: true },
+  action: { type: String, enum: ['admin_promoted', 'admin_access_revoked', 'co_owner_granted', 'co_owner_access_revoked', 'student_account_deleted'], required: true },
   previousRole: { type: String, enum: ['student', 'admin', 'co_owner'], required: true },
   newRole: { type: String, enum: ['student', 'admin', 'co_owner'], required: true },
   occurredAt: { type: Date, required: true },
