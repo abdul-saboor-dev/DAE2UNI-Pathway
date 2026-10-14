@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import BrandLogo from '../components/BrandLogo.jsx'
+import RouteSeo from '../components/RouteSeo.jsx'
 import useAuth from '../context/useAuth.js'
 import { canManageContent } from '../utils/roles.js'
 
@@ -38,6 +39,7 @@ export default function MainLayout() {
   }
 
   return <div className="site-shell flex min-h-screen min-w-0 flex-col">
+    <RouteSeo />
     <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-white focus:px-4 focus:py-3">Skip to content</a>
     <header className="site-header relative z-20">
       <div className="site-container flex min-h-20 items-center justify-between gap-5 py-3">

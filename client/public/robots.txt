@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /eligibility
+Disallow: /merit-calculator
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /resend-verification
+Disallow: /setup/admin
+
+Sitemap: https://dae2uni-pathway.vercel.app/sitemap.xml

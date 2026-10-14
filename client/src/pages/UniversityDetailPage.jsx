@@ -5,6 +5,7 @@ import CampusDirectory from '../components/CampusDirectory.jsx'
 import { CatalogueError, CatalogueLoading, CatalogueNotFound } from '../components/CatalogueStates.jsx'
 import ProgramCard from '../components/ProgramCard.jsx'
 import SourceAttribution from '../components/SourceAttribution.jsx'
+import Seo, { SITE_ORIGIN } from '../components/Seo.jsx'
 import useCatalogueDetail from '../hooks/useCatalogueDetail.js'
 import { getProgramsForUniversity, getUniversity } from '../services/catalogueApi.js'
 import { getSafeExternalUrl } from '../utils/externalLinks.js'
@@ -41,17 +42,20 @@ export default function UniversityDetailPage() {
     return <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-10"><CatalogueLoading label="Loading university details…" /></section>
   }
   if (detail.status === 'not-found') {
-    return <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6"><CatalogueNotFound title="University not found" description="This university is unavailable, unpublished, unverified, or the address is incorrect." backTo="/universities" backLabel="Back to universities" /></section>
+    return <><Seo title="University not found | DAE2UNI Pathway" description="The requested university catalogue record is not publicly available." canonicalPath={`/universities/${encodeURIComponent(universityIdentifier)}`} noIndex /><section className="mx-auto max-w-4xl px-4 py-12 sm:px-6"><CatalogueNotFound title="University not found" description="This university is unavailable, unpublished, unverified, or the address is incorrect." backTo="/universities" backLabel="Back to universities" /></section></>
   }
   if (detail.status === 'error') {
     return <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6"><CatalogueError onRetry={detail.retry} /></section>
   }
 
   const university = detail.item
+  const canonicalIdentifier = university.slug || university.id
+  const canonicalPath = `/universities/${encodeURIComponent(canonicalIdentifier)}`
+  const seoDescription = `${university.name}: published, source-verified university and campus information for students researching pathways after DAE in Pakistan.`
   const website = getSafeExternalUrl(university.contact?.websiteUrl)
   const hecProfile = getSafeExternalUrl(university.hecProfileUrl)
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-14">
+    <><Seo title={`${university.name} | DAE2UNI Pathway`} description={seoDescription} canonicalPath={canonicalPath} structuredData={{ '@context': 'https://schema.org', '@type': 'CollegeOrUniversity', name: university.name, url: `${SITE_ORIGIN}${canonicalPath}`, ...(website && { sameAs: website }) }} /><section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-14">
       <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Universities', to: '/universities' }, { label: university.name }]} />
       <Link to="/universities" className="mb-5 inline-flex rounded text-sm font-black text-academic underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-academic">← Back to universities</Link>
 
@@ -104,6 +108,6 @@ export default function UniversityDetailPage() {
         {related.status === 'ready' && related.programs.length === 0 && <p className="mt-6 rounded-2xl border border-dashed border-academic/20 p-6 text-ink/60">No verified published programs are listed for this university.</p>}
         {related.status === 'ready' && related.programs.length > 0 && <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">{related.programs.map((program) => <ProgramCard key={program.id} program={program} />)}</div>}
       </section>
-    </section>
+    </section></>
   )
 }
