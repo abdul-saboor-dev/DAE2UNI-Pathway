@@ -25,6 +25,6 @@ assert.match(files['scripts/generateSeoAssets.js'], /renderStaticBody/)
 assert.doesNotMatch(files['scripts/generateSeoAssets.js'], /Authorization|Bearer/)
 assert.equal(vercelConfig.cleanUrls, true)
 assert.ok(vercelConfig.headers.some(({ source, headers }) => source.includes('admin') && headers.some(({ key, value }) => key === 'X-Robots-Tag' && value === 'noindex, nofollow')))
-assert.deepEqual(vercelConfig.rewrites, [{ source: '/(.*)', destination: '/index.html' }])
+assert.deepEqual(vercelConfig.rewrites, [{ source: '/(.*)', destination: '/' }])
 
 console.log('SEO frontend safeguard passed: 17 assertions.')
