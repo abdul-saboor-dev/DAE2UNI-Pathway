@@ -3,6 +3,7 @@ import Breadcrumbs from '../components/Breadcrumbs.jsx'
 import CampusDirectory from '../components/CampusDirectory.jsx'
 import { CatalogueError, CatalogueLoading, CatalogueNotFound } from '../components/CatalogueStates.jsx'
 import SourceAttribution from '../components/SourceAttribution.jsx'
+import Seo, { SITE_ORIGIN } from '../components/Seo.jsx'
 import useCatalogueDetail from '../hooks/useCatalogueDetail.js'
 import { getProgram } from '../services/catalogueApi.js'
 
@@ -18,16 +19,18 @@ export default function ProgramDetailPage() {
     return <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-10"><CatalogueLoading label="Loading program details…" /></section>
   }
   if (detail.status === 'not-found') {
-    return <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6"><CatalogueNotFound title="Program not found" description="This program is unavailable, unpublished, unverified, or the address is incorrect." backTo="/programs" backLabel="Back to programs" /></section>
+    return <><Seo title="Program not found | DAE2UNI Pathway" description="The requested programme catalogue record is not publicly available." canonicalPath={`/programs/${encodeURIComponent(programId)}`} noIndex /><section className="mx-auto max-w-4xl px-4 py-12 sm:px-6"><CatalogueNotFound title="Program not found" description="This program is unavailable, unpublished, unverified, or the address is incorrect." backTo="/programs" backLabel="Back to programs" /></section></>
   }
   if (detail.status === 'error') {
     return <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6"><CatalogueError onRetry={detail.retry} /></section>
   }
 
   const program = detail.item
+  const canonicalPath = `/programs/${encodeURIComponent(program.id)}`
+  const seoDescription = `${program.name} at ${program.university.name}: published, source-verified programme and campus information. Eligibility and admission are not guaranteed.`
   const universityIdentifier = program.university.slug || program.university.id
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-14">
+    <><Seo title={`${program.name} at ${program.university.name} | DAE2UNI`} description={seoDescription} canonicalPath={canonicalPath} structuredData={{ '@context': 'https://schema.org', '@type': 'EducationalOccupationalProgram', name: program.name, url: `${SITE_ORIGIN}${canonicalPath}`, provider: { '@type': 'CollegeOrUniversity', name: program.university.name } }} /><section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-14">
       <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Programs', to: '/programs' }, { label: program.name }]} />
       <Link to="/programs" className="mb-5 inline-flex rounded text-sm font-black text-academic underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-academic">← Back to programs</Link>
 
@@ -72,6 +75,6 @@ export default function ProgramDetailPage() {
           </div>
         </div>
       </article>
-    </section>
+    </section></>
   )
 }
