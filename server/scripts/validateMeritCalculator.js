@@ -46,7 +46,7 @@ try {
   ])
   const studentToken = signAccessToken(student)
   const adminToken = signAccessToken(admin)
-  await StudentProfile.create({ user: student._id, profileStatus: 'draft', dae: { year1: { obtainedMarks: 1, totalMarks: 2 }, year2: { obtainedMarks: 1, totalMarks: 2 } }, matric: { marks: { obtainedMarks: 1, totalMarks: 2 } } })
+  await StudentProfile.create({ user: student._id, profileStatus: 'draft', dae: { academicStage: 'third_year', year1: { obtainedMarks: 1, totalMarks: 2 }, year2: { obtainedMarks: 1, totalMarks: 2 } }, matric: { marks: { obtainedMarks: 1, totalMarks: 2 } } })
   await new Promise((resolve) => { server = app.listen(0, '127.0.0.1', resolve) })
 
   equal((await request('/api/student/merit-calculator/options')).status, 401, 'logged-out access denied')
@@ -71,20 +71,16 @@ try {
   const formulaId = formula._id.toString()
   const entryTestId = entryTest._id.toString()
   const path = '/api/student/merit-calculator/calculate'
-  const daeMarks = { year1: { obtainedMarks: 1, totalMarks: 2 }, year2: { obtainedMarks: 1, totalMarks: 2 } }
   const scores = [{ entryTestId, obtainedMarks: 1 }]
-  check(!meritCalculatorSchemas.calculateBody.safeParse({ formulaId, entryTestScores: scores, daeMarks: { ...daeMarks, year3: { totalMarks: 2 } } }).success, 'partial Year 3 rejected')
-  check(!meritCalculatorSchemas.calculateBody.safeParse({ formulaId, entryTestScores: scores, daeMarks: { ...daeMarks, year3: { obtainedMarks: 1 } } }).success, 'other partial Year 3 rejected')
-  check(!meritCalculatorSchemas.calculateBody.safeParse({ formulaId, entryTestScores: scores, daeMarks: { ...daeMarks, year1: { obtainedMarks: 3, totalMarks: 2 } } }).success, 'obtained marks above total rejected')
-  check(!meritCalculatorSchemas.calculateBody.safeParse({ formulaId, entryTestScores: scores, daeMarks: { ...daeMarks, year2: { obtainedMarks: 1, totalMarks: 0 } } }).success, 'nonpositive total rejected')
-  check(!meritCalculatorSchemas.calculateBody.safeParse({ formulaId, entryTestScores: scores, daeMarks: { ...daeMarks, year2: { obtainedMarks: Infinity, totalMarks: 2 } } }).success, 'nonfinite year marks rejected')
-  equal((await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: scores } })).status, 400, 'DAE formula requires temporary Year 1 and Year 2 marks')
+  check(!meritCalculatorSchemas.calculateBody.safeParse({ formulaId, entryTestScores: scores, daeMarks: { obtainedMarks: 1, totalMarks: 2 } }).success, 'client-supplied DAE marks are rejected')
+  equal((await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: scores } })).status, 409, 'incomplete DAE stage cannot produce a final aggregate')
   const matricOnly = await MeritFormula.create({ code: `MATRIC-${unique.slice(0, 20)}`, name: 'Temporary Matric Only Formula', university: university._id, program: program._id, components: [
     { key: 'matric', label: 'Matric', inputSource: 'matric_percentage', operation: 'weighted_percentage', weightPercentage: 100, explanation: 'Temporary Matric weight.' },
   ], source: verifiedSource, recordStatus: 'published' })
   const withoutDae = await request(path, { method: 'POST', token: studentToken, body: { formulaId: matricOnly._id.toString(), entryTestScores: [] } })
   equal(withoutDae.status, 200, 'non-DAE formula needs no temporary DAE marks')
   equal(withoutDae.body.data.result.daeResultStatus, null, 'non-DAE formula has no DAE result status')
+  await StudentProfile.updateOne({ user: student._id }, { $set: { 'dae.academicStage': 'pass_out', 'dae.marks': { obtainedMarks: 1, totalMarks: 2, percentage: 50, status: 'final' } } })
   equal((await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: [] } })).status, 400, 'missing test score rejected')
   equal((await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: [{ entryTestId, obtainedMarks: -1 }] } })).status, 400, 'negative score rejected')
   equal((await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: [{ entryTestId, obtainedMarks: 25 }] } })).status, 400, 'above-maximum score rejected')
@@ -92,24 +88,24 @@ try {
   check(!meritCalculatorSchemas.calculateBody.safeParse({ formulaId, entryTestScores: [{ entryTestId, obtainedMarks: Infinity }] }).success, 'non-finite score rejected')
   equal((await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: [{ entryTestId, obtainedMarks: 1 }], daePercentage: 100, weights: [100], finalAggregate: 100 } })).status, 400, 'client overrides and unknown fields rejected')
 
+  await StudentProfile.collection.updateOne({ user: student._id }, { $unset: { 'dae.academicStage': '' } })
+  equal((await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: scores } })).status, 200, 'legacy pass-out profile without a stored academic stage remains usable')
+  await StudentProfile.collection.updateOne({ user: student._id }, { $set: { 'dae.academicStage': 'pass_out' } })
+
   const before = { users: await User.countDocuments(), profiles: await StudentProfile.countDocuments(), universities: await University.countDocuments(), programs: await Program.countDocuments(), tests: await EntryTest.countDocuments(), formulas: await MeritFormula.countDocuments() }
   const profileBefore = await StudentProfile.findOne({ user: student._id }).lean()
   const userBefore = await User.findById(student._id).select('updatedAt').lean()
-  const calculated = await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: scores, daeMarks } })
+  const calculated = await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: scores } })
   equal(calculated.status, 200, 'valid calculation succeeds')
   equal(calculated.body.data.result.finalAggregate, 34.88, 'aggregate uses unrounded intermediate values')
-  equal(calculated.body.data.result.daeResultStatus, 'provisional', 'missing Year 3 is provisional')
+  equal(calculated.body.data.result.daeResultStatus, 'final', 'saved complete DAE result is final')
   equal(calculated.body.data.result.breakdown.length, 3, 'transparent three-component breakdown returned')
-  const final = await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: scores, daeMarks: { ...daeMarks, year3: { obtainedMarks: 0, totalMarks: 2 } } } })
-  equal(final.status, 200, 'complete Year 3 calculation succeeds')
-  equal(final.body.data.result.finalAggregate, 26.54, 'Year 3 changes only the temporary DAE calculation')
-  equal(final.body.data.result.daeResultStatus, 'final', 'all three years produce final status')
   equal(calculated.body.data.result.disclaimer, 'This is a merit calculation, not an eligibility or admission decision.', 'safe merit-only disclaimer returned')
   const after = { users: await User.countDocuments(), profiles: await StudentProfile.countDocuments(), universities: await University.countDocuments(), programs: await Program.countDocuments(), tests: await EntryTest.countDocuments(), formulas: await MeritFormula.countDocuments() }
   assert.deepEqual(after, before, 'calculation must not change collection counts'); checks += 1
   const profileAfter = await StudentProfile.findOne({ user: student._id }).lean()
   equal(profileAfter.updatedAt.getTime(), profileBefore.updatedAt.getTime(), 'calculation does not update the profile')
-  assert.deepEqual(profileAfter.dae, profileBefore.dae, 'temporary year marks do not alter saved DAE data'); checks += 1
+  assert.deepEqual(profileAfter.dae, profileBefore.dae, 'calculation does not alter saved DAE data'); checks += 1
   equal(profileAfter.profileStatus, profileBefore.profileStatus, 'calculation does not change profile completion')
   const userAfter = await User.findById(student._id).select('updatedAt').lean()
   equal(userAfter.updatedAt.getTime(), userBefore.updatedAt.getTime(), 'calculation does not update the user')

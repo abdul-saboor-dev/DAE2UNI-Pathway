@@ -1,5 +1,5 @@
 import api from './api.js'
-export { buildMeritCalculationPayload, emptyTemporaryDaeMarks, profileDaeToTemporaryMarks, validateTemporaryDaeMarks } from '../utils/meritCalculator.js'
+export { buildMeritCalculationPayload } from '../utils/meritCalculator.js'
 
 const objectId = /^[a-f\d]{24}$/i
 

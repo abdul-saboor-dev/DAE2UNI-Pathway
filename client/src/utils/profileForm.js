@@ -1,14 +1,14 @@
 export const emptyProfileForm = {
+  academicStage: 'first_year',
   daeBoardName: '',
   daeInstituteName: '',
-  daeRegistrationNumber: '',
   daePassingYear: '',
+  daeCompleteTotalMarks: '',
+  daeCompleteObtainedMarks: '',
   daeYear1TotalMarks: '',
   daeYear1ObtainedMarks: '',
   daeYear2TotalMarks: '',
   daeYear2ObtainedMarks: '',
-  daeYear3TotalMarks: '',
-  daeYear3ObtainedMarks: '',
   matricBoardName: '',
   matricGroup: '',
   matricPassingYear: '',
@@ -52,16 +52,16 @@ export function profileToForm(profile) {
   if (!profile) return { ...emptyProfileForm }
 
   return {
+    academicStage: profile.dae?.academicStage || 'first_year',
     daeBoardName: profile.dae?.boardName || '',
     daeInstituteName: profile.dae?.instituteName || '',
-    daeRegistrationNumber: profile.dae?.registrationNumber || '',
     daePassingYear: profile.dae?.passingYear?.toString() || '',
+    daeCompleteTotalMarks: profile.dae?.marks?.totalMarks?.toString() || '',
+    daeCompleteObtainedMarks: profile.dae?.marks?.obtainedMarks?.toString() || '',
     daeYear1TotalMarks: profile.dae?.year1?.totalMarks?.toString() || '',
     daeYear1ObtainedMarks: profile.dae?.year1?.obtainedMarks?.toString() || '',
     daeYear2TotalMarks: profile.dae?.year2?.totalMarks?.toString() || '',
     daeYear2ObtainedMarks: profile.dae?.year2?.obtainedMarks?.toString() || '',
-    daeYear3TotalMarks: profile.dae?.year3?.totalMarks?.toString() || '',
-    daeYear3ObtainedMarks: profile.dae?.year3?.obtainedMarks?.toString() || '',
     matricBoardName: profile.matric?.boardName || '',
     matricGroup: profile.matric?.group || '',
     matricPassingYear: profile.matric?.passingYear?.toString() || '',
@@ -81,15 +81,19 @@ export function buildProfilePayload(form, profileStatus) {
   const domicile = {}
   const interests = {}
 
+  include(dae, 'academicStage', form.academicStage)
   include(dae, 'boardName', text(form.daeBoardName))
   include(dae, 'instituteName', text(form.daeInstituteName))
-  include(dae, 'registrationNumber', text(form.daeRegistrationNumber))
-  include(dae, 'passingYear', number(form.daePassingYear))
-  include(dae, 'year1', marks(form.daeYear1TotalMarks, form.daeYear1ObtainedMarks))
-  include(dae, 'year2', marks(form.daeYear2TotalMarks, form.daeYear2ObtainedMarks))
-  const year3 = marks(form.daeYear3TotalMarks, form.daeYear3ObtainedMarks)
-  if (year3) dae.year3 = year3
-  else if (Object.keys(dae).length) dae.year3 = null
+  if (form.academicStage === 'second_year' || form.academicStage === 'third_year') {
+    include(dae, 'year1', marks(form.daeYear1TotalMarks, form.daeYear1ObtainedMarks))
+  }
+  if (form.academicStage === 'third_year') {
+    include(dae, 'year2', marks(form.daeYear2TotalMarks, form.daeYear2ObtainedMarks))
+  }
+  if (form.academicStage === 'pass_out') {
+    include(dae, 'passingYear', number(form.daePassingYear))
+    include(dae, 'marks', marks(form.daeCompleteTotalMarks, form.daeCompleteObtainedMarks))
+  }
 
   include(matric, 'boardName', text(form.matricBoardName))
   include(matric, 'group', text(form.matricGroup))
@@ -112,14 +116,10 @@ export function buildProfilePayload(form, profileStatus) {
   return payload
 }
 
-const completionRequirements = [
+const sharedCompletionRequirements = [
+  ['academicStage', 'DAE academic stage'],
   ['daeBoardName', 'DAE board name'],
   ['daeInstituteName', 'DAE institute name'],
-  ['daePassingYear', 'DAE passing year'],
-  ['daeYear1TotalMarks', 'DAE Year 1 total marks'],
-  ['daeYear1ObtainedMarks', 'DAE Year 1 obtained marks'],
-  ['daeYear2TotalMarks', 'DAE Year 2 total marks'],
-  ['daeYear2ObtainedMarks', 'DAE Year 2 obtained marks'],
   ['matricBoardName', 'Matric board name'],
   ['matricGroup', 'Matric group'],
   ['matricPassingYear', 'Matric passing year'],
@@ -156,17 +156,17 @@ function validateYear(errors, form, key, label) {
 export function validateProfile(form, profileStatus) {
   const errors = {}
 
-  validateMarks(errors, form, 'daeYear1', 'DAE Year 1')
-  validateMarks(errors, form, 'daeYear2', 'DAE Year 2')
-  validateMarks(errors, form, 'daeYear3', 'DAE Year 3')
-  const year3Total = form.daeYear3TotalMarks?.toString().trim()
-  const year3Obtained = form.daeYear3ObtainedMarks?.toString().trim()
-  if (Boolean(year3Total) !== Boolean(year3Obtained)) {
-    errors.daeYear3TotalMarks = 'Enter both DAE Year 3 marks, or leave both blank.'
-    errors.daeYear3ObtainedMarks = 'Enter both DAE Year 3 marks, or leave both blank.'
+  if (form.academicStage === 'second_year' || form.academicStage === 'third_year') {
+    validateMarks(errors, form, 'daeYear1', 'DAE Year 1')
+  }
+  if (form.academicStage === 'third_year') {
+    validateMarks(errors, form, 'daeYear2', 'DAE Year 2')
+  }
+  if (form.academicStage === 'pass_out') {
+    validateMarks(errors, form, 'daeComplete', 'Complete DAE')
+    validateYear(errors, form, 'daePassingYear', 'DAE passing year')
   }
   validateMarks(errors, form, 'matric', 'Matric')
-  validateYear(errors, form, 'daePassingYear', 'DAE passing year')
   validateYear(errors, form, 'matricPassingYear', 'Matric passing year')
 
   if (list(form.preferredCities)?.length > 20) {
@@ -177,7 +177,27 @@ export function validateProfile(form, profileStatus) {
   }
 
   if (profileStatus === 'complete') {
-    for (const [key, label] of completionRequirements) {
+    const requirements = [...sharedCompletionRequirements]
+    if (form.academicStage === 'second_year' || form.academicStage === 'third_year') {
+      requirements.push(
+        ['daeYear1TotalMarks', 'DAE Year 1 total marks'],
+        ['daeYear1ObtainedMarks', 'DAE Year 1 obtained marks'],
+      )
+    }
+    if (form.academicStage === 'third_year') {
+      requirements.push(
+        ['daeYear2TotalMarks', 'DAE Year 2 total marks'],
+        ['daeYear2ObtainedMarks', 'DAE Year 2 obtained marks'],
+      )
+    }
+    if (form.academicStage === 'pass_out') {
+      requirements.push(
+        ['daePassingYear', 'DAE passing year'],
+        ['daeCompleteTotalMarks', 'Complete DAE total marks'],
+        ['daeCompleteObtainedMarks', 'Complete DAE obtained marks'],
+      )
+    }
+    for (const [key, label] of requirements) {
       if (!form[key].toString().trim()) errors[key] = `${label} is required to complete your profile.`
     }
   }

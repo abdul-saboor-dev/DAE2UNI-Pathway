@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import FormAlert from '../components/FormAlert.jsx'
 import LoadingScreen from '../components/LoadingScreen.jsx'
-import { calculateMerit, buildMeritCalculationPayload, emptyTemporaryDaeMarks, getMeritCalculatorOptions, profileDaeToTemporaryMarks, validateTemporaryDaeMarks } from '../services/meritCalculatorApi.js'
+import { calculateMerit, buildMeritCalculationPayload, getMeritCalculatorOptions } from '../services/meritCalculatorApi.js'
 import { getStudentProfile } from '../services/profileApi.js'
 import { getApiErrorMessage, isApiError } from '../utils/apiErrors.js'
 
@@ -24,7 +24,6 @@ export default function MeritCalculatorPage() {
   const [formulas, setFormulas] = useState([])
   const [formulaId, setFormulaId] = useState('')
   const [scores, setScores] = useState({})
-  const [daeMarks, setDaeMarks] = useState({ ...emptyTemporaryDaeMarks })
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const [fieldErrors, setFieldErrors] = useState({})
@@ -40,7 +39,7 @@ export default function MeritCalculatorPage() {
         try { loadedProfile = await getStudentProfile(controller.signal) }
         catch (caught) { if (!isApiError(caught, 404, 'PROFILE_NOT_FOUND')) throw caught }
         const options = await getMeritCalculatorOptions(controller.signal)
-        if (active) { setProfile(loadedProfile); setDaeMarks(profileDaeToTemporaryMarks(loadedProfile)); setFormulas(options); setState('ready') }
+        if (active) { setProfile(loadedProfile); setFormulas(options); setState('ready') }
       } catch (caught) {
         if (active && caught.name !== 'CanceledError' && caught.response?.status !== 401) {
           setError(getApiErrorMessage(caught, 'Could not load the merit calculator.')); setState('error')
@@ -56,6 +55,8 @@ export default function MeritCalculatorPage() {
   const needsDae = Boolean(selected?.components?.some((component) => component.basis === 'dae'))
   const needsMatric = Boolean(selected?.components?.some((component) => component.basis === 'matric'))
   const matricReady = completeMarks(profile?.matric?.marks)
+  const daeReady = profile?.dae?.academicStage === 'pass_out' &&
+    profile?.dae?.marks?.status === 'final' && completeMarks(profile?.dae?.marks)
 
   function selectFormula(value) {
     setFormulaId(value); setScores({}); setResult(null); setError(''); setFieldErrors({})
@@ -69,7 +70,10 @@ export default function MeritCalculatorPage() {
       setError('Save your Matric marks in your profile before calculating with this formula.')
       return
     }
-    if (needsDae) Object.assign(errors, validateTemporaryDaeMarks(daeMarks))
+    if (needsDae && !daeReady) {
+      setError('Your complete DAE result is still needed. Update your academic stage and final marks in your profile.')
+      return
+    }
     for (const test of requiredTests) {
       const value = Number(scores[test.id])
       if (scores[test.id] === '' || scores[test.id] == null || !Number.isFinite(value) || value < 0 || value > test.maximumMarks) {
@@ -79,7 +83,7 @@ export default function MeritCalculatorPage() {
     if (Object.keys(errors).length) { setFieldErrors(errors); return }
     setState('calculating')
     try {
-      setResult(await calculateMerit(buildMeritCalculationPayload(selected.id, scores, daeMarks, needsDae)))
+      setResult(await calculateMerit(buildMeritCalculationPayload(selected.id, scores)))
     } catch (caught) {
       setError(getApiErrorMessage(caught, 'Could not calculate merit. Review the entered marks and try again.'))
     } finally { setState('ready') }
@@ -87,7 +91,7 @@ export default function MeritCalculatorPage() {
 
   if (state === 'loading') return <LoadingScreen label="Loading your merit calculator…" />
   return <section className="site-container max-w-6xl py-10 lg:py-14">
-    <header className="max-w-3xl"><p className="eyebrow">Student merit calculator</p><h1 className="page-title mt-3 text-4xl text-navy sm:text-5xl">Calculate a verified merit aggregate</h1><p className="body-copy mt-4">Matric marks come from your saved profile. DAE year marks can be edited here for this calculation only; they do not change your profile. Enter scores only for required entry tests.</p></header>
+    <header className="max-w-3xl"><p className="eyebrow">Student merit calculator</p><h1 className="page-title mt-3 text-4xl text-navy sm:text-5xl">Calculate a verified merit aggregate</h1><p className="body-copy mt-4">Matric and complete DAE marks come from your saved profile. Enter scores only for required entry tests.</p></header>
 
     {state === 'error' && <div className="mt-8 max-w-2xl"><FormAlert message={error} /><button type="button" className="action-primary mt-5" onClick={() => setRevision((value) => value + 1)}>Try again</button></div>}
     {state !== 'error' && formulas.length === 0 && <div className="empty-state mt-8"><h2 className="section-title text-2xl text-navy">No verified merit formula is available yet.</h2></div>}
@@ -99,10 +103,10 @@ export default function MeritCalculatorPage() {
         <select id="merit-formula" className="site-input mt-2" value={formulaId} onChange={(event) => selectFormula(event.target.value)} aria-invalid={Boolean(fieldErrors.formulaId)} aria-describedby={fieldErrors.formulaId ? 'merit-formula-error' : undefined}><option value="">Select university, program, and formula</option>{formulas.map((formula) => <option key={formula.id} value={formula.id}>{optionLabel(formula)}</option>)}</select>
         {fieldErrors.formulaId && <p id="merit-formula-error" className="mt-1 text-sm font-semibold text-[#8b2525]">{fieldErrors.formulaId}</p>}
         {selected && needsMatric && !matricReady && <div className="mt-5 border-l-4 border-gold bg-[var(--ui-paper)] p-4"><p className="font-bold text-navy">Complete your profile</p><p className="mt-1 text-sm">This formula needs saved Matric marks.</p><Link to="/profile" className="mt-2 inline-block font-bold text-academic underline">Add Matric marks</Link></div>}
-        {selected && needsDae && <fieldset className="mt-6"><legend className="font-bold text-navy">Temporary DAE year marks</legend><p className="mt-1 text-sm text-[var(--ui-muted)]">Years 1 and 2 are required. Year 3 is optional if its result is unavailable. Missing Year 3 produces a provisional DAE percentage; all three years produce a final percentage.</p><div className="mt-4 grid gap-4 sm:grid-cols-2">{[1, 2, 3].flatMap((year) => ['Total', 'Obtained'].map((kind) => { const key = `year${year}${kind}Marks`; return <div key={key}><label htmlFor={`merit-${key}`} className="block text-sm font-bold text-navy">Year {year} {kind.toLowerCase()} marks{year === 3 ? ' (optional)' : ''}</label><input id={`merit-${key}`} type="number" min={kind === 'Total' ? '1' : '0'} step="any" inputMode="decimal" className="site-input mt-2" value={daeMarks[key]} onChange={(event) => { setDaeMarks((current) => ({ ...current, [key]: event.target.value })); setResult(null); setFieldErrors((current) => ({ ...current, [key]: undefined })) }} aria-invalid={Boolean(fieldErrors[key])} aria-describedby={fieldErrors[key] ? `merit-${key}-error` : undefined} />{fieldErrors[key] && <p id={`merit-${key}-error`} className="mt-1 text-sm font-semibold text-[#8b2525]">{fieldErrors[key]}</p>}</div> }))}</div></fieldset>}
+        {selected && needsDae && !daeReady && <div className="mt-5 border-l-4 border-gold bg-[var(--ui-paper)] p-4"><p className="font-bold text-navy">Complete DAE result needed</p><p className="mt-1 text-sm">This formula cannot produce a final aggregate until your stage is DAE Pass-out and your complete DAE marks are saved.</p><Link to="/profile" className="mt-2 inline-block font-bold text-academic underline">Update DAE stage and marks</Link></div>}
         {selected && <div className="mt-6 space-y-5">{requiredTests.map((test) => <div key={test.id}><label htmlFor={`score-${test.id}`} className="block text-sm font-bold text-navy">{test.name} obtained marks</label><p id={`score-${test.id}-hint`} className="mt-1 text-xs text-[var(--ui-muted)]">Official maximum: {test.maximumMarks}</p><input id={`score-${test.id}`} type="number" min="0" max={test.maximumMarks} step="any" inputMode="decimal" className="site-input mt-2" value={scores[test.id] ?? ''} onChange={(event) => { setScores((current) => ({ ...current, [test.id]: event.target.value })); setFieldErrors({}) }} aria-invalid={Boolean(fieldErrors[test.id])} aria-describedby={`score-${test.id}-hint${fieldErrors[test.id] ? ` score-${test.id}-error` : ''}`} />{fieldErrors[test.id] && <p id={`score-${test.id}-error`} className="mt-1 text-sm font-semibold text-[#8b2525]">{fieldErrors[test.id]}</p>}</div>)}</div>}
         {error && <div className="mt-5"><FormAlert message={error} /></div>}
-        <button type="submit" className="action-primary mt-6" disabled={state === 'calculating' || (selected && needsMatric && !matricReady)}>{state === 'calculating' ? 'Calculating…' : 'Calculate merit'}</button>
+        <button type="submit" className="action-primary mt-6" disabled={state === 'calculating' || (selected && needsMatric && !matricReady) || (selected && needsDae && !daeReady)}>{state === 'calculating' ? 'Calculating…' : 'Calculate merit'}</button>
       </form>
 
       <section className="min-w-0 border-t-4 border-academic bg-[var(--ui-paper)] p-5 sm:p-7" aria-labelledby="merit-result-title">
