@@ -13,6 +13,20 @@ export async function listAdministrators(values, signal) {
   return data.data
 }
 
+export async function listStudents(values, signal) {
+  const { data } = await api.get('/admin/students', { params: teamQueryParams(values), signal, requiresAuth: true })
+  if (!Array.isArray(data?.data?.users) || !data?.data?.pagination) throw new Error('Unexpected student list response.')
+  return data.data
+}
+
+export async function deleteStudent(userId, currentPassword, confirmEmail) {
+  const { data } = await api.delete(`/admin/students/${safeId(userId)}`, {
+    data: { currentPassword, confirmEmail, confirmed: true },
+    requiresAuth: true,
+  })
+  return data.data
+}
+
 export async function promoteStudent(email, currentPassword) {
   const { data } = await api.post('/admin/administrators/promote', { email, currentPassword }, { requiresAuth: true })
   return data.data.user

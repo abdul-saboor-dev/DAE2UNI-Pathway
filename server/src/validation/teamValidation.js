@@ -9,13 +9,21 @@ const params = z.object({ userId: objectId }).strict()
 const request = (body, requestParams = emptyObjectSchema, query = emptyObjectSchema) =>
   z.object({ body, params: requestParams, query })
 
-export const listTeamSchema = request(emptyObjectSchema, emptyObjectSchema, z.object({
+const listAccountsQuery = z.object({
   page: z.coerce.number().int().min(1).max(100000).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   search: z.string().trim().min(1).max(80).optional(),
   sort: z.enum(['name', '-name', 'createdAt', '-createdAt', 'lastLoginAt', '-lastLoginAt', 'role', '-role']).default('name'),
-}).strict())
+}).strict()
+
+export const listTeamSchema = request(emptyObjectSchema, emptyObjectSchema, listAccountsQuery)
+export const listStudentsSchema = request(emptyObjectSchema, emptyObjectSchema, listAccountsQuery)
 
 export const promoteStudentSchema = request(z.object({ email: emailSchema, currentPassword: password }).strict())
 export const revokeAdminSchema = request(z.object({ currentPassword: password, confirmed: z.literal(true) }).strict(), params)
 export const changeCoOwnerSchema = request(z.object({ currentPassword: password, confirmEmail: emailSchema, confirmed: z.literal(true) }).strict(), params)
+export const deleteStudentSchema = request(z.object({
+  currentPassword: password,
+  confirmEmail: emailSchema,
+  confirmed: z.literal(true),
+}).strict(), params)

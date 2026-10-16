@@ -34,6 +34,7 @@ import MeritCalculatorPage from './pages/MeritCalculatorPage.jsx'
 import AdminEligibilityResearchPage from './pages/admin/AdminEligibilityResearchPage.jsx'
 import AdminEligibilityRulesPage from './pages/admin/AdminEligibilityRulesPage.jsx'
 import AdminEligibilityRuleFormPage from './pages/admin/AdminEligibilityRuleFormPage.jsx'
+import AdminStudentsPage from './pages/admin/AdminStudentsPage.jsx'
 
 function App() {
   return (
@@ -61,6 +62,9 @@ function App() {
           <Route path="merit-formulas/:meritFormulaId/edit" element={<AdminMeritFormulaFormPage />} />
           <Route element={<TeamRouteGuard />}>
             <Route path="administrators" element={<AdminTeamPage />} />
+          </Route>
+          <Route element={<ProtectedRoute allowedRoles={['owner']} />}>
+            <Route path="students" element={<AdminStudentsPage />} />
           </Route>
         </Route>
       </Route>

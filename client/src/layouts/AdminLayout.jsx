@@ -16,6 +16,7 @@ function AdminLinks({ user, signOut }) {
     <NavLink to="/admin/entry-tests" className={navClass}>Entry tests</NavLink>
     <NavLink to="/admin/merit-formulas" className={navClass}>Merit formulas</NavLink>
     {canManageRoles(user?.role) && <NavLink to="/admin/administrators" className={navClass}>Manage administrators</NavLink>}
+    {user?.role === 'owner' && <NavLink to="/admin/students" className={navClass}>Student accounts</NavLink>}
     <div className="my-3 border-t border-white/20" />
     <NavLink to="/" className={navClass}>Public site</NavLink>
     <button type="button" onClick={signOut} className="admin-nav-link w-full text-left">Logout</button>

@@ -1,8 +1,18 @@
-import { grantCoOwner, listTeamMembers, promoteStudent, revokeAdmin, revokeCoOwner } from '../services/teamService.js'
+import { deleteStudentAccount, grantCoOwner, listStudentAccounts, listTeamMembers, promoteStudent, revokeAdmin, revokeCoOwner } from '../services/teamService.js'
 import asyncHandler from '../utils/asyncHandler.js'
 
 export const listAdministrators = asyncHandler(async (request, response) => {
   const result = await listTeamMembers(request.validated.query)
+  response.json({ status: 'success', data: result })
+})
+
+export const listStudents = asyncHandler(async (request, response) => {
+  const result = await listStudentAccounts(request.validated.query)
+  response.json({ status: 'success', data: result })
+})
+
+export const removeStudent = asyncHandler(async (request, response) => {
+  const result = await deleteStudentAccount(request.user._id, request.validated.params.userId, request.validated.body)
   response.json({ status: 'success', data: result })
 })
 
