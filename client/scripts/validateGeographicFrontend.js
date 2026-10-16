@@ -31,6 +31,13 @@ check(importPage.includes('type="file"') && importPage.includes('JSON.parse(text
 check(importPage.includes('Dry-run preview') && importPage.includes('confirmed'), 'Preview and confirmation precede writes')
 check(importPage.includes('role="alert"') && importPage.includes('disabled={busy'), 'Import error and busy states are accessible')
 check(importPage.includes('programs_only') && importPage.includes('Add programs to existing universities'), 'Programs-only mode is explicitly selectable')
+check(importPage.includes("user?.role === 'owner'") && importPage.includes('catalogue_restore'), 'Exact restore control is shown only to an Owner')
+check(importPage.includes('Permanent Owner only') && importPage.includes('transactionReady'), 'Restore UI explains permanent-Owner and transaction requirements')
+for (const label of ['Universities to restore', 'Programs to restore', 'Verification records to restore', 'Exact records to skip', 'Restore conflicts']) {
+  check(importPage.includes(label), `Restore preview shows ${label.toLowerCase()}`)
+}
+check(importPage.includes('Any conflict aborts the complete transaction') && importPage.includes('preview.totals.conflicted > 0'),
+  'Restore confirmation blocks conflicts and explains atomic behavior')
 for (const label of ['Programs to create', 'Existing programs to skip', 'Missing universities', 'Campus conflicts', 'Invalid programs']) {
   check(importPage.includes(label), `Programs-only preview shows ${label.toLowerCase()}`)
 }

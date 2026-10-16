@@ -38,6 +38,8 @@ function deepEqual(actual, expected, description) {
   assert.deepEqual(actual, expected, description)
 }
 
+const blankAuditTotals = () => ({ created: 0, updated: 0, skipped: 0, conflicted: 0, invalid: 0 })
+
 async function request(path, { method = 'GET', token, body, rawBody } = {}) {
   const headers = { accept: 'application/json' }
   if (token) headers.authorization = `Bearer ${token}`
@@ -76,6 +78,59 @@ function programsOnlyFixture(campusId, programs) {
       credentialType: 'BS', duration: { years: 4 }, campusKeys: [], source: { officialUrl: 'https://example.invalid/unresolved' } },
   ]
   return body
+}
+
+function restoreFixture() {
+  const universityId = new mongoose.Types.ObjectId().toString()
+  const campusId = new mongoose.Types.ObjectId().toString()
+  const programId = new mongoose.Types.ObjectId().toString()
+  const verificationId = new mongoose.Types.ObjectId().toString()
+  const historicalVerifierId = new mongoose.Types.ObjectId().toString()
+  const checkedAt = '2026-09-01T10:00:00.000Z'
+  return {
+    strategy: 'catalogue_restore',
+    universities: [{
+      id: universityId,
+      name: 'Temporary Exact Restore University',
+      slug: `${slug}-restore`,
+      abbreviation: 'TERU',
+      sector: 'public',
+      institutionType: 'engineering',
+      establishedYear: 1975,
+      recognitionBodies: ['HEC', 'PEC'],
+      provinceOrTerritory: 'Punjab',
+      charterAuthority: 'provincial',
+      hecRecognitionStatus: 'recognized',
+      campuses: [{
+        id: campusId,
+        name: 'Temporary Exact Main Campus', city: 'Lahore', district: 'Lahore', province: 'Punjab',
+        address: 'Temporary test address', latitude: 31.5204, longitude: 74.3587,
+        isMainCampus: true, isActive: true,
+      }],
+      contact: { websiteUrl: 'https://example.invalid/restore', admissionsUrl: 'https://example.invalid/restore/admissions',
+        email: 'restore@example.invalid', phone: '+92 00 0000000' },
+      source: { officialUrl: 'https://example.invalid/restore', verificationStatus: 'verified',
+        lastVerifiedAt: checkedAt, verificationRecord: verificationId },
+      recordStatus: 'published',
+      createdAt: '2026-08-01T09:00:00.000Z', updatedAt: checkedAt,
+      programs: [{
+        id: programId,
+        name: 'Temporary Exact Computing Program', slug: 'temporary-exact-computing',
+        degreeTitle: 'BS Computer Science', credentialType: 'BS', degreeLevel: 'undergraduate',
+        department: 'Computer Science', duration: { years: 4, semesters: 8 }, campusIds: [campusId],
+        studyMode: 'morning', source: { officialUrl: 'https://example.invalid/restore/program', verificationStatus: 'pending_review' },
+        recordStatus: 'draft', createdAt: '2026-08-02T09:00:00.000Z', updatedAt: '2026-08-02T09:00:00.000Z',
+      }],
+    }],
+    sourceVerifications: [{
+      id: verificationId, entityModel: 'University', entity: universityId,
+      sourceUrl: 'https://example.invalid/restore', sourceTitle: 'Temporary exact official source',
+      sourceType: 'official_webpage', checkedAt, verifiedAt: checkedAt,
+      verifiedBy: historicalVerifierId, status: 'verified',
+      evidence: { pageOrSection: 'Catalogue' }, changesDetected: false,
+      createdAt: checkedAt, updatedAt: checkedAt,
+    }],
+  }
 }
 
 async function main() {
@@ -208,6 +263,122 @@ async function main() {
   equal(await Program.countDocuments({ university: university._id }), 3, 'Repeated programs-only import is idempotent')
   deepEqual(await University.collection.findOne({ _id: university._id }), universitySnapshot,
     'Idempotent reapply still leaves university unchanged')
+
+  const restore = restoreFixture()
+  equal((await request(previewPath, { method: 'POST', body: restore })).status, 401,
+    'Catalogue restore requires login')
+  equal((await request(previewPath, { method: 'POST', token: tokens.student, body: restore })).status, 403,
+    'Student cannot preview catalogue restore')
+  for (const role of ['co_owner', 'admin']) {
+    equal((await request(previewPath, { method: 'POST', token: tokens[role], body: restore })).status, 403,
+      `${role} cannot use permanent-Owner catalogue restore`)
+  }
+  await User.collection.updateOne({ _id: users[0]._id }, { $unset: { ownerMarker: '' } })
+  equal((await request(previewPath, { method: 'POST', token: tokens.owner, body: restore })).status, 403,
+    'Owner role without the protected permanent marker cannot restore')
+  await User.collection.updateOne({ _id: users[0]._id }, { $set: { ownerMarker: 'permanent_owner' } })
+  const restorePreview = await request(previewPath, { method: 'POST', token: tokens.owner, body: restore })
+  equal(restorePreview.status, 200, 'Permanent Owner can preview catalogue restore')
+  equal(restorePreview.body.data.restoreSummary.universitiesToCreate, 1, 'Restore previews the exact university')
+  equal(restorePreview.body.data.restoreSummary.programsToCreate, 1, 'Restore previews the exact program')
+  equal(restorePreview.body.data.restoreSummary.verificationsToCreate, 1, 'Restore previews exact verification history')
+  equal(await University.countDocuments({ _id: restore.universities[0].id }), 0, 'Restore preview writes no university')
+  equal(await SourceVerification.countDocuments({ _id: restore.sourceVerifications[0].id }), 0, 'Restore preview writes no verification')
+  const injectedRestore = structuredClone(restore)
+  injectedRestore.universities[0].role = 'owner'
+  equal((await request(previewPath, { method: 'POST', token: tokens.owner, body: injectedRestore })).status, 400,
+    'Restore rejects unknown protected fields')
+  const malformedRelationship = structuredClone(restore)
+  malformedRelationship.universities[0].programs[0].campusIds = [new mongoose.Types.ObjectId().toString()]
+  equal((await request(previewPath, { method: 'POST', token: tokens.owner, body: malformedRelationship })).status, 400,
+    'Restore rejects a cross-university or nonexistent campus relationship')
+  const missingHistory = structuredClone(restore)
+  missingHistory.sourceVerifications = []
+  equal((await request(previewPath, { method: 'POST', token: tokens.owner, body: missingHistory })).status, 400,
+    'Restore rejects verified state without its exact history record')
+
+  const originalAdmin = mongoose.connection.db.admin
+  mongoose.connection.db.admin = () => ({ command: async () => ({}) })
+  try {
+    const transactionFailure = await request(applyPath, { method: 'POST', token: tokens.owner,
+      body: { ...restore, confirmed: true } })
+    equal(transactionFailure.status, 409, 'Restore refuses a database without transaction support')
+    equal(transactionFailure.body.code, 'RESTORE_TRANSACTION_REQUIRED', 'Transaction failure has a stable error code')
+  } finally {
+    mongoose.connection.db.admin = originalAdmin
+  }
+  equal(await University.countDocuments({ _id: restore.universities[0].id }), 0, 'Transaction refusal leaves universities unchanged')
+  equal(await CatalogueImportRun.countDocuments({ strategy: 'catalogue_restore' }), 0,
+    'Failed restore creates no misleading audit record')
+
+  const restoreUniversity = restore.universities[0]
+  const restoreProgram = restoreUniversity.programs[0]
+  const restoreVerification = restore.sourceVerifications[0]
+  const exactUniversityDocument = {
+    _id: new mongoose.Types.ObjectId(restoreUniversity.id), name: restoreUniversity.name, slug: restoreUniversity.slug,
+    abbreviation: restoreUniversity.abbreviation, sector: restoreUniversity.sector,
+    institutionType: restoreUniversity.institutionType, establishedYear: restoreUniversity.establishedYear,
+    recognitionBodies: restoreUniversity.recognitionBodies, provinceOrTerritory: restoreUniversity.provinceOrTerritory,
+    charterAuthority: restoreUniversity.charterAuthority, hecRecognitionStatus: restoreUniversity.hecRecognitionStatus,
+    campuses: restoreUniversity.campuses.map((item) => ({ _id: new mongoose.Types.ObjectId(item.id), name: item.name,
+      city: item.city, district: item.district, province: item.province, address: item.address,
+      latitude: item.latitude, longitude: item.longitude, isMainCampus: item.isMainCampus, isActive: item.isActive })),
+    contact: restoreUniversity.contact,
+    source: { ...restoreUniversity.source, lastVerifiedAt: new Date(restoreUniversity.source.lastVerifiedAt),
+      verificationRecord: new mongoose.Types.ObjectId(restoreUniversity.source.verificationRecord) },
+    recordStatus: restoreUniversity.recordStatus, createdAt: new Date(restoreUniversity.createdAt),
+    updatedAt: new Date(restoreUniversity.updatedAt),
+  }
+  const exactProgramDocument = {
+    _id: new mongoose.Types.ObjectId(restoreProgram.id), university: new mongoose.Types.ObjectId(restoreUniversity.id),
+    name: restoreProgram.name, slug: restoreProgram.slug, degreeTitle: restoreProgram.degreeTitle,
+    credentialType: restoreProgram.credentialType, degreeLevel: restoreProgram.degreeLevel,
+    department: restoreProgram.department, duration: restoreProgram.duration,
+    campusIds: restoreProgram.campusIds.map((id) => new mongoose.Types.ObjectId(id)), studyMode: restoreProgram.studyMode,
+    source: restoreProgram.source, recordStatus: restoreProgram.recordStatus,
+    createdAt: new Date(restoreProgram.createdAt), updatedAt: new Date(restoreProgram.updatedAt),
+  }
+  const exactVerificationDocument = {
+    _id: new mongoose.Types.ObjectId(restoreVerification.id), entityModel: restoreVerification.entityModel,
+    entity: new mongoose.Types.ObjectId(restoreVerification.entity), sourceUrl: restoreVerification.sourceUrl,
+    sourceTitle: restoreVerification.sourceTitle, sourceType: restoreVerification.sourceType,
+    checkedAt: new Date(restoreVerification.checkedAt), verifiedAt: new Date(restoreVerification.verifiedAt),
+    verifiedBy: new mongoose.Types.ObjectId(restoreVerification.verifiedBy), status: restoreVerification.status,
+    evidence: restoreVerification.evidence, changesDetected: restoreVerification.changesDetected,
+    createdAt: new Date(restoreVerification.createdAt), updatedAt: new Date(restoreVerification.updatedAt),
+  }
+  await University.collection.insertOne(exactUniversityDocument)
+  await Program.collection.insertOne(exactProgramDocument)
+  await SourceVerification.collection.insertOne(exactVerificationDocument)
+  const exactUniversityBefore = await University.collection.findOne({ _id: exactUniversityDocument._id })
+  const exactProgramBefore = await Program.collection.findOne({ _id: exactProgramDocument._id })
+  const exactVerificationBefore = await SourceVerification.collection.findOne({ _id: exactVerificationDocument._id })
+  const exactPreview = await request(previewPath, { method: 'POST', token: tokens.owner, body: restore })
+  equal(exactPreview.status, 200, 'Exact restored records remain valid on a repeated preview')
+  equal(exactPreview.body.data.totals.created, 0, 'Idempotent restore plans no duplicate records')
+  equal(exactPreview.body.data.restoreSummary.exactRecordsToSkip, 3, 'Idempotent restore skips every exact record')
+  deepEqual(await University.collection.findOne({ _id: exactUniversityDocument._id }), exactUniversityBefore,
+    'Repeated restore preview preserves every university field and timestamp')
+  deepEqual(await Program.collection.findOne({ _id: exactProgramDocument._id }), exactProgramBefore,
+    'Repeated restore preview preserves every program field and timestamp')
+  deepEqual(await SourceVerification.collection.findOne({ _id: exactVerificationDocument._id }), exactVerificationBefore,
+    'Repeated restore preview preserves historical verification exactly')
+  const populatedHistory = await SourceVerification.findById(exactVerificationDocument._id).populate('verifiedBy')
+  equal(populatedHistory.verifiedBy, null, 'Absent historical verifier safely populates as a deleted account')
+  equal((await request(`/api/admin/universities/${restoreUniversity.id}`, { token: tokens.owner })).status, 200,
+    'Absent historical verifier does not break administrator display')
+  equal((await request(`/api/universities/${restoreUniversity.slug}`)).status, 200,
+    'Absent historical verifier does not break verified student-facing university display')
+  const conflictBody = structuredClone(restore)
+  conflictBody.universities[0].name = 'Conflicting replacement name'
+  const conflictPreview = await request(previewPath, { method: 'POST', token: tokens.owner, body: conflictBody })
+  check(conflictPreview.body.data.totals.conflicted > 0, 'Any changed content is reported as a restore conflict')
+  deepEqual(await University.collection.findOne({ _id: exactUniversityDocument._id }), exactUniversityBefore,
+    'Conflicting restore cannot overwrite the existing university')
+  for (const strategy of ['skip', 'update_drafts', 'programs_only', 'catalogue_restore']) {
+    await new CatalogueImportRun({ actor: users[0]._id, strategy, totals: blankAuditTotals() }).validate()
+    check(true, `${strategy} remains accepted by import audit validation`)
+  }
 
   const missing = programsOnlyFixture(campusId, [programsOnly.universities[0].programs[1]])
   missing.universities[0].slug = `${slug}-missing`

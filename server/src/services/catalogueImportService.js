@@ -1,8 +1,10 @@
 import mongoose from 'mongoose'
 import CatalogueImportRun from '../models/CatalogueImportRun.js'
 import Program from '../models/Program.js'
+import SourceVerification from '../models/SourceVerification.js'
 import University from '../models/University.js'
 import { importUniversitySchema } from '../validation/catalogueImportValidation.js'
+import ApiError from '../utils/ApiError.js'
 
 const blankTotals = () => ({ created: 0, updated: 0, skipped: 0, conflicted: 0, invalid: 0 })
 const blankProgramSummary = () => ({ matchedUniversities: 0, programsToCreate: 0,
@@ -250,12 +252,264 @@ async function writeProgramsOnlyGroup(plan, session) {
   }
 }
 
+const objectId = (value) => new mongoose.Types.ObjectId(value)
+const date = (value) => new Date(value)
+const optional = (key, value) => (value === undefined ? {} : { [key]: value })
+
+function restoreSourceDocument(input) {
+  return {
+    officialUrl: input.officialUrl,
+    verificationStatus: input.verificationStatus,
+    ...optional('lastVerifiedAt', input.lastVerifiedAt && date(input.lastVerifiedAt)),
+    ...optional('verificationRecord', input.verificationRecord && objectId(input.verificationRecord)),
+  }
+}
+
+function restoreUniversityDocument(input) {
+  const campuses = input.campuses.map((campus) => ({
+    _id: objectId(campus.id),
+    ...optional('importKey', campus.importKey),
+    name: campus.name,
+    city: campus.city,
+    ...optional('district', campus.district),
+    province: campus.province,
+    ...optional('address', campus.address),
+    ...optional('latitude', campus.latitude),
+    ...optional('longitude', campus.longitude),
+    isMainCampus: campus.isMainCampus,
+    isActive: campus.isActive,
+  }))
+  return {
+    _id: objectId(input.id),
+    name: input.name,
+    slug: input.slug,
+    ...optional('abbreviation', input.abbreviation),
+    sector: input.sector,
+    institutionType: input.institutionType,
+    ...optional('establishedYear', input.establishedYear),
+    ...optional('recognitionBodies', input.recognitionBodies),
+    provinceOrTerritory: input.provinceOrTerritory,
+    charterAuthority: input.charterAuthority,
+    hecRecognitionStatus: input.hecRecognitionStatus,
+    ...optional('hecProfileUrl', input.hecProfileUrl),
+    campuses,
+    ...optional('contact', input.contact),
+    source: restoreSourceDocument(input.source),
+    recordStatus: input.recordStatus,
+    createdAt: date(input.createdAt),
+    updatedAt: date(input.updatedAt),
+  }
+}
+
+function restoreProgramDocument(input, universityId) {
+  return {
+    _id: objectId(input.id),
+    university: objectId(universityId),
+    name: input.name,
+    slug: input.slug,
+    degreeTitle: input.degreeTitle,
+    credentialType: input.credentialType,
+    degreeLevel: input.degreeLevel,
+    ...optional('department', input.department),
+    ...optional('disciplineCode', input.disciplineCode),
+    duration: input.duration,
+    campusIds: input.campusIds.map(objectId),
+    studyMode: input.studyMode,
+    source: restoreSourceDocument(input.source),
+    recordStatus: input.recordStatus,
+    createdAt: date(input.createdAt),
+    updatedAt: date(input.updatedAt),
+  }
+}
+
+function restoreVerificationDocument(input) {
+  return {
+    _id: objectId(input.id),
+    entityModel: input.entityModel,
+    entity: objectId(input.entity),
+    sourceUrl: input.sourceUrl,
+    sourceTitle: input.sourceTitle,
+    sourceType: input.sourceType,
+    ...optional('documentPublishedAt', input.documentPublishedAt && date(input.documentPublishedAt)),
+    checkedAt: date(input.checkedAt),
+    verifiedAt: date(input.verifiedAt),
+    verifiedBy: objectId(input.verifiedBy),
+    status: input.status,
+    ...optional('evidence', input.evidence),
+    changesDetected: input.changesDetected,
+    ...optional('changeSummary', input.changeSummary),
+    ...optional('nextReviewAt', input.nextReviewAt && date(input.nextReviewAt)),
+    ...optional('notes', input.notes),
+    createdAt: date(input.createdAt),
+    updatedAt: date(input.updatedAt),
+  }
+}
+
+function canonical(value) {
+  if (value instanceof Date) return value.toISOString()
+  if (value instanceof mongoose.Types.ObjectId) return value.toString()
+  if (Array.isArray(value)) return value.map(canonical)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value)
+      .filter(([, item]) => item !== undefined)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => [key, canonical(item)]))
+  }
+  return value
+}
+
+function exactDocumentMatch(existing, expected) {
+  return JSON.stringify(canonical(existing)) === JSON.stringify(canonical(expected))
+}
+
+async function validateRestoreDocuments(universities, programs, verifications) {
+  for (const item of universities) await new University(item.document).validate()
+  for (const item of programs) await new Program(item.document).validate()
+  for (const item of verifications) await new SourceVerification(item.document).validate()
+}
+
+function restoreResult(transactionReady) {
+  return {
+    dryRun: true,
+    strategy: 'catalogue_restore',
+    totals: blankTotals(),
+    entries: [],
+    restoreSummary: {
+      universitiesToCreate: 0,
+      programsToCreate: 0,
+      verificationsToCreate: 0,
+      exactRecordsToSkip: 0,
+      conflicts: 0,
+      transactionReady,
+    },
+  }
+}
+
+async function prepareCatalogueRestore(body, transactionReady, session = null) {
+  const result = restoreResult(transactionReady)
+  const universities = body.universities.map((input) => ({ input, document: restoreUniversityDocument(input) }))
+  const programs = body.universities.flatMap((university) => university.programs
+    .map((input) => ({ input, university, document: restoreProgramDocument(input, university.id) })))
+  const verifications = body.sourceVerifications
+    .map((input) => ({ input, document: restoreVerificationDocument(input) }))
+  await validateRestoreDocuments(universities, programs, verifications)
+
+  const queryOptions = session ? { session } : {}
+  const campusOwners = new Map()
+  for (const university of universities) {
+    for (const campus of university.input.campuses) campusOwners.set(campus.id.toLowerCase(), university.input.id.toLowerCase())
+  }
+
+  for (const item of universities) {
+    const collisions = await University.find({ $or: [{ _id: item.document._id }, { slug: item.document.slug }] }, null, queryOptions).lean()
+    const foreignCampus = await University.findOne({
+      _id: { $ne: item.document._id },
+      'campuses._id': { $in: item.document.campuses.map((campus) => campus._id) },
+    }, null, queryOptions).lean()
+    let outcome = 'created'
+    if (foreignCampus || collisions.length > 1 || (collisions.length === 1 && !exactDocumentMatch(collisions[0], item.document))) {
+      outcome = 'conflicted'
+    } else if (collisions.length === 1) outcome = 'skipped'
+    item.outcome = outcome
+    result.entries.push({
+      universitySlug: item.input.slug,
+      outcome,
+      message: outcome === 'created' ? 'Exact university record is ready to restore.'
+        : outcome === 'skipped' ? 'An exact university record already exists.'
+          : 'University ID, slug, campus identity, or stored content conflicts with production.',
+      issues: [],
+      programs: [],
+    })
+  }
+
+  for (const item of programs) {
+    const collisions = await Program.find({ $or: [
+      { _id: item.document._id },
+      { university: item.document.university, slug: item.document.slug },
+    ] }, null, queryOptions).lean()
+    const campusesValid = item.input.campusIds.every((id) => campusOwners.get(id.toLowerCase()) === item.university.id.toLowerCase())
+    let outcome = 'created'
+    if (!campusesValid || collisions.length > 1 || (collisions.length === 1 && !exactDocumentMatch(collisions[0], item.document))) {
+      outcome = 'conflicted'
+    } else if (collisions.length === 1) outcome = 'skipped'
+    item.outcome = outcome
+    const entry = result.entries.find((candidate) => candidate.universitySlug === item.university.slug)
+    entry.programs.push({ slug: item.input.slug, outcome })
+    if (outcome === 'conflicted' && entry.outcome !== 'conflicted') {
+      entry.outcome = 'conflicted'
+      entry.message = 'A nested program conflicts with production; the complete restore is blocked.'
+    }
+  }
+
+  for (const item of verifications) {
+    const collisions = await SourceVerification.find({ $or: [
+      { _id: item.document._id },
+      { entityModel: item.document.entityModel, entity: item.document.entity,
+        sourceUrl: item.document.sourceUrl, checkedAt: item.document.checkedAt },
+    ] }, null, queryOptions).lean()
+    let outcome = 'created'
+    if (collisions.length > 1 || (collisions.length === 1 && !exactDocumentMatch(collisions[0], item.document))) outcome = 'conflicted'
+    else if (collisions.length === 1) outcome = 'skipped'
+    item.outcome = outcome
+  }
+
+  const all = [...universities, ...programs, ...verifications]
+  result.totals.created = all.filter((item) => item.outcome === 'created').length
+  result.totals.skipped = all.filter((item) => item.outcome === 'skipped').length
+  result.totals.conflicted = all.filter((item) => item.outcome === 'conflicted').length
+  result.restoreSummary.universitiesToCreate = universities.filter((item) => item.outcome === 'created').length
+  result.restoreSummary.programsToCreate = programs.filter((item) => item.outcome === 'created').length
+  result.restoreSummary.verificationsToCreate = verifications.filter((item) => item.outcome === 'created').length
+  result.restoreSummary.exactRecordsToSkip = result.totals.skipped
+  result.restoreSummary.conflicts = result.totals.conflicted
+  return { result, universities, programs, verifications }
+}
+
+async function processCatalogueRestore(body, actorId, dryRun) {
+  const transactionReady = await supportsTransactions()
+  let plan = await prepareCatalogueRestore(body, transactionReady)
+  plan.result.dryRun = dryRun
+  if (dryRun || plan.result.totals.conflicted > 0) return plan.result
+  if (!transactionReady) {
+    throw new ApiError(409, 'Catalogue restore requires a transaction-capable MongoDB deployment.', 'RESTORE_TRANSACTION_REQUIRED')
+  }
+
+  const session = await mongoose.startSession()
+  let completed
+  try {
+    await session.withTransaction(async () => {
+      const fresh = await prepareCatalogueRestore(body, true, session)
+      if (fresh.result.totals.conflicted > 0) {
+        throw new ApiError(409, 'Catalogue changed after preview; the complete restore was aborted.', 'RESTORE_CONFLICT')
+      }
+      const newUniversities = fresh.universities.filter((item) => item.outcome === 'created').map((item) => item.document)
+      const newPrograms = fresh.programs.filter((item) => item.outcome === 'created').map((item) => item.document)
+      const newVerifications = fresh.verifications.filter((item) => item.outcome === 'created').map((item) => item.document)
+      if (newUniversities.length) await University.collection.insertMany(newUniversities, { session, ordered: true })
+      if (newPrograms.length) await Program.collection.insertMany(newPrograms, { session, ordered: true })
+      if (newVerifications.length) await SourceVerification.collection.insertMany(newVerifications, { session, ordered: true })
+      const [run] = await CatalogueImportRun.create([{
+        actor: actorId,
+        strategy: 'catalogue_restore',
+        totals: fresh.result.totals,
+      }], { session })
+      fresh.result.importRunId = run.id
+      fresh.result.dryRun = false
+      completed = fresh.result
+    })
+  } finally {
+    await session.endSession()
+  }
+  return completed
+}
+
 async function supportsTransactions() {
   const hello = await mongoose.connection.db.admin().command({ hello: 1 })
   return Boolean(hello.setName || hello.msg === 'isdbgrid')
 }
 
 export async function processCatalogueImport(body, actorId, dryRun) {
+  if (body.strategy === 'catalogue_restore') return processCatalogueRestore(body, actorId, dryRun)
   const result = { dryRun, strategy: body.strategy, totals: blankTotals(), entries: [] }
   const seenSlugs = new Set()
   const plans = []
