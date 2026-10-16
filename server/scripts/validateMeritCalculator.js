@@ -88,6 +88,10 @@ try {
   check(!meritCalculatorSchemas.calculateBody.safeParse({ formulaId, entryTestScores: [{ entryTestId, obtainedMarks: Infinity }] }).success, 'non-finite score rejected')
   equal((await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: [{ entryTestId, obtainedMarks: 1 }], daePercentage: 100, weights: [100], finalAggregate: 100 } })).status, 400, 'client overrides and unknown fields rejected')
 
+  await StudentProfile.collection.updateOne({ user: student._id }, { $unset: { 'dae.academicStage': '' } })
+  equal((await request(path, { method: 'POST', token: studentToken, body: { formulaId, entryTestScores: scores } })).status, 200, 'legacy pass-out profile without a stored academic stage remains usable')
+  await StudentProfile.collection.updateOne({ user: student._id }, { $set: { 'dae.academicStage': 'pass_out' } })
+
   const before = { users: await User.countDocuments(), profiles: await StudentProfile.countDocuments(), universities: await University.countDocuments(), programs: await Program.countDocuments(), tests: await EntryTest.countDocuments(), formulas: await MeritFormula.countDocuments() }
   const profileBefore = await StudentProfile.findOne({ user: student._id }).lean()
   const userBefore = await User.findById(student._id).select('updatedAt').lean()

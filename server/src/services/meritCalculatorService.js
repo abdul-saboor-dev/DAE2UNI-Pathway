@@ -1,7 +1,7 @@
 import EntryTest from '../models/EntryTest.js'
 import MeritFormula from '../models/MeritFormula.js'
 import Program from '../models/Program.js'
-import StudentProfile from '../models/StudentProfile.js'
+import StudentProfile, { inferDaeAcademicStage } from '../models/StudentProfile.js'
 import University from '../models/University.js'
 import ApiError from '../utils/ApiError.js'
 
@@ -108,7 +108,7 @@ export async function calculateStudentMerit(userId, input) {
     throw new ApiError(409, 'Complete your saved Matric marks before calculating merit.', 'PROFILE_MARKS_REQUIRED')
   }
   const needsDae = formula.components.some((component) => component.basis === 'dae')
-  const dae = needsDae && profile?.dae?.academicStage === 'pass_out' &&
+  const dae = needsDae && inferDaeAcademicStage(profile?.dae) === 'pass_out' &&
     profile.dae.marks?.status === 'final' && validMarks(profile.dae.marks)
     ? { percentage: rawPercentage(profile.dae.marks), status: 'final' }
     : null
