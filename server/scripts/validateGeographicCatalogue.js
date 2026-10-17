@@ -292,6 +292,26 @@ async function main() {
   malformedRelationship.universities[0].programs[0].campusIds = [new mongoose.Types.ObjectId().toString()]
   equal((await request(previewPath, { method: 'POST', token: tokens.owner, body: malformedRelationship })).status, 400,
     'Restore rejects a cross-university or nonexistent campus relationship')
+  const duplicateCampusRestore = structuredClone(restore)
+  duplicateCampusRestore.universities[0].programs[0].campusIds = []
+  const duplicateCampusUniversity = structuredClone(restore.universities[0])
+  duplicateCampusUniversity.id = new mongoose.Types.ObjectId().toString()
+  duplicateCampusUniversity.name = 'Temporary Duplicate Campus University'
+  duplicateCampusUniversity.slug = `${slug}-duplicate-campus`
+  duplicateCampusUniversity.abbreviation = 'TDCU'
+  duplicateCampusUniversity.programs = []
+  duplicateCampusUniversity.source = {
+    officialUrl: 'https://example.invalid/restore/duplicate-campus', verificationStatus: 'pending_review',
+  }
+  duplicateCampusUniversity.recordStatus = 'draft'
+  duplicateCampusRestore.universities.push(duplicateCampusUniversity)
+  equal((await request(applyPath, { method: 'POST', token: tokens.owner,
+    body: { ...duplicateCampusRestore, confirmed: true } })).status, 400,
+  'Restore rejects a campus ObjectId reused across universities even when neither campus is referenced by a program')
+  equal(await University.countDocuments({ _id: { $in: duplicateCampusRestore.universities.map((item) => item.id) } }), 0,
+    'Duplicate global campus IDs are rejected before any university write')
+  equal(await CatalogueImportRun.countDocuments({ strategy: 'catalogue_restore' }), 0,
+    'Duplicate global campus IDs are rejected before any audit write')
   const missingHistory = structuredClone(restore)
   missingHistory.sourceVerifications = []
   equal((await request(previewPath, { method: 'POST', token: tokens.owner, body: missingHistory })).status, 400,

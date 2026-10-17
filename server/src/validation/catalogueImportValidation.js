@@ -190,6 +190,7 @@ const restoreTopLevel = (confirmed) => z.object({
 }).strict().superRefine((value, context) => {
   const universityIds = new Set()
   const universitySlugs = new Set()
+  const campusIds = new Set()
   const programIds = new Set()
   const entities = new Map()
   for (const [index, university] of value.universities.entries()) {
@@ -198,6 +199,11 @@ const restoreTopLevel = (confirmed) => z.object({
     universityIds.add(university.id.toLowerCase())
     universitySlugs.add(university.slug)
     entities.set(`University:${university.id.toLowerCase()}`, university.source)
+    for (const [campusIndex, campus] of university.campuses.entries()) {
+      const campusId = campus.id.toLowerCase()
+      if (campusIds.has(campusId)) context.addIssue({ code: 'custom', path: ['universities', index, 'campuses', campusIndex, 'id'], message: 'Campus IDs must be globally unique.' })
+      campusIds.add(campusId)
+    }
     for (const [programIndex, programItem] of university.programs.entries()) {
       if (programIds.has(programItem.id.toLowerCase())) context.addIssue({ code: 'custom', path: ['universities', index, 'programs', programIndex, 'id'], message: 'Program IDs must be globally unique.' })
       programIds.add(programItem.id.toLowerCase())
