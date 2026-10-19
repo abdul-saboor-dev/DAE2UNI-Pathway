@@ -65,9 +65,9 @@ export default function ProgramDetailPage() {
 
           <div className="space-y-4">
             <SourceAttribution source={program.source} label="View official program source" />
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+            <div className="status-panel border-l-[var(--ui-warning)] p-4 text-sm leading-6">
               <p className="font-black">Eligibility is not evaluated here</p>
-              <p className="mt-1 text-amber-900/75">This page reports catalogue information only. DAE eligibility, merit, fees, deadlines, and entry-test requirements belong to later verified services.</p>
+              <p className="mt-1 text-[var(--ui-muted-strong)]">This page reports catalogue information only. DAE eligibility, merit, fees, deadlines, and entry-test requirements belong to later verified services.</p>
             </div>
             <Link to={`/universities/${encodeURIComponent(universityIdentifier)}`} className="flex min-h-12 items-center justify-center rounded-xl border border-academic/20 px-4 py-3 text-center text-sm font-black text-academic hover:bg-bluewash focus:outline-none focus-visible:ring-4 focus-visible:ring-academic/20">
               View parent university

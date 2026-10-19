@@ -1,7 +1,7 @@
 export default function CatalogueFilterPanel({ activeCount, onClear, children }) {
   return (
-    <details className="group paper-surface p-5 lg:open" open>
-      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between font-black text-navy lg:cursor-default">
+    <details className="group form-surface p-5 lg:open" open>
+      <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between rounded-[var(--ui-radius-sm)] font-semibold text-navy lg:cursor-default">
         <span>Filter results{activeCount ? ` (${activeCount})` : ''}</span>
         <span aria-hidden="true" className="text-lg lg:hidden">▾</span>
       </summary>

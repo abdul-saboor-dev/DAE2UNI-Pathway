@@ -14,7 +14,7 @@ function TextField({ id, label, error, description, className = '', ...inputProp
         aria-describedby={describedBy}
         className="site-input mt-2 text-sm placeholder:text-[var(--ui-muted)]"
       />
-      {error && <p id={errorId} className="mt-1.5 text-sm font-semibold text-[#8b2525]">{error}</p>}
+      {error && <p id={errorId} className="field-error" role="alert">{error}</p>}
     </div>
   )
 }

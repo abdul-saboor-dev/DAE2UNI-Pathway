@@ -63,17 +63,17 @@ export default function AdminVerificationQueuePage() {
     </form>
     <AdminState state={state} retry={() => setRetry((value) => value + 1)} noun="verification records" />
     {state === 'ready' && <section aria-label="Verification results" className="mt-6">
-      <p role="status" className="mb-4 text-sm text-slate-600">{pagination.totalRecords} records requiring review · page {pagination.page} of {Math.max(pagination.totalPages, 1)}</p>
-      {result.records.length === 0 ? <div className="rounded-2xl border border-slate-200 bg-white p-7"><h2 className="text-lg font-black">No records need review here</h2><p className="mt-2 text-sm text-slate-600">Try another type, status, or search. Published status is managed separately.</p></div> :
+      <p role="status" className="mb-4 text-sm text-[var(--ui-muted)]">{pagination.totalRecords} records requiring review · page {pagination.page} of {Math.max(pagination.totalPages, 1)}</p>
+      {result.records.length === 0 ? <div className="data-surface p-7"><h2 className="card-title text-lg">No records need review here</h2><p className="mt-2 text-sm text-[var(--ui-muted)]">Try another type, status, or search. Published status is managed separately.</p></div> :
         <div className="grid min-w-0 gap-4 lg:grid-cols-2">{result.records.map((record) => {
           const safeUrl = getSafeExternalUrl(record.sourceUrl)
           const editPath = record.entityType === 'university' ? `/admin/universities/${record.id}/edit` : `/admin/programs/${record.id}/edit`
-          return <article key={`${record.entityType}-${record.id}`} className="paper-surface min-w-0 border-l-4 !border-l-gold p-5">
+          return <article key={`${record.entityType}-${record.id}`} className="record-row min-w-0 border-l-2 border-l-[var(--ui-accent)] p-5">
             <h2 className="break-words text-lg font-black">{record.name}</h2>
-            {record.university?.name && <p className="break-words text-sm text-slate-600">{record.university.name}</p>}
+            {record.university?.name && <p className="break-words text-sm text-[var(--ui-muted)]">{record.university.name}</p>}
             <div className="mt-3 flex flex-wrap gap-2"><StatusBadge value={record.verificationStatus} /><StatusBadge value={record.recordStatus} /></div>
             <dl className="mt-4 space-y-2 text-sm"><div><dt className="font-semibold">Official source</dt><dd className="break-all">{safeUrl ? <a href={safeUrl} target="_blank" rel="noopener noreferrer" className="text-academic underline">Open official source (external site)</a> : 'Missing or unsafe URL — edit before review'}</dd></div><div><dt className="font-semibold">Last verified</dt><dd>{record.lastVerifiedAt ? new Date(record.lastVerifiedAt).toLocaleString() : 'Never'}</dd></div></dl>
-            <div className="mt-5 flex flex-wrap gap-3 border-t border-slate-100 pt-4"><Link to={editPath} className="inline-flex min-h-11 items-center text-academic underline focus-visible:ring-4 focus-visible:ring-academic">Open and edit record</Link><button type="button" disabled={!safeUrl} className={adminButtonClass} onClick={() => setSelected(record)}>Record manual verification</button></div>
+            <div className="mt-5 flex flex-wrap gap-3 border-t border-[var(--ui-border)] pt-4"><Link to={editPath} className="inline-flex min-h-11 items-center text-academic underline focus-visible:outline-3">Open and edit record</Link><button type="button" disabled={!safeUrl} className={adminButtonClass} onClick={() => setSelected(record)}>Record manual verification</button></div>
           </article>
         })}</div>}
       <Pagination page={pagination.page} totalPages={pagination.totalPages} focusTargetId="verification-heading" hrefForPage={(page) => `/admin/verification-queue?${verificationParams({ ...query, page })}`} />

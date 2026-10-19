@@ -151,7 +151,7 @@ export default function CampusLocationPicker({ campusName, initialSearchQuery, l
               </label>
               <p className="text-xs text-[var(--ui-muted)]">Pakistan-only search is recommended. Use broader search when OpenStreetMap has not classified the institution under Pakistan.</p>
             </div>
-            <p role={searchState === 'error' ? 'alert' : 'status'} aria-live="polite" className={`mt-2 min-h-5 text-sm ${searchState === 'error' ? 'font-semibold text-red-800' : 'text-[var(--ui-muted)]'}`}>{searchMessage}</p>
+            <p role={searchState === 'error' ? 'alert' : 'status'} aria-live="polite" className={`mt-2 min-h-5 text-sm ${searchState === 'error' ? 'field-error font-semibold' : 'text-[var(--ui-muted)]'}`}>{searchMessage}</p>
             {searchResults.length > 0 && <ul className="campus-location-results mt-2 max-h-40 space-y-1 overflow-y-auto border-y border-[var(--ui-border)] py-2" aria-label="Location search results">
               {searchResults.map((result) => <li key={result.id}><button type="button" className="w-full px-3 py-2 text-left text-sm font-semibold text-navy hover:bg-bluewash focus-visible:outline-3" onClick={() => chooseResult(result)}>{result.label}</button></li>)}
             </ul>}

@@ -104,7 +104,7 @@ export default function UniversityDetailPage() {
           <Link to={`/programs?university=${encodeURIComponent(university.slug || university.id)}`} className="rounded text-sm font-black text-academic underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-academic">View filtered program list</Link>
         </div>
         {related.status === 'loading' && <div className="mt-6"><CatalogueLoading label="Loading related programs…" /></div>}
-        {related.status === 'error' && <p role="alert" className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-5 text-red-900">Related programs could not be loaded. The university details remain available above.</p>}
+        {related.status === 'error' && <p role="alert" className="status-panel status-panel--critical mt-6 p-5">Related programs could not be loaded. The university details remain available above.</p>}
         {related.status === 'ready' && related.programs.length === 0 && <p className="mt-6 rounded-2xl border border-dashed border-academic/20 p-6 text-ink/60">No verified published programs are listed for this university.</p>}
         {related.status === 'ready' && related.programs.length > 0 && <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">{related.programs.map((program) => <ProgramCard key={program.id} program={program} />)}</div>}
       </section>

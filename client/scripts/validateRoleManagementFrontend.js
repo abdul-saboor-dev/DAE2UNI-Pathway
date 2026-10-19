@@ -53,7 +53,7 @@ check(dialog.includes('completedRef.current = true') && dialog.includes('!comple
 check(dialog.includes('setPassword(\'\')') && dialog.includes('setConfirmEmail(\'\')') && dialog.includes('autoComplete="current-password"'), 'password handling in active form only')
 check(dialog.includes('confirmEmail.trim().toLowerCase() !== action.target.email') && dialog.includes('role="alert"'), 'typed email and accessible errors')
 check(studentsPage.includes('Delete student account') && studentsPage.includes("type: 'deleteStudent'") && studentsPage.includes('Owner-only account removal'), 'destructive student action is explicit')
-check(dialog.includes("action.type === 'deleteStudent'") && dialog.includes('anonymizes the account') && dialog.includes('bg-red-800'), 'student deletion has destructive confirmation styling and explanation')
+check(dialog.includes("action.type === 'deleteStudent'") && dialog.includes('anonymizes the account') && dialog.includes('action-danger'), 'student deletion has destructive confirmation styling and explanation')
 check(studentsPage.includes('AbortController') && studentsPage.includes('controller.abort()') && studentsPage.includes('AdminState'), 'student page has loading, error, retry, and cancellation behavior')
 check(api.includes('ROLE_REFRESH_EVENT') && auth.includes('getCurrentUser(controller.signal)') && auth.includes('getAccessToken() === tokenAtStart'), 'database-backed role refresh and logout race guard')
 check(!/jwt\.decode|atob\(/.test(app + guard + layout + page), 'no JWT claim authority')

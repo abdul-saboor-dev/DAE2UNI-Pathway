@@ -29,7 +29,7 @@ function PasswordField({ id, label, error, description, ...inputProps }) {
           {visible ? 'Hide' : 'Show'}
         </button>
       </div>
-      {error && <p id={errorId} className="mt-1.5 text-sm font-semibold text-[#8b2525]">{error}</p>}
+      {error && <p id={errorId} className="field-error" role="alert">{error}</p>}
     </div>
   )
 }

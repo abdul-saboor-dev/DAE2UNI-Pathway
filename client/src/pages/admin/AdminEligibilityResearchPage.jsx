@@ -184,7 +184,7 @@ export default function AdminEligibilityResearchPage() {
         description="Record official evidence and unresolved criteria before any eligibility rule is created. A verified research status confirms review of this evidence only; it never evaluates students or changes an eligibility rule."
       />
     </div>
-    {message && <p role={messageKind === 'error' ? 'alert' : 'status'} className={`mb-5 border-l-4 p-4 text-sm font-bold ${messageKind === 'error' ? 'border-red-800 bg-red-50 text-red-900' : 'border-emerald-700 bg-emerald-50 text-emerald-900'}`}>{message}</p>}
+    {message && <p role={messageKind === 'error' ? 'alert' : 'status'} className={`status-panel mb-5 p-4 text-sm font-semibold ${messageKind === 'error' ? 'status-panel--critical' : 'status-panel--positive'}`}>{message}</p>}
 
     <section aria-labelledby="research-records-heading">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
@@ -200,7 +200,7 @@ export default function AdminEligibilityResearchPage() {
         {result.records.length === 0 ? <div className="paper-surface p-7"><h3 className="text-lg font-black">No research records yet</h3><p className="mt-2 text-sm text-[var(--ui-muted)]">Create the first evidence record below. No eligibility decision will be produced.</p></div> :
           <div className="grid min-w-0 gap-4 lg:grid-cols-2">{result.records.map((record) => {
             const safeUrl = getSafeExternalUrl(record.officialSourceUrl)
-            return <article key={record.id} className="paper-surface min-w-0 border-l-4 !border-l-gold p-5">
+            return <article key={record.id} className="record-row min-w-0 border-l-2 border-l-[var(--ui-accent)] p-5">
               <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="break-words text-lg font-black">{record.program?.name}</h3><p className="break-words text-sm text-[var(--ui-muted)]">{record.university?.name}</p></div><StatusBadge value={record.researchStatus} /></div>
               {record.admissionCycle && <p className="mt-2 text-sm"><strong>Cycle:</strong> {record.admissionCycle.name}</p>}
               <dl className="mt-4 space-y-2 text-sm"><div><dt className="font-bold">Official evidence</dt><dd className="break-all">{safeUrl ? <a className="text-academic underline" href={safeUrl} target="_blank" rel="noopener noreferrer">{record.sourceTitle} (external site)</a> : 'Unsafe source URL'}</dd></div><div><dt className="font-bold">Reviewed date</dt><dd>{new Date(record.reviewedDate).toLocaleDateString()}</dd></div><div><dt className="font-bold">Unresolved items</dt><dd>{record.unresolvedItems.length || 'None recorded'}</dd></div><div><dt className="font-bold">Last reviewed by</dt><dd>{record.reviewedBy?.name || 'Administrator'} ({record.reviewedBy?.role?.replaceAll('_', ' ') || 'content manager'})</dd></div></dl>
