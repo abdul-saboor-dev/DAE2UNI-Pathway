@@ -72,9 +72,9 @@ export default function AdminTeamPage() {
   const pagination = result?.pagination
   return <div className="min-w-0">
     <div id="team-page-heading" tabIndex={-1} className="rounded-xl focus-visible:outline-4 focus-visible:outline-academic"><AdminHeading eyebrow="Team control" title="Manage administrators" description="Owner and Co-Owner share content access with Admins. Only Owner controls Co-Owners; Owner and Co-Owner may appoint or remove regular Admins." /></div>
-    <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
+    <section className="data-surface mb-6 p-5">
       <h2 className="text-lg font-black">Promote a registered Student</h2>
-      <p className="mt-1 text-sm leading-6 text-slate-600">The person registers normally first. Making them an Admin keeps their account and profile. Only the Owner can later make an Admin a Co-Owner.</p>
+      <p className="mt-1 text-sm leading-6 text-[var(--ui-muted)]">The person registers normally first. Making them an Admin keeps their account and profile. Only the Owner can later make an Admin a Co-Owner.</p>
       <form onSubmit={(event) => { event.preventDefault(); if (promoteEmail.trim()) { setSuccess(''); setAction({ type: 'promote', target: { email: promoteEmail.trim().toLowerCase() } }) } }} className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="min-w-0 flex-1"><label htmlFor="team-promote-email" className="block text-sm font-bold">Registered Student email</label><input id="team-promote-email" type="email" className={`${adminInputClass} mt-1`} value={promoteEmail} onChange={(event) => setPromoteEmail(event.target.value)} autoComplete="off" required maxLength={254} /></div>
         <button type="submit" className={adminButtonClass}>Make Admin</button>
@@ -89,12 +89,12 @@ export default function AdminTeamPage() {
       </form>
       <AdminState state={state} retry={() => setAttempt((value) => value + 1)} noun="team members" />
       {state === 'ready' && <>
-        <p className="mb-4 text-sm text-slate-600" role="status">{pagination.totalRecords} elevated team {pagination.totalRecords === 1 ? 'member' : 'members'} · Page {pagination.page} of {Math.max(pagination.totalPages, 1)}</p>
-        {result.users.length === 0 ? <div className="rounded-2xl border border-slate-200 bg-white p-7"><h2 className="text-lg font-black">No team members found</h2><p className="mt-1 text-sm text-slate-600">Try a different search. No accounts are deleted by role changes.</p></div> :
-          <div className="grid gap-4 xl:grid-cols-2">{result.users.map((member) => <article key={member.id} className="paper-surface min-w-0 border-l-4 !border-l-gold p-5">
-            <div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><h2 className="break-words text-lg font-black">{member.name} {member.id === user?.id && <span className="text-xs font-semibold text-academic">(Current account)</span>}</h2><p className="break-all text-sm text-slate-600">{member.email}</p></div><div className="flex flex-wrap gap-2"><StatusBadge value={member.role} /><StatusBadge value={member.accountStatus} /></div></div>
-            <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2"><div><dt className="font-semibold text-slate-600">Created</dt><dd>{formatDate(member.createdAt)}</dd></div><div><dt className="font-semibold text-slate-600">Last login</dt><dd>{formatDate(member.lastLoginAt)}</dd></div></dl>
-            <div className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">{member.role === 'owner' && <span className="rounded-full bg-bluewash px-3 py-2 text-xs font-black text-navy">Permanent owner</span>}
+        <p className="mb-4 text-sm text-[var(--ui-muted)]" role="status">{pagination.totalRecords} elevated team {pagination.totalRecords === 1 ? 'member' : 'members'} · Page {pagination.page} of {Math.max(pagination.totalPages, 1)}</p>
+        {result.users.length === 0 ? <div className="data-surface p-7"><h2 className="card-title text-lg">No team members found</h2><p className="mt-1 text-sm text-[var(--ui-muted)]">Try a different search. No accounts are deleted by role changes.</p></div> :
+          <div className="grid gap-4 xl:grid-cols-2">{result.users.map((member) => <article key={member.id} className="record-row min-w-0 border-l-2 border-l-[var(--ui-accent)] p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><h2 className="card-title break-words text-lg">{member.name} {member.id === user?.id && <span className="text-xs font-semibold text-academic">(Current account)</span>}</h2><p className="break-all text-sm text-[var(--ui-muted)]">{member.email}</p></div><div className="flex flex-wrap gap-2"><StatusBadge value={member.role} /><StatusBadge value={member.accountStatus} /></div></div>
+            <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2"><div><dt className="font-semibold text-[var(--ui-muted)]">Created</dt><dd>{formatDate(member.createdAt)}</dd></div><div><dt className="font-semibold text-[var(--ui-muted)]">Last login</dt><dd>{formatDate(member.lastLoginAt)}</dd></div></dl>
+            <div className="mt-5 flex flex-wrap gap-2 border-t border-[var(--ui-border)] pt-4">{member.role === 'owner' && <span className="status-badge">Permanent owner</span>}
               {member.role === 'co_owner' && user?.role === 'owner' && <button type="button" className={adminButtonClass} onClick={() => { setSuccess(''); setAction({ type: 'revokeCoOwner', target: member }) }}>Remove Co-Owner access</button>}
               {member.role === 'admin' && <><button type="button" className={adminButtonClass} onClick={() => { setSuccess(''); setAction({ type: 'revoke', target: member }) }}>Remove admin access</button>{user?.role === 'owner' && <button type="button" className={adminButtonClass} onClick={() => { setSuccess(''); setAction({ type: 'grant', target: member }) }}>Make Co-Owner</button>}</>}
             </div>

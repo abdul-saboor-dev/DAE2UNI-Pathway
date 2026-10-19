@@ -40,24 +40,24 @@ export default function MainLayout() {
 
   return <div className="site-shell flex min-h-screen min-w-0 flex-col">
     <RouteSeo />
-    <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-white focus:px-4 focus:py-3">Skip to content</a>
+    <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-[var(--ui-radius-sm)] focus:bg-[var(--ui-surface-raised)] focus:px-4 focus:py-3">Skip to content</a>
     <header className="site-header relative z-20">
       <div className="site-container flex min-h-20 items-center justify-between gap-5 py-3">
         <Link to="/" className="flex min-w-0 items-center gap-3 focus-visible:outline-3" aria-label="DAE2UNI Pathway home">
           <BrandLogo variant="navigation" />
-          <span className="text-[.68rem] font-bold uppercase tracking-[.16em] text-academic">Pathway</span>
+          <span className="text-[.68rem] font-bold uppercase tracking-[.16em] text-[var(--ui-muted-strong)]">Pathway</span>
         </Link>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation"><NavigationLinks user={user} isLoading={isLoading} onLogout={handleLogout} /></nav>
         <details key={location.pathname} className="group relative lg:hidden">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 border border-[var(--ui-border)] px-3 text-sm font-bold text-navy focus-visible:outline-3"><span aria-hidden="true">☰</span> Menu</summary>
-          <nav aria-label="Mobile navigation" className="absolute right-0 top-full z-30 mt-2 flex w-[min(18rem,calc(100vw-1.5rem))] flex-col gap-1 border border-[var(--ui-border)] bg-[var(--ui-paper)] p-3 shadow-lg"><NavigationLinks user={user} isLoading={isLoading} onLogout={handleLogout} /></nav>
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-[var(--ui-radius-sm)] border border-[var(--ui-border)] bg-[var(--ui-paper)] px-4 text-sm font-semibold text-navy focus-visible:outline-3"><span aria-hidden="true">☰</span> Menu</summary>
+          <nav aria-label="Mobile navigation" className="mobile-navigation absolute right-0 top-full z-30 mt-2 flex w-[min(18rem,calc(100vw-1.5rem))] flex-col gap-1 border border-[var(--ui-border)] p-3"><NavigationLinks user={user} isLoading={isLoading} onLogout={handleLogout} /></nav>
         </details>
       </div>
     </header>
     <main id="main-content" className="min-w-0 flex-1" tabIndex={-1}><Outlet /></main>
-    <footer className="site-footer mt-14 bg-[var(--ui-paper)]">
+    <footer className="site-footer mt-14">
       <div className="site-container grid gap-5 py-8 text-sm sm:grid-cols-[1fr_auto] sm:items-end">
-        <div><p className="font-black text-navy">DAE2UNI Pathway</p><p className="mt-1 max-w-xl">A practical pathway for DAE CIT students exploring undergraduate study. Catalogue information is source-attributed; eligibility and merit tools are future work.</p></div>
+        <div><p className="font-black text-navy">DAE2UNI Pathway</p><p className="mt-1 max-w-xl">A practical pathway for DAE CIT students exploring undergraduate study. Published guidance remains source-attributed and reviewable.</p></div>
         <p className="font-semibold text-academic">From Diploma to University</p>
       </div>
     </footer>

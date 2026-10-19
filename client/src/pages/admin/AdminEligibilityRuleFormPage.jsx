@@ -150,7 +150,7 @@ export default function AdminEligibilityRuleFormPage() {
   if (state !== 'ready') return <div><AdminHeading eyebrow="Internal criteria" title={editing ? 'Edit draft eligibility rule' : 'Create draft eligibility rule'} description="Draft rules are internal review records, not student eligibility decisions." /><AdminState state={state} retry={() => window.location.reload()} noun="eligibility rule" /></div>
   return <div className="min-w-0">
     <AdminHeading eyebrow="Internal criteria" title={editing ? 'Edit draft eligibility rule' : 'Create draft eligibility rule'} description="Draft rules are internal review records, not student eligibility decisions." />
-    {error && <p role="alert" className="mb-5 border-l-4 border-red-800 bg-red-50 p-4 text-sm font-bold text-red-900">{error}</p>}
+    {error && <p role="alert" className="status-panel status-panel--critical mb-5 p-4 text-sm font-semibold">{error}</p>}
     <form className="space-y-7" onSubmit={submit} noValidate>
       <section className="paper-surface grid gap-5 p-5 md:grid-cols-2" aria-labelledby="rule-identity"><h2 id="rule-identity" className="section-title text-xl text-navy md:col-span-2">Rule identity and scope</h2>
         <AdminField id="code" label="Rule code" error={errors.code}><input id="code" className={adminInputClass} value={form.code} maxLength={80} onChange={(event) => setField('code', event.target.value)} required /></AdminField>
@@ -200,7 +200,7 @@ export default function AdminEligibilityRuleFormPage() {
         <label className="text-sm font-bold">Effective until<input type="date" className={`${adminInputClass} mt-1`} value={form.effectiveUntil} onChange={(event) => setField('effectiveUntil', event.target.value)} /></label>
         <label className="text-sm font-bold">Priority<input type="number" min="-1000" max="1000" className={`${adminInputClass} mt-1`} value={form.priority} onChange={(event) => setField('priority', event.target.value)} /></label>
         <AdminField id="officialSourceUrl" label="Official source URL" error={errors.officialSourceUrl} hint="A URL does not verify this rule."><input id="officialSourceUrl" type="url" className={adminInputClass} maxLength={2048} value={form.officialSourceUrl} onChange={(event) => setField('officialSourceUrl', event.target.value)} required /></AdminField>
-        <div className="border-l-4 border-gold bg-[#fcf4df] p-4 text-sm md:col-span-2"><p className="font-bold">Source status: {(editing ? `${sourceStatus.replaceAll('_', ' ')}; pending review after save` : 'pending review')}</p><p className="mt-1">New and edited rules remain draft and pending review. This page cannot publish or verify rules.</p></div>
+        <div className="status-panel p-4 text-sm md:col-span-2"><p className="font-bold">Source status: {(editing ? `${sourceStatus.replaceAll('_', ' ')}; pending review after save` : 'pending review')}</p><p className="mt-1">New and edited rules remain draft and pending review. This page cannot publish or verify rules.</p></div>
       </section>
 
       <section className="border-l-4 border-academic bg-bluewash p-5" aria-labelledby="rule-preview"><h2 id="rule-preview" className="section-title text-lg text-navy">Readable criteria summary</h2><p className="mt-2 text-sm leading-6">{preview}</p><p className="mt-2 text-sm font-bold">This is an internal draft, not a student eligibility decision.</p></section>

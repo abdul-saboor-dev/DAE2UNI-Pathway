@@ -14,13 +14,13 @@ function pageItems(currentPage, totalPages) {
 function PageLink({ page, currentPage, href, children, label, onNavigate }) {
   if (page === currentPage) {
     return (
-      <span aria-current="page" aria-label={`Page ${page}, current page`} className="grid min-h-11 min-w-11 place-items-center border-b-4 border-gold bg-navy px-3 text-sm font-black text-white">
+      <span aria-current="page" aria-label={`Page ${page}, current page`} className="grid min-h-11 min-w-11 place-items-center rounded-full border border-[var(--ui-border-strong)] bg-[var(--ui-accent)] px-3 text-sm font-semibold text-[var(--ui-bg)]">
         {children}
       </span>
     )
   }
   return (
-    <Link aria-label={label || `Go to page ${page}`} className="grid min-h-11 min-w-11 place-items-center border border-[var(--ui-border)] bg-white px-3 text-sm font-bold text-academic hover:bg-bluewash focus-visible:outline-3" to={href} onClick={onNavigate}>
+    <Link aria-label={label || `Go to page ${page}`} className="grid min-h-11 min-w-11 place-items-center rounded-full border border-[var(--ui-border)] bg-[var(--ui-surface-solid)] px-3 text-sm font-semibold text-academic hover:bg-[var(--ui-accent-soft)] focus-visible:outline-3" to={href} onClick={onNavigate}>
       {children}
     </Link>
   )
@@ -34,17 +34,17 @@ export default function Pagination({ page, totalPages, hrefForPage, focusTargetI
       {page > 1 ? (
         <PageLink page={page - 1} currentPage={page} href={hrefForPage(page - 1)} label="Go to previous page" onNavigate={focusResults}>Previous</PageLink>
       ) : (
-        <span aria-disabled="true" className="grid min-h-11 place-items-center border border-[var(--ui-border)] px-4 text-sm font-bold text-ink/40">Previous</span>
+        <span aria-disabled="true" className="grid min-h-11 place-items-center border border-[var(--ui-border)] px-4 text-sm font-semibold text-[var(--ui-muted)]">Previous</span>
       )}
       {pageItems(page, totalPages).map((item) => typeof item === 'number' ? (
         <PageLink key={item} page={item} currentPage={page} href={hrefForPage(item)} onNavigate={focusResults}>{item}</PageLink>
       ) : (
-        <span key={item} aria-hidden="true" className="px-1 text-ink/45">…</span>
+        <span key={item} aria-hidden="true" className="px-1 text-[var(--ui-muted)]">…</span>
       ))}
       {page < totalPages ? (
         <PageLink page={page + 1} currentPage={page} href={hrefForPage(page + 1)} label="Go to next page" onNavigate={focusResults}>Next</PageLink>
       ) : (
-        <span aria-disabled="true" className="grid min-h-11 place-items-center border border-[var(--ui-border)] px-4 text-sm font-bold text-ink/40">Next</span>
+        <span aria-disabled="true" className="grid min-h-11 place-items-center border border-[var(--ui-border)] px-4 text-sm font-semibold text-[var(--ui-muted)]">Next</span>
       )}
     </nav>
   )

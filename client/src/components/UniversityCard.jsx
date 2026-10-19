@@ -13,21 +13,20 @@ export default function UniversityCard({ university, imageUrl }) {
   const officialUrl = getSafeExternalUrl(university.contact?.websiteUrl || university.source?.officialUrl)
   const safeImageUrl = getSafeExternalUrl(imageUrl)
   const identifier = university.slug || university.id
-  return <article className="paper-surface group flex min-w-0 flex-col overflow-hidden transition-colors hover:border-academic/50">
-    <div className="relative flex h-32 min-w-0 items-center justify-between overflow-hidden bg-navy px-6 text-white" data-image-state={safeImageUrl ? 'image' : 'fallback'}>
-      {safeImageUrl ? <img src={safeImageUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" /> : <>
-        <span aria-hidden="true" className="display-type break-all text-5xl text-white">{universityMonogram(university)}</span>
-        <span aria-hidden="true" className="self-end border-t border-gold pb-4 pt-2 text-[.65rem] font-black uppercase tracking-[.2em] text-[#d9b56e]">DAE2UNI catalogue</span>
-      </>}
-    </div>
+  return <article className="record-surface interactive-surface group flex min-w-0 flex-col overflow-hidden border-t-2 border-t-[var(--ui-accent)]" data-image-state={safeImageUrl ? 'image' : 'fallback'}>
+    {safeImageUrl && <img src={safeImageUrl} alt="" loading="lazy" className="h-28 w-full border-b border-[var(--ui-border)] object-cover" />}
     <div className="flex flex-1 flex-col p-5 sm:p-6">
-      <p className="text-[.7rem] font-black uppercase tracking-[.13em] text-academic">{titleCase(university.institutionType) || 'University'}{university.sector ? ` · ${titleCase(university.sector)}` : ''}</p>
-      <h2 className="section-title mt-3 break-words text-[1.45rem] text-navy">{university.name}</h2>
-      <p className="mt-3 text-sm text-[var(--ui-muted)]">{locations.length ? locations.join(', ') : university.provinceOrTerritory || 'Campus location not listed'}</p>
-      <p className="mt-2 text-xs text-[var(--ui-muted)]">{university.source?.verificationStatus === 'verified' ? 'Official source reviewed' : 'Official source listed'}{university.hecRecognitionStatus ? ` · HEC: ${titleCase(university.hecRecognitionStatus)}` : ''}</p>
+      <div className="flex min-w-0 items-start gap-4">
+        <span aria-hidden="true" className="card-title grid size-12 shrink-0 place-items-center rounded-[var(--ui-radius-sm)] border border-[var(--ui-border-strong)] bg-[var(--ui-surface-subtle)] text-base text-academic">{universityMonogram(university)}</span>
+        <div className="min-w-0"><p className="metadata text-academic">{titleCase(university.institutionType) || 'University'}{university.sector ? ` · ${titleCase(university.sector)}` : ''}</p><h2 className="card-title mt-2 break-words text-[1.4rem] text-navy">{university.name}</h2></div>
+      </div>
+      <dl className="mt-5 grid gap-3 text-sm">
+        <div><dt className="metadata">Campus coverage</dt><dd className="mt-1 text-[var(--ui-muted-strong)]">{locations.length ? locations.join(', ') : university.provinceOrTerritory || 'Campus location not listed'}</dd></div>
+        <div><dt className="metadata">Evidence</dt><dd className="mt-1 text-[var(--ui-muted-strong)]">{university.source?.verificationStatus === 'verified' ? 'Official source reviewed' : 'Official source listed'}{university.hecRecognitionStatus ? ` · HEC: ${titleCase(university.hecRecognitionStatus)}` : ''}</dd></div>
+      </dl>
       <div className="editorial-rule mt-auto flex flex-wrap items-center justify-between gap-3 pt-5 text-sm">
-        <Link to={`/universities/${encodeURIComponent(identifier)}`} className="inline-flex min-h-11 items-center font-black text-academic underline decoration-gold decoration-2 hover:text-navy focus-visible:outline-3">View university <span aria-hidden="true" className="ml-2">→</span></Link>
-        {officialUrl && <a href={officialUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-xs font-bold text-navy underline">Official site <span className="sr-only">(opens in a new tab)</span></a>}
+        <Link to={`/universities/${encodeURIComponent(identifier)}`} className="inline-flex min-h-11 items-center font-semibold text-academic underline decoration-2 hover:text-navy focus-visible:outline-3">View university <span aria-hidden="true" className="ml-2">→</span></Link>
+        {officialUrl && <a href={officialUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-xs font-semibold text-navy underline">Official site <span className="sr-only">(opens in a new tab)</span></a>}
       </div>
     </div>
   </article>

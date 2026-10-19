@@ -19,7 +19,7 @@ const statePresentation = {
   },
   needs_information: {
     label: 'More information needed',
-    className: 'bg-amber-100 text-amber-950',
+    className: 'bg-[var(--ui-warning-surface)] text-[var(--ui-warning)]',
     guidance: 'Complete the missing profile information before relying on this result.',
   },
   needs_manual_review: {
@@ -29,7 +29,7 @@ const statePresentation = {
   },
   unavailable: {
     label: 'Rule unavailable',
-    className: 'bg-slate-100 text-slate-800',
+    className: 'bg-[var(--ui-surface-subtle)] text-[var(--ui-muted-strong)]',
     guidance: 'No verified eligibility rule is available yet. This is not a rejection.',
   },
 }

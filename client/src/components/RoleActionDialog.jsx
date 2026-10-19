@@ -59,15 +59,15 @@ export default function RoleActionDialog({ action, onClose, onConfirm }) {
   }
 
   return <dialog ref={dialogRef} onCancel={(event) => { if (pending) event.preventDefault(); else onClose() }}
-    className="m-auto w-[min(94vw,32rem)] max-w-none border-t-4 border-gold bg-[var(--ui-paper)] p-5 shadow-2xl backdrop:bg-navy/70 sm:p-7">
+    className="m-auto w-[min(94vw,32rem)] max-w-none rounded-[var(--ui-radius-lg)] border border-[var(--ui-border-strong)] bg-[var(--ui-paper-elevated)] p-5 shadow-[var(--ui-shadow-raised)] backdrop:bg-navy/70 sm:p-7">
     <form onSubmit={submit} className="space-y-5">
       <h2 className="section-title break-words text-xl text-navy">{titles[action.type]}</h2>
-      <p className="break-words text-sm leading-6 text-slate-700">{descriptions[action.type]}</p>
-      <p className="break-all text-sm font-bold text-slate-900">{action.target.email}</p>
+      <p className="break-words text-sm leading-6 text-[var(--ui-muted)]">{descriptions[action.type]}</p>
+      <p className="break-all text-sm font-semibold text-[var(--ui-text)]">{action.target.email}</p>
       {needsEmail && <div><label htmlFor="role-confirm-email" className="block text-sm font-bold">Type the target email to confirm</label><input id="role-confirm-email" className={`${adminInputClass} mt-1`} value={confirmEmail} onChange={(event) => { setConfirmEmail(event.target.value); setError('') }} autoComplete="off" aria-describedby={error ? 'role-dialog-error' : undefined} required /></div>}
       <div><label htmlFor="role-current-password" className="block text-sm font-bold">Your current password</label><input ref={passwordRef} id="role-current-password" type="password" className={`${adminInputClass} mt-1`} value={password} onChange={(event) => { setPassword(event.target.value); setError('') }} autoComplete="current-password" aria-describedby={error ? 'role-dialog-error' : undefined} required /></div>
-      {error && <p id="role-dialog-error" role="alert" className="break-words text-sm font-semibold text-red-800">{error}</p>}
-      <div className="flex flex-wrap justify-end gap-3"><button type="button" disabled={pending} onClick={onClose} className="min-h-11 rounded-xl border border-slate-300 px-4 font-bold focus-visible:ring-4 focus-visible:ring-academic/50">Cancel</button><button type="submit" disabled={pending} className={action.type === 'deleteStudent' ? 'min-h-11 rounded-xl bg-red-800 px-4 font-bold text-white hover:bg-red-900 focus-visible:ring-4 focus-visible:ring-red-300' : adminButtonClass}>{pending ? 'Confirming…' : titles[action.type]}</button></div>
+      {error && <p id="role-dialog-error" role="alert" className="field-error break-words text-sm">{error}</p>}
+      <div className="flex flex-wrap justify-end gap-3"><button type="button" disabled={pending} onClick={onClose} className="action-secondary">Cancel</button><button type="submit" disabled={pending} className={action.type === 'deleteStudent' ? 'action-danger' : adminButtonClass}>{pending ? 'Confirming…' : titles[action.type]}</button></div>
     </form>
   </dialog>
 }

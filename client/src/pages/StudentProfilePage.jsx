@@ -139,7 +139,7 @@ function StudentProfilePage() {
           <h1 className="page-title mt-3 text-4xl text-navy sm:text-5xl">Build your academic profile</h1>
           <p className="mt-4 max-w-3xl leading-7 text-ink/65">Save a draft with only the details you know today, or complete every required academic and domicile field when you are ready.</p>
         </div>
-        <span className={`w-fit rounded-full px-4 py-2 text-xs font-black uppercase tracking-wide ${profile?.profileStatus === 'complete' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+        <span className={`status-badge w-fit ${profile?.profileStatus === 'complete' ? 'status-badge--positive' : 'status-badge--pending'}`}>
           {profile?.profileStatus === 'complete' ? 'Complete' : 'Draft'}
         </span>
       </div>
@@ -159,13 +159,13 @@ function StudentProfilePage() {
                 ['third_year', 'Third Year DAE'],
                 ['pass_out', 'DAE Pass-out'],
               ].map(([value, label]) => (
-                <label key={value} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-bold text-navy focus-within:ring-2 focus-within:ring-academic focus-within:ring-offset-2">
+                <label key={value} className="flex min-h-12 cursor-pointer items-center gap-3 rounded-[var(--ui-radius-sm)] border border-[var(--ui-border)] bg-[var(--ui-surface-subtle)] px-4 py-3 text-sm font-semibold text-navy focus-within:ring-2 focus-within:ring-academic">
                   <input type="radio" name="academicStage" value={value} checked={form.academicStage === value} onChange={updateField} />
                   {label}
                 </label>
               ))}
             </div>
-            {fieldErrors.academicStage && <p id="academic-stage-error" className="mt-2 text-sm font-semibold text-[#8b2525]">{fieldErrors.academicStage}</p>}
+            {fieldErrors.academicStage && <p id="academic-stage-error" className="field-error" role="alert">{fieldErrors.academicStage}</p>}
           </div>
           <TextField id="dae-board" name="daeBoardName" label="DAE board name" value={form.daeBoardName} onChange={updateField} error={fieldErrors.daeBoardName} placeholder="Punjab Board of Technical Education" autoComplete="organization" maxLength={160} />
           <TextField id="dae-institute" name="daeInstituteName" label="Institute name" value={form.daeInstituteName} onChange={updateField} error={fieldErrors.daeInstituteName} autoComplete="organization" maxLength={200} />
@@ -205,7 +205,7 @@ function StudentProfilePage() {
             <p className="text-sm font-bold text-ink/80">Preferred university sectors</p>
             <div className="mt-3 flex flex-wrap gap-4">
               {['public', 'private'].map((sector) => (
-                <label key={sector} className="flex cursor-pointer items-center gap-2 rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm font-semibold capitalize">
+                <label key={sector} className="flex cursor-pointer items-center gap-2 rounded-[var(--ui-radius-sm)] border border-[var(--ui-border)] bg-[var(--ui-surface-subtle)] px-4 py-3 text-sm font-semibold capitalize">
                   <input type="checkbox" name="preferredUniversitySectors" value={sector} checked={form.preferredUniversitySectors.includes(sector)} onChange={toggleSector} className="size-4 accent-academic" />
                   {sector}
                 </label>
@@ -214,7 +214,7 @@ function StudentProfilePage() {
           </div>
         </Section>
 
-        <div className="sticky bottom-2 z-10 flex flex-col gap-3 border-t-4 border-gold bg-[var(--ui-paper)] p-4 shadow-lg sm:flex-row sm:items-center sm:justify-between">
+        <div className="sticky bottom-2 z-10 flex flex-col gap-3 rounded-[var(--ui-radius-sm)] border border-[var(--ui-border-strong)] bg-[var(--ui-paper-elevated)] p-4 shadow-[var(--ui-shadow-raised)] sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs leading-5 text-ink/55">Completing the profile requires DAE Years 1 and 2, Matric, and domicile fields. Year 3 may be added later.</p>
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
             <button type="button" disabled={isSaving} onClick={() => saveProfile('draft')} className="action-secondary">{isSaving ? 'Saving…' : 'Save draft'}</button>

@@ -32,10 +32,10 @@ export function CatalogueEmpty({ title, description, onClear }) {
 
 export function CatalogueError({ onRetry }) {
   return (
-    <section role="alert" className="border-l-4 border-[#8b2525] bg-[#fff6f3] px-6 py-10 text-center">
-      <h2 className="section-title text-2xl text-[#731d1d]">We couldn’t load the catalogue.</h2>
-      <p className="mx-auto mt-3 max-w-xl leading-7 text-red-900/70">The service may be temporarily unavailable. No account or profile information was affected.</p>
-      <button type="button" onClick={onRetry} className="action-primary mt-6 !bg-[#8b2525] hover:!bg-[#731d1d]">
+    <section role="alert" className="status-panel status-panel--critical px-6 py-10 text-center">
+      <h2 className="section-title text-2xl">We couldn’t load the catalogue.</h2>
+      <p className="mx-auto mt-3 max-w-xl leading-7 text-[var(--ui-muted-strong)]">The service may be temporarily unavailable. No account or profile information was affected.</p>
+      <button type="button" onClick={onRetry} className="action-danger mt-6">
         Try again
       </button>
     </section>

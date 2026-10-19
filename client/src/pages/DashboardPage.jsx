@@ -47,7 +47,7 @@ function DashboardPage() {
   return (
     <section className="site-container py-10 lg:py-16">
       <div className="border-b-4 border-gold bg-navy px-6 py-9 text-white sm:px-10">
-        <p className="text-xs font-black uppercase tracking-[0.22em] text-[#d9b56e]">Student dashboard</p>
+        <p className="eyebrow">Student dashboard</p>
         <h1 className="page-title mt-3 text-4xl sm:text-5xl">Welcome, {user.name}</h1>
         <p className="mt-4 max-w-2xl leading-7 text-white/75">Build a complete academic profile now so later eligibility and merit tools can give you accurate DAE-specific guidance.</p>
       </div>
@@ -64,7 +64,7 @@ function DashboardPage() {
                 {profileState.state === 'error' && 'Profile status unavailable'}
               </h2>
             </div>
-            <span className={`rounded-full px-3 py-1.5 text-xs font-black uppercase tracking-wide ${isComplete ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+            <span className={`status-badge ${isComplete ? 'status-badge--positive' : 'status-badge--pending'}`}>
               {isComplete ? 'Complete' : profileState.state === 'loading' ? 'Loading' : 'Action needed'}
             </span>
           </div>
