@@ -155,7 +155,8 @@ export async function updateUniversity(universityId, updates) {
 
   await university.save()
   await cleanupDetachedMediaAssets(detachedMedia)
-  return toAdminUniversity(university)
+  const updatedUniversity = await populateUniversityMedia(University.findById(university._id))
+  return toAdminUniversity(updatedUniversity)
 }
 
 export async function deleteUniversity(universityId) {

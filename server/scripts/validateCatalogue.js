@@ -12,6 +12,7 @@ import {
   University,
   User,
 } from '../src/models/index.js'
+import MediaAsset from '../src/models/MediaAsset.js'
 import { signAccessToken } from '../src/utils/jwt.js'
 
 const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
@@ -23,6 +24,7 @@ const programSlugs = [`${slugPrefix}-program`, `${slugPrefix}-draft-program`]
 const createdUniversityIds = []
 const createdProgramIds = []
 const createdAdmissionCycleIds = []
+const createdMediaAssetIds = []
 const createdUserIds = []
 let server
 let assertions = 0
@@ -155,6 +157,7 @@ async function cleanup() {
       ...(identifiersReserved ? [{ slug: { $in: universitySlugs } }] : []),
     ],
   })
+  await MediaAsset.deleteMany({ _id: { $in: createdMediaAssetIds } })
   await StudentProfile.deleteMany({ user: { $in: userObjectIds } })
   await User.deleteMany({
     $or: [
@@ -261,6 +264,17 @@ async function main() {
   equal(university.slug, universitySlugs[0], 'University slug should be normalized and returned.')
   check(university.campuses[0].id, 'Administrator response should expose campus identifiers.')
 
+  const mediaFixtures = await MediaAsset.create([
+    { provider: 'cloudinary', publicId: `${slugPrefix}/logo`, version: 1, format: 'webp', resourceType: 'image', secureUrl: `https://res.cloudinary.com/test/image/upload/v1/${slugPrefix}/logo.webp`, width: 256, height: 256, bytes: 1024, uploadIntent: new mongoose.Types.ObjectId(), uploadedBy: admin._id },
+    { provider: 'cloudinary', publicId: `${slugPrefix}/cover`, version: 1, format: 'webp', resourceType: 'image', secureUrl: `https://res.cloudinary.com/test/image/upload/v1/${slugPrefix}/cover.webp`, width: 1280, height: 720, bytes: 2048, uploadIntent: new mongoose.Types.ObjectId(), uploadedBy: admin._id },
+    { provider: 'cloudinary', publicId: `${slugPrefix}/campus`, version: 1, format: 'webp', resourceType: 'image', secureUrl: `https://res.cloudinary.com/test/image/upload/v1/${slugPrefix}/campus.webp`, width: 960, height: 540, bytes: 1536, uploadIntent: new mongoose.Types.ObjectId(), uploadedBy: admin._id },
+  ])
+  createdMediaAssetIds.push(...mediaFixtures.map((asset) => asset._id))
+  await University.updateOne(
+    { _id: university.id, 'campuses._id': university.campuses[0].id },
+    { $set: { logoMedia: mediaFixtures[0]._id, coverMedia: mediaFixtures[1]._id, 'campuses.$.imageMedia': mediaFixtures[2]._id } },
+  )
+
   await expectStatus(baseUrl, '/api/admin/universities', 409, {
     method: 'POST', token: adminToken, body: universityBody(),
   })
@@ -309,9 +323,25 @@ async function main() {
   equal(universityDetail.data.university.id, university.id, 'University detail should return the requested record.')
 
   const universityUpdated = await expectStatus(baseUrl, `/api/admin/universities/${university.id}`, 200, {
-    method: 'PUT', token: adminToken, body: { name: `Synthetic Updated University ${runId}` },
+    method: 'PUT', token: adminToken, body: {
+      name: `Synthetic Updated University ${runId}`,
+      campuses: university.campuses.map((campus) => ({
+        id: campus.id,
+        name: campus.name,
+        city: campus.city,
+        province: campus.province,
+        isMainCampus: campus.isMainCampus,
+        isActive: campus.isActive,
+      })),
+    },
   })
   check(universityUpdated.data.university.name.startsWith('Synthetic Updated'), 'University update should persist.')
+  check(universityUpdated.data.university.logo?.url, 'University update response should preserve the attached logo.')
+  check(universityUpdated.data.university.cover?.url, 'University update response should preserve the attached cover.')
+  check(universityUpdated.data.university.campuses[0].image?.url, 'University update response should preserve attached campus images.')
+  const reloadedUniversity = await expectStatus(baseUrl, `/api/admin/universities/${university.id}`, 200, { token: adminToken })
+  check(reloadedUniversity.data.university.logo?.url && reloadedUniversity.data.university.cover?.url, 'Reloading the editor should retain university media.')
+  check(reloadedUniversity.data.university.campuses[0].image?.url, 'Reloading the editor should retain campus media.')
   const universityContactUpdated = await expectStatus(baseUrl, `/api/admin/universities/${university.id}`, 200, {
     method: 'PUT', token: adminToken, body: { contact: { phone: '+92 00 0000000' } },
   })
@@ -435,6 +465,9 @@ async function main() {
   equal(publicUniversities.data.universities.length, 1, 'Public universities should exclude draft/unverified records.')
   const publicUniversity = publicUniversities.data.universities[0]
   equal(publicUniversity.id, university.id, 'Public university list should include the verified record.')
+  check(publicUniversity.logo?.url, 'Public university list should expose the attached logo after an ordinary edit.')
+  check(publicUniversity.cover?.url, 'Public university list should expose the attached cover after an ordinary edit.')
+  check(publicUniversity.campuses[0].image?.url, 'Public university list should expose preserved campus media after an ordinary edit.')
   check(!Object.hasOwn(publicUniversity, 'recordStatus'), 'Public university should omit record status.')
   check(!Object.hasOwn(publicUniversity.source, 'verificationRecord'), 'Public university should omit verification history references.')
   check(!Object.hasOwn(publicUniversity.campuses[0], 'id'), 'Public university should omit internal campus identifiers.')
@@ -443,6 +476,7 @@ async function main() {
 
   const publicUniversityDetail = await expectStatus(baseUrl, `/api/universities/${universitySlugs[0]}`, 200)
   equal(publicUniversityDetail.data.university.id, university.id, 'Public university detail should support slug lookup.')
+  check(publicUniversityDetail.data.university.logo?.url && publicUniversityDetail.data.university.cover?.url, 'Public university detail should retain attached university media.')
   await expectStatus(baseUrl, `/api/universities/${universitySlugs[1]}`, 404)
 
   const publicPrograms = await expectStatus(
