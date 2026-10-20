@@ -6,6 +6,7 @@ import SourceAttribution from '../components/SourceAttribution.jsx'
 import Seo, { SITE_ORIGIN } from '../components/Seo.jsx'
 import useCatalogueDetail from '../hooks/useCatalogueDetail.js'
 import { getProgram } from '../services/catalogueApi.js'
+import { getSafeExternalUrl } from '../utils/externalLinks.js'
 
 function label(value) {
   return value?.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
@@ -29,12 +30,14 @@ export default function ProgramDetailPage() {
   const canonicalPath = `/programs/${encodeURIComponent(program.id)}`
   const seoDescription = `${program.name} at ${program.university.name}: published, source-verified programme and campus information. Eligibility and admission are not guaranteed.`
   const universityIdentifier = program.university.slug || program.university.id
+  const disciplineImage = getSafeExternalUrl(program.disciplineMedia?.image?.url)
   return (
     <><Seo title={`${program.name} at ${program.university.name} | DAE2UNI`} description={seoDescription} canonicalPath={canonicalPath} structuredData={{ '@context': 'https://schema.org', '@type': 'EducationalOccupationalProgram', name: program.name, url: `${SITE_ORIGIN}${canonicalPath}`, provider: { '@type': 'CollegeOrUniversity', name: program.university.name } }} /><section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-14">
       <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Programs', to: '/programs' }, { label: program.name }]} />
       <Link to="/programs" className="mb-5 inline-flex rounded text-sm font-black text-academic underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-academic">← Back to programs</Link>
 
       <article className="paper-surface overflow-hidden">
+        {disciplineImage && <img src={disciplineImage} srcSet={program.disciplineMedia.image.srcSet || undefined} sizes="(min-width: 1280px) 80rem, 100vw" width={program.disciplineMedia.image.width} height={program.disciplineMedia.image.height} alt={`${program.disciplineMedia.discipline} discipline`} decoding="async" className="aspect-[16/5] w-full object-cover" />}
         <header className="border-b-4 border-gold bg-navy px-6 py-10 text-white sm:px-10">
           <div className="flex flex-wrap gap-2 text-xs font-black uppercase tracking-[0.16em] text-bluewash">
             {program.credentialType && <span>{program.credentialType}</span>}

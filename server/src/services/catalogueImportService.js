@@ -362,6 +362,23 @@ function exactDocumentMatch(existing, expected) {
   return JSON.stringify(canonical(existing)) === JSON.stringify(canonical(expected))
 }
 
+function exactUniversityRestoreMatch(existing, expected) {
+  const comparable = { ...existing }
+  const restored = { ...expected }
+  delete comparable.logoMedia
+  delete comparable.coverMedia
+  // Attaching or replacing optional media legitimately advances updatedAt.
+  // Every catalogue field still has to match the restore document exactly.
+  delete comparable.updatedAt
+  delete restored.updatedAt
+  comparable.campuses = comparable.campuses?.map((campus) => {
+    const copy = { ...campus }
+    delete copy.imageMedia
+    return copy
+  })
+  return exactDocumentMatch(comparable, restored)
+}
+
 async function validateRestoreDocuments(universities, programs, verifications) {
   for (const item of universities) await new University(item.document).validate()
   for (const item of programs) await new Program(item.document).validate()
@@ -407,7 +424,7 @@ async function prepareCatalogueRestore(body, transactionReady, session = null) {
       'campuses._id': { $in: item.document.campuses.map((campus) => campus._id) },
     }, null, queryOptions).lean()
     let outcome = 'created'
-    if (foreignCampus || collisions.length > 1 || (collisions.length === 1 && !exactDocumentMatch(collisions[0], item.document))) {
+    if (foreignCampus || collisions.length > 1 || (collisions.length === 1 && !exactUniversityRestoreMatch(collisions[0], item.document))) {
       outcome = 'conflicted'
     } else if (collisions.length === 1) outcome = 'skipped'
     item.outcome = outcome

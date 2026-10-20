@@ -21,6 +21,7 @@ import {
   mergeSourceFields,
   setSimpleFields,
 } from '../utils/catalogueUpdates.js'
+import { cleanupDetachedMediaAssets } from './mediaLibraryService.js'
 
 const simpleUniversityFields = [
   'name',
@@ -36,6 +37,10 @@ const simpleUniversityFields = [
   'recognitionBodies',
   'recordStatus',
 ]
+
+function populateUniversityMedia(query) {
+  return query.populate('logoMedia').populate('coverMedia').populate('campuses.imageMedia')
+}
 
 async function ensureUniqueSlug(slug, excludedId) {
   if (!slug) return
@@ -63,6 +68,7 @@ function normalizedCampuses(document, campuses) {
   return campuses.map(({ id, ...campus }) => ({ ...campus,
     ...(id && { _id: id }),
     ...(id && existingById.get(id)?.importKey && { importKey: existingById.get(id).importKey }),
+    ...(id && existingById.get(id)?.imageMedia && { imageMedia: existingById.get(id).imageMedia }),
   }))
 }
 
@@ -104,11 +110,10 @@ export async function listAdminUniversities(filters) {
 
   const skip = (filters.page - 1) * filters.pageSize
   const [records, totalRecords] = await Promise.all([
-    University.find(query)
+    populateUniversityMedia(University.find(query)
       .sort(universitySort(filters.sort))
       .skip(skip)
-      .limit(filters.pageSize)
-      .lean(),
+      .limit(filters.pageSize)).lean(),
     University.countDocuments(query),
   ])
 
@@ -119,7 +124,7 @@ export async function listAdminUniversities(filters) {
 }
 
 export async function getAdminUniversity(universityId) {
-  const university = await University.findById(universityId)
+  const university = await populateUniversityMedia(University.findById(universityId))
   if (!university) throw new ApiError(404, 'University not found.', 'UNIVERSITY_NOT_FOUND')
   return toAdminUniversity(university)
 }
@@ -136,13 +141,20 @@ export async function updateUniversity(universityId, updates) {
   mergeNestedFields(university, 'contact', updates.contact)
   mergeSourceFields(university, updates.source)
 
+  let detachedMedia = []
   if (updates.campuses) {
+    const nextIds = new Set(updates.campuses.map((campus) => campus.id).filter(Boolean))
+    detachedMedia = university.campuses
+      .filter((campus) => !nextIds.has(campus._id.toString()))
+      .map((campus) => campus.imageMedia?.toString())
+      .filter(Boolean)
     const campuses = normalizedCampuses(university, updates.campuses)
     await ensureRemovedCampusesAreUnused(university._id, university.campuses, campuses)
     university.set('campuses', campuses)
   }
 
   await university.save()
+  await cleanupDetachedMediaAssets(detachedMedia)
   return toAdminUniversity(university)
 }
 
@@ -174,7 +186,9 @@ export async function deleteUniversity(universityId) {
     )
   }
 
+  const mediaIds = [university.logoMedia, university.coverMedia, ...university.campuses.map((campus) => campus.imageMedia)].filter(Boolean)
   await university.deleteOne()
+  await cleanupDetachedMediaAssets(mediaIds)
   return { id: university._id.toString() }
 }
 
@@ -204,11 +218,10 @@ export async function listPublicUniversities(filters) {
   const query = publicUniversityQuery(filters)
   const skip = (filters.page - 1) * filters.pageSize
   const [records, totalRecords] = await Promise.all([
-    University.find(query)
+    populateUniversityMedia(University.find(query)
       .sort(universitySort(filters.sort))
       .skip(skip)
-      .limit(filters.pageSize)
-      .lean(),
+      .limit(filters.pageSize)).lean(),
     University.countDocuments(query),
   ])
 
@@ -222,10 +235,10 @@ export async function getPublicUniversity(universityIdentifier) {
   const identifierQuery = mongoose.isObjectIdOrHexString(universityIdentifier)
     ? { _id: universityIdentifier }
     : { slug: universityIdentifier }
-  const university = await University.findOne({
+  const university = await populateUniversityMedia(University.findOne({
     ...identifierQuery,
     ...publicUniversityQuery(),
-  })
+  }))
   if (!university) throw new ApiError(404, 'University not found.', 'UNIVERSITY_NOT_FOUND')
   return toPublicUniversity(university)
 }

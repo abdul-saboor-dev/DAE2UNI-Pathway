@@ -74,12 +74,42 @@ import {
   listEligibilityRulesSchema,
   updateEligibilityRuleSchema,
 } from '../validation/eligibilityRuleManagementValidation.js'
+import {
+  deleteMediaAttachment,
+  deleteUploadIntent,
+  getProgramDisciplines,
+  postProgramDiscipline,
+  postUploadCompletion,
+  postUploadIntent,
+  putProgramDiscipline,
+  removeProgramDiscipline,
+} from '../controllers/mediaLibraryController.js'
+import {
+  cancelMediaUploadSchema,
+  completeMediaUploadSchema,
+  createMediaUploadIntentSchema,
+  createProgramDisciplineSchema,
+  deleteProgramDisciplineSchema,
+  listProgramDisciplinesSchema,
+  removeMediaAttachmentSchema,
+  updateProgramDisciplineSchema,
+} from '../validation/mediaLibraryValidation.js'
 
 const router = Router()
 
 router.use(authenticate, authorize(...CONTENT_MANAGER_ROLES))
 
 router.get('/ping', validateRequest(emptyRequestSchema), getAdminPing)
+router.post('/media/upload-intents', validateRequest(createMediaUploadIntentSchema), postUploadIntent)
+router.post('/media/upload-completions', validateRequest(completeMediaUploadSchema), postUploadCompletion)
+router.delete('/media/upload-intents/:intentId', validateRequest(cancelMediaUploadSchema), deleteUploadIntent)
+router.delete('/media/attachments', validateRequest(removeMediaAttachmentSchema), deleteMediaAttachment)
+router.route('/program-disciplines')
+  .get(validateRequest(listProgramDisciplinesSchema), getProgramDisciplines)
+  .post(validateRequest(createProgramDisciplineSchema), postProgramDiscipline)
+router.route('/program-disciplines/:disciplineId')
+  .put(validateRequest(updateProgramDisciplineSchema), putProgramDiscipline)
+  .delete(validateRequest(deleteProgramDisciplineSchema), removeProgramDiscipline)
 router.get('/verification-queue', validateRequest(listVerificationQueueSchema), getVerificationQueue)
 router.post('/verification-queue/:entityType/:recordId/verify', validateRequest(verifyCatalogueSourceSchema), postVerifySource)
 

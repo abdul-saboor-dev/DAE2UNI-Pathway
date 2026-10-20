@@ -14,6 +14,7 @@ const campusSchema = new Schema({
   longitude: { type: Number, min: -180, max: 180 },
   isMainCampus: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
+  imageMedia: { type: Schema.Types.ObjectId, ref: 'MediaAsset' },
 })
 
 campusSchema.pre('validate', function validateCoordinates() {
@@ -61,6 +62,8 @@ const universitySchema = new Schema(
     },
     establishedYear: { type: Number, min: 1800, max: 2100 },
     recognitionBodies: { type: [String], default: undefined },
+    logoMedia: { type: Schema.Types.ObjectId, ref: 'MediaAsset' },
+    coverMedia: { type: Schema.Types.ObjectId, ref: 'MediaAsset' },
     campuses: {
       type: [campusSchema],
       validate: {

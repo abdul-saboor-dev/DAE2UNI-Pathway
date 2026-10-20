@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { getSafeExternalUrl } from '../utils/externalLinks.js'
 
 function titleCase(value) {
   return value?.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
@@ -6,8 +7,10 @@ function titleCase(value) {
 
 export default function ProgramCard({ program }) {
   const locations = [...new Set((program.campuses || []).map((campus) => campus.city).filter(Boolean))]
+  const imageUrl = getSafeExternalUrl(program.disciplineMedia?.image?.url)
   return (
     <article className="record-surface interactive-surface flex min-w-0 flex-col border-l-2 border-l-[var(--ui-accent)] p-5 sm:p-6">
+      {imageUrl && <img src={imageUrl} srcSet={program.disciplineMedia.image.srcSet || undefined} sizes="(min-width: 1280px) 24rem, (min-width: 768px) 50vw, 100vw" width={program.disciplineMedia.image.width} height={program.disciplineMedia.image.height} alt={`${program.disciplineMedia.discipline} discipline`} loading="lazy" decoding="async" className="mb-5 aspect-[16/8] w-full rounded-[var(--ui-radius-sm)] border border-[var(--ui-border)] object-cover" />}
       <div className="metadata flex flex-wrap items-center gap-2 text-academic">
         {program.credentialType && <span>{program.credentialType}</span>}
         {program.studyMode && <span className="border-l border-[var(--ui-border)] pl-2 text-[var(--ui-muted)]">{titleCase(program.studyMode)}</span>}

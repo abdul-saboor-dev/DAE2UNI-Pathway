@@ -22,6 +22,7 @@
     "check:eligibility-rules": "node scripts/validateEligibilityRuleManagementFrontend.js",
     "check:eligibility-frontend": "node scripts/validateEligibilityFrontend.js",
     "check:campus-locations": "node scripts/validateCampusLocationsFrontend.js",
+    "check:media-library": "node scripts/validateMediaLibraryFrontend.js",
     "check:seo": "node scripts/validateSeoFrontend.js",
     "lint": "eslint .",
     "preview": "vite preview"
