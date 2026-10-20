@@ -122,10 +122,14 @@ select.site-input { color-scheme: dark; }
 .pathway-stop::before { position: absolute; top: .25rem; left: .35rem; width: .72rem; height: .72rem; border: 2px solid var(--ui-accent); border-radius: 999px; background: var(--ui-surface-solid); content: ""; }
 @supports (height: 100dvh) { .landing-hero { min-height: calc(100dvh - 5rem); } }
 
-.brand-logo { position: relative; isolation: isolate; display: inline-grid; max-width: 100%; flex: none; place-items: center; border-radius: .8rem; background: #fff; padding: .18rem; box-shadow: 0 10px 30px -20px #000; }
+.brand-logo { position: relative; isolation: isolate; display: inline-grid; max-width: 100%; flex: none; place-items: center; overflow: hidden; border-radius: .8rem; background: #fff; padding: .22rem .35rem; box-shadow: 0 10px 30px -20px #000; }
 .brand-logo__image { position: relative; z-index: 1; display: block; width: 100%; height: auto; max-width: 100%; }
-.brand-logo--navigation { width: 6.5rem; margin-block: -1.45rem; }
-.brand-logo--admin { width: 4.5rem; }
+.brand-logo--navigation { width: 7.25rem; }
+.brand-logo--admin { width: 5.25rem; }
+
+.university-card__cover { background: var(--ui-surface-subtle); }
+.university-card__cover img { transition: transform .2s ease; }
+.university-card:hover .university-card__cover img { transform: scale(1.015); }
 
 .admin-workspace { min-height: 100vh; color: var(--ui-text); background: transparent; }
 .admin-sidebar { background: rgb(8 11 20 / .94); color: var(--ui-text); backdrop-filter: blur(18px); }
@@ -164,7 +168,7 @@ select.site-input { color-scheme: dark; }
 @media (max-width: 767px) {
   .site-container { width: min(100% - 1.5rem, 78rem); }
   .admin-workspace main { padding-inline: .9rem; }
-  .brand-logo--navigation { width: 5.7rem; margin-block: -1.1rem; }
+  .brand-logo--navigation { width: 6.4rem; }
   .landing-hero { align-items: flex-start; }
 }
 @media (min-width: 640px) {
