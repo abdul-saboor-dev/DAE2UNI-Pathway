@@ -1,4 +1,4 @@
-import logoUrl from '../assets/dae2uni-pathway-logo.svg'
+import logoUrl from '../assets/dae2uni-pathway-logo-primary.png'
 
 function BrandLogo({ variant = 'navigation', whiteBackdrop = false }) {
   return (

@@ -19,6 +19,8 @@ check(app.includes('AdminRouteGuard') && app.includes('ProtectedRoute'), 'Route 
 
 const main = read('src/layouts/MainLayout.jsx')
 const admin = read('src/layouts/AdminLayout.jsx')
+const brandLogo = read('src/components/BrandLogo.jsx')
+const html = read('index.html')
 for (const layout of [main, admin]) {
   check(layout.includes('Skip to '), 'Layout offers a keyboard skip link')
   check(layout.includes('<details') && layout.includes('<summary'), 'Mobile navigation uses native disclosure')
@@ -26,6 +28,9 @@ for (const layout of [main, admin]) {
   check(layout.includes('Logout'), 'Account exit remains available')
 }
 check(admin.includes('canManageRoles(user?.role)'), 'Team navigation retains role gating')
+check(brandLogo.includes('dae2uni-pathway-logo-primary.png') && brandLogo.includes('alt="DAE2UNI Pathway"'), 'Navigation and shared brand locations use the supplied accessible logo')
+for (const icon of ['favicon.ico', 'favicon-48x48.png', 'favicon-32x32.png', 'favicon-16x16.png']) check(html.includes(icon), `Document references ${icon}`)
+check(!html.includes('favicon.svg'), 'Retired favicon reference is removed')
 
 const campus = read('src/components/CampusDirectory.jsx')
 const universityCard = read('src/components/UniversityCard.jsx')
