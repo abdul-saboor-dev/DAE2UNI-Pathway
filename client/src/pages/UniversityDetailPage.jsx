@@ -54,13 +54,17 @@ export default function UniversityDetailPage() {
   const seoDescription = `${university.name}: published, source-verified university and campus information for students researching pathways after DAE in Pakistan.`
   const website = getSafeExternalUrl(university.contact?.websiteUrl)
   const hecProfile = getSafeExternalUrl(university.hecProfileUrl)
+  const cover = getSafeExternalUrl(university.cover?.url)
+  const logo = getSafeExternalUrl(university.logo?.url)
   return (
     <><Seo title={`${university.name} | DAE2UNI Pathway`} description={seoDescription} canonicalPath={canonicalPath} structuredData={{ '@context': 'https://schema.org', '@type': 'CollegeOrUniversity', name: university.name, url: `${SITE_ORIGIN}${canonicalPath}`, ...(website && { sameAs: website }) }} /><section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-14">
       <Breadcrumbs items={[{ label: 'Home', to: '/' }, { label: 'Universities', to: '/universities' }, { label: university.name }]} />
       <Link to="/universities" className="mb-5 inline-flex rounded text-sm font-black text-academic underline-offset-4 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-academic">← Back to universities</Link>
 
       <article className="paper-surface overflow-hidden">
+        {cover && <img src={cover} srcSet={university.cover?.srcSet || undefined} sizes="(min-width: 1280px) 80rem, 100vw" width={university.cover?.width} height={university.cover?.height} alt={`${university.name} cover`} decoding="async" className="aspect-[16/5] w-full object-cover" />}
         <header className="border-b-4 border-gold bg-navy px-6 py-10 text-white sm:px-10">
+          {logo && <img src={logo} srcSet={university.logo?.srcSet || undefined} sizes="80px" width={university.logo?.width} height={university.logo?.height} alt={`${university.name} logo`} className="mb-5 size-20 rounded-[var(--ui-radius-sm)] bg-white object-contain p-2" />}
           <p className="text-xs font-black uppercase tracking-[0.2em] text-bluewash">{label(university.institutionType) || 'University'} · {label(university.sector)}</p>
           <h1 className="page-title mt-3 break-words text-4xl sm:text-5xl">{university.name}</h1>
           {university.abbreviation && <p className="mt-3 text-lg font-bold text-white/70">{university.abbreviation}</p>}

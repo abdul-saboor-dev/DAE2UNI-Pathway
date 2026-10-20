@@ -1,3 +1,5 @@
+import { toSafeMedia } from './mediaSerializers.js'
+
 function identifier(value) {
   return value?.toString()
 }
@@ -38,6 +40,7 @@ function campus(campusRecord, includeId = false) {
     }),
     isMainCampus: campusRecord.isMainCampus,
     isActive: campusRecord.isActive,
+    image: toSafeMedia(campusRecord.imageMedia, [480, 960, 1440]),
   }
 }
 
@@ -56,6 +59,8 @@ export function toAdminUniversity(university) {
     institutionType: record.institutionType,
     establishedYear: record.establishedYear,
     recognitionBodies: record.recognitionBodies || [],
+    logo: toSafeMedia(record.logoMedia, [96, 192, 384]),
+    cover: toSafeMedia(record.coverMedia, [640, 1280, 1920]),
     campuses: record.campuses?.map((item) => campus(item, true)),
     contact: record.contact,
     source: adminSource(record.source),
@@ -80,6 +85,8 @@ export function toPublicUniversity(university) {
     institutionType: record.institutionType,
     establishedYear: record.establishedYear,
     recognitionBodies: record.recognitionBodies || [],
+    logo: toSafeMedia(record.logoMedia, [96, 192, 384]),
+    cover: toSafeMedia(record.coverMedia, [640, 1280, 1920]),
     campuses: record.campuses
       ?.filter((item) => item.isActive)
       .map((item) => campus(item)),
@@ -130,7 +137,7 @@ export function toAdminProgram(program) {
   }
 }
 
-export function toPublicProgram(program) {
+export function toPublicProgram(program, disciplineMedia = null) {
   const record = program.toObject ? program.toObject() : program
   const university = populatedUniversity(record.university, true)
   const campusIds = new Set(record.campusIds?.map(identifier) || [])
@@ -155,5 +162,6 @@ export function toPublicProgram(program) {
     campuses: publicCampuses,
     studyMode: record.studyMode,
     source: publicSource(record.source),
+    ...(disciplineMedia && { disciplineMedia }),
   }
 }

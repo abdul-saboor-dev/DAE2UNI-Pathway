@@ -18,6 +18,7 @@ import {
   mergeSourceFields,
   setSimpleFields,
 } from '../utils/catalogueUpdates.js'
+import { disciplineMediaForPrograms } from './mediaLibraryService.js'
 
 const simpleProgramFields = [
   'university',
@@ -97,6 +98,7 @@ function publicUniversityPopulate(query) {
   return query.populate({
     path: 'university',
     select: 'name slug abbreviation sector institutionType campuses',
+    populate: { path: 'campuses.imageMedia' },
   })
 }
 
@@ -236,8 +238,9 @@ export async function listPublicPrograms(filters) {
     Program.countDocuments(query),
   ])
 
+  const media = await disciplineMediaForPrograms(records)
   return {
-    programs: records.map(toPublicProgram),
+    programs: records.map((record) => toPublicProgram(record, media.get(record._id.toString()))),
     pagination: paginationMeta(filters.page, filters.pageSize, totalRecords),
   }
 }
@@ -253,5 +256,6 @@ export async function getPublicProgram(programId) {
     }),
   )
   if (!program) throw new ApiError(404, 'Program not found.', 'PROGRAM_NOT_FOUND')
-  return toPublicProgram(program)
+  const media = await disciplineMediaForPrograms([program])
+  return toPublicProgram(program, media.get(program._id.toString()))
 }

@@ -10,6 +10,7 @@ function AdminLinks({ user, signOut }) {
     <NavLink to="/admin" end className={navClass}>Dashboard</NavLink>
     <NavLink to="/admin/universities" className={navClass}>Universities</NavLink>
     <NavLink to="/admin/programs" className={navClass}>Programs</NavLink>
+    <NavLink to="/admin/program-images" className={navClass}>Program images</NavLink>
     <NavLink to="/admin/import" className={navClass}>Bulk import</NavLink>
     <NavLink to="/admin/verification-queue" className={navClass}>Verification queue</NavLink>
     <NavLink to="/admin/eligibility-research" className={navClass}>Eligibility research</NavLink>

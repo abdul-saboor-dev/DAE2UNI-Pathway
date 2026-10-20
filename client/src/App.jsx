@@ -35,6 +35,7 @@ import AdminEligibilityResearchPage from './pages/admin/AdminEligibilityResearch
 import AdminEligibilityRulesPage from './pages/admin/AdminEligibilityRulesPage.jsx'
 import AdminEligibilityRuleFormPage from './pages/admin/AdminEligibilityRuleFormPage.jsx'
 import AdminStudentsPage from './pages/admin/AdminStudentsPage.jsx'
+import AdminProgramImagesPage from './pages/admin/AdminProgramImagesPage.jsx'
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           <Route path="programs" element={<AdminProgramsPage />} />
           <Route path="programs/new" element={<AdminProgramFormPage />} />
           <Route path="programs/:programId/edit" element={<AdminProgramFormPage />} />
+          <Route path="program-images" element={<AdminProgramImagesPage />} />
           <Route path="import/*" element={<AdminImportPage />} />
           <Route path="verification-queue" element={<AdminVerificationQueuePage />} />
           <Route path="eligibility-research" element={<AdminEligibilityResearchPage />} />

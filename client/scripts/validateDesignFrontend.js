@@ -36,7 +36,7 @@ check(campus.includes('getCampusMapUrl') && campus.includes('{mapUrl &&'), 'Map 
 check(campus.includes('target="_blank" rel="noopener noreferrer"'), 'Map link opens safely')
 check(campus.includes('isMainCampus') && campus.includes('isActive'), 'Campus state is described in text')
 check(universityCard.includes('universityMonogram') && universityCard.includes("data-image-state={safeImageUrl ? 'image' : 'fallback'}"), 'University media has a branded fallback')
-check(universityCard.includes('getSafeExternalUrl(imageUrl)'), 'Future image input is URL checked')
+check(universityCard.includes('getSafeExternalUrl(university.cover?.url || imageUrl)'), 'Catalogue and fallback image input is URL checked')
 check(!universityCard.includes('https://images.') && !universityCard.includes('unsplash'), 'No real image host is hard-coded')
 check(ui.includes('showModal()') && ui.includes('focusAfterCloseId'), 'Confirmation dialog retains focus management')
 check(roleDialog.includes('showModal()') && roleDialog.includes('focusTarget.focus()'), 'Role dialog retains focus restoration')
