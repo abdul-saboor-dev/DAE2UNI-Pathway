@@ -45,6 +45,19 @@ const httpUrlSchema = z
     message: 'Enter an HTTP or HTTPS URL without embedded credentials.',
   })
 
+const googleMapsUrlSchema = z
+  .string()
+  .trim()
+  .max(2048)
+  .refine((value) => {
+    try {
+      const url = new URL(value)
+      const host = url.hostname.toLowerCase()
+      return url.protocol === 'https:' && !url.username && !url.password &&
+        (host === 'google.com' || host.endsWith('.google.com') || host === 'maps.app.goo.gl' || host === 'goo.gl')
+    } catch { return false }
+  }, 'Enter a valid Google Maps HTTPS URL.')
+
 const sourceCreateSchema = z
   .object({
     officialUrl: httpUrlSchema,
@@ -78,6 +91,7 @@ const campusBaseShape = {
   address: optionalTrimmedString(300),
   latitude: z.number().finite().min(-90).max(90).optional(),
   longitude: z.number().finite().min(-180).max(180).optional(),
+  googleMapsUrl: googleMapsUrlSchema.optional(),
   isMainCampus: z.boolean().default(false),
   isActive: z.boolean().default(true),
 }
@@ -89,6 +103,9 @@ function validateCoordinatePair(campus, context) {
       path: [campus.latitude === undefined ? 'latitude' : 'longitude'],
       message: 'Campus latitude and longitude must be provided together.',
     })
+  }
+  if (campus.latitude !== undefined && campus.longitude !== undefined && campus.googleMapsUrl) {
+    context.addIssue({ code: 'custom', path: ['googleMapsUrl'], message: 'Use either map coordinates or a Google Maps URL, not both.' })
   }
 }
 

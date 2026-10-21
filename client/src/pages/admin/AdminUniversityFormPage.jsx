@@ -9,10 +9,11 @@ import { toLocalDateTime } from '../../utils/adminDates.js'
 import { getApiErrorMessage, getApiFieldErrors } from '../../utils/apiErrors.js'
 import { getSafeExternalUrl } from '../../utils/externalLinks.js'
 import { charterAuthorities, hecRecognitionStatuses, physicalLocations } from '../../utils/geography.js'
+import { getSafeGoogleMapsUrl } from '../../utils/campusMap.js'
 import CampusLocationPicker from '../../components/CampusLocationPicker.jsx'
 import MediaUploadField from '../../components/MediaUploadField.jsx'
 
-const blankCampus = () => ({ clientKey: crypto.randomUUID(), name: '', city: '', district: '', province: 'Punjab', address: '', latitude: null, longitude: null, isMainCampus: false, isActive: true })
+const blankCampus = () => ({ clientKey: crypto.randomUUID(), name: '', city: '', district: '', province: 'Punjab', address: '', latitude: null, longitude: null, googleMapsUrl: '', isMainCampus: false, isActive: true })
 const blankForm = () => ({ name: '', abbreviation: '', slug: '', sector: 'public', provinceOrTerritory: 'unknown', charterAuthority: 'unknown', hecRecognitionStatus: 'unverified', hecProfileUrl: '', institutionType: 'general', establishedYear: '', recognitionBodies: '', logo: null, cover: null, campuses: [blankCampus()], contact: { websiteUrl: '', admissionsUrl: '', email: '', phone: '' }, source: { officialUrl: '', verificationStatus: 'unverified', lastVerifiedAt: '' }, recordStatus: 'draft' })
 function fromRecord(record) {
   return {
@@ -40,6 +41,8 @@ function validate(form) {
     if (hasLatitude !== hasLongitude) errors[`campuses.${index}.location`] = 'Select both latitude and longitude from the map.'
     if (hasLatitude && (campus.latitude < -90 || campus.latitude > 90)) errors[`campuses.${index}.location`] = 'Latitude must be between -90 and 90.'
     if (hasLongitude && (campus.longitude < -180 || campus.longitude > 180)) errors[`campuses.${index}.location`] = 'Longitude must be between -180 and 180.'
+    if (campus.googleMapsUrl && !getSafeGoogleMapsUrl(campus.googleMapsUrl)) errors[`campuses.${index}.googleMapsUrl`] = 'Enter a valid Google Maps HTTPS link.'
+    if (hasLatitude && hasLongitude && campus.googleMapsUrl) errors[`campuses.${index}.location`] = 'Use either the map picker or a Google Maps link, not both.'
   })
   if (form.recordStatus === 'published' && form.campuses.filter((campus) => campus.isMainCampus).length !== 1) errors.campuses = 'A published university requires exactly one main campus.'
   return errors
@@ -79,7 +82,18 @@ export default function AdminUniversityFormPage() {
     setForm((current) => ({
       ...current,
       campuses: current.campuses.map((campus, campusIndex) => campusIndex === index
-        ? { ...campus, latitude: locationValue.latitude, longitude: locationValue.longitude }
+        ? { ...campus, latitude: locationValue.latitude, longitude: locationValue.longitude, googleMapsUrl: '' }
+        : campus),
+    }))
+    setErrors({})
+    setMessage('')
+  }
+
+  function changeCampusGoogleMapsUrl(index, value) {
+    setForm((current) => ({
+      ...current,
+      campuses: current.campuses.map((campus, campusIndex) => campusIndex === index
+        ? { ...campus, googleMapsUrl: value, ...(value.trim() && { latitude: null, longitude: null }) }
         : campus),
     }))
     setErrors({})
@@ -132,6 +146,7 @@ export default function AdminUniversityFormPage() {
             <CampusLocationPicker campusName={campus.name} initialSearchQuery={[form.name, campus.name, campus.city].filter(Boolean).join(', ')} latitude={campus.latitude} longitude={campus.longitude} onChange={(locationValue) => changeCampusLocation(index, locationValue)} />
           </div>
           {errors[`campuses.${index}.location`] && <p role="alert" className="field-error md:col-span-2 text-sm">{errors[`campuses.${index}.location`]}</p>}
+          <div className="md:col-span-2"><AdminField id={`campus-${index}-google-maps-url`} label="Google Maps link" hint="Optional alternative to the map picker. Adding a link clears saved coordinates." error={errors[`campuses.${index}.googleMapsUrl`]}><input id={`campus-${index}-google-maps-url`} type="url" className={adminInputClass} placeholder="https://maps.app.goo.gl/…" value={campus.googleMapsUrl || ''} onChange={(event) => changeCampusGoogleMapsUrl(index, event.target.value)} aria-invalid={Boolean(errors[`campuses.${index}.googleMapsUrl`])} aria-describedby={fieldDescription(`campus-${index}-google-maps-url`, errors[`campuses.${index}.googleMapsUrl`], true)} /></AdminField></div>
           <div className="md:col-span-2"><MediaUploadField label="Campus image" hint="Optional landscape image for this physical campus." media={campus.image} target={!isNew && campus.id ? { targetType: 'campus_image', targetId: universityId, campusId: campus.id } : null} alt={`${campus.name || `Campus ${index + 1}`} preview`} onChange={(media) => changeCampus(index, 'image', media)} /></div>
         </div><div className="mt-4"><AdminField id={`campus-${index}-province`} label="Province or territory"><select id={`campus-${index}-province`} className={adminInputClass} value={campus.province || 'Punjab'} onChange={(event) => changeCampus(index, 'province', event.target.value)}>{physicalLocations.map((value) => <option key={value} value={value}>{value}</option>)}</select></AdminField></div><div className="mt-4 flex flex-wrap gap-5"><label className="inline-flex min-h-11 items-center gap-2 text-sm font-bold"><input type="checkbox" checked={campus.isMainCampus} onChange={(event) => change('campuses', form.campuses.map((item, itemIndex) => ({ ...item, isMainCampus: itemIndex === index ? event.target.checked : false })))} />Main campus</label><label className="inline-flex min-h-11 items-center gap-2 text-sm font-bold"><input type="checkbox" checked={campus.isActive} onChange={(event) => changeCampus(index, 'isActive', event.target.checked)} />Active</label><button type="button" className="min-h-11 text-sm font-bold text-[var(--ui-error)] underline" onClick={() => change('campuses', form.campuses.filter((_, itemIndex) => itemIndex !== index))}>Remove campus</button></div></fieldset>)}</div>
         <button type="button" disabled={form.campuses.length >= 30} className="action-secondary mt-4 disabled:opacity-50" onClick={() => change('campuses', [...form.campuses, blankCampus()])}>Add campus</button>

@@ -20,6 +20,7 @@ for (const contract of ['MapContainer', 'TileLayer', 'useMapEvents', 'draggable'
 }
 check(!picker.includes('carto.com') && !picker.includes('cartocdn.com'), 'Picker has no CARTO tile dependency')
 check(form.includes('<CampusLocationPicker') && form.includes('latitude={campus.latitude}') && form.includes('longitude={campus.longitude}'), 'Each campus owns its saved picker coordinates')
+check(form.includes('Google Maps link') && form.includes('changeCampusGoogleMapsUrl') && form.includes("googleMapsUrl: ''"), 'Each campus accepts one Google Maps link and map selection clears it')
 check(directory.includes('View on Google Maps') && directory.includes('target="_blank" rel="noopener noreferrer"'), 'Public coordinate link is clearly labelled and opens safely')
 check(!picker.includes('google') && !picker.includes('apiKey'), 'Picker uses no Google map service or API key')
 check(!picker.includes('<form') && picker.includes('role="search"'), 'Picker avoids nesting a search form inside the university form')
@@ -34,6 +35,9 @@ equal(getCampusMapUrl({ latitude: 31.5204, longitude: 74.3587 }),
   'https://www.google.com/maps/search/?api=1&query=31.5204%2C74.3587', 'Google Maps link uses encoded coordinates')
 equal(getCampusMapUrl({ address: 'Legacy address only' }), null, 'Legacy campuses without coordinates keep working without a map link')
 equal(getCampusMapUrl({ latitude: 91, longitude: 74 }), null, 'Out-of-range coordinates do not become links')
+equal(getCampusMapUrl({ googleMapsUrl: 'https://maps.app.goo.gl/ExampleCampus123' }), 'https://maps.app.goo.gl/ExampleCampus123', 'A validated pasted Google Maps link is supported without coordinates')
+equal(getCampusMapUrl({ googleMapsUrl: 'https://example.com/campus' }), null, 'Non-Google location links are rejected')
+equal(getCampusMapUrl({ latitude: 31.5, longitude: 74.3, googleMapsUrl: 'https://maps.app.goo.gl/Ignored' }), 'https://www.google.com/maps/search/?api=1&query=31.5%2C74.3', 'Validated coordinates remain authoritative when legacy data contains both forms')
 
 const payload = buildUniversityPayload({
   name: 'Synthetic University', slug: 'synthetic-university', sector: 'public', institutionType: 'general',
@@ -41,6 +45,7 @@ const payload = buildUniversityPayload({
   campuses: [
     { name: 'First Campus', city: 'Lahore', province: 'Punjab', latitude: 31.5, longitude: 74.3, isMainCampus: true, isActive: true },
     { name: 'Legacy Campus', city: 'Multan', province: 'Punjab', latitude: null, longitude: null, isMainCampus: false, isActive: true },
+    { name: 'Linked Campus', city: 'Rawalpindi', province: 'Punjab', latitude: null, longitude: null, googleMapsUrl: 'https://maps.app.goo.gl/LinkedCampus123', isMainCampus: false, isActive: true },
   ],
   recordStatus: 'draft', source: { officialUrl: 'https://example.edu', verificationStatus: 'pending_review', lastVerifiedAt: '' },
   abbreviation: '', establishedYear: '', recognitionBodies: '', contact: {},
@@ -48,5 +53,6 @@ const payload = buildUniversityPayload({
 equal(payload.campuses[0].latitude, 31.5, 'Campus latitude is allowlisted into the admin payload')
 equal(payload.campuses[0].longitude, 74.3, 'Campus longitude is allowlisted into the admin payload')
 check(!Object.hasOwn(payload.campuses[1], 'latitude') && !Object.hasOwn(payload.campuses[1], 'longitude'), 'Missing coordinates are omitted for backward compatibility')
+equal(payload.campuses[2].googleMapsUrl, 'https://maps.app.goo.gl/LinkedCampus123', 'Google Maps campus link is allowlisted into the admin payload')
 
 process.stdout.write(`Validated ${assertions} campus-location frontend safeguards.\n`)
