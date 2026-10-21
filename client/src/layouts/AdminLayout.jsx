@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import BrandLogo from '../components/BrandLogo.jsx'
 import useAuth from '../context/useAuth.js'
@@ -29,7 +30,22 @@ export default function AdminLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    function closeOnEscape(event) {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => document.removeEventListener('keydown', closeOnEscape)
+  }, [])
+
   function signOut() {
+    setMenuOpen(false)
     logout()
     navigate('/', { replace: true })
   }
@@ -38,20 +54,17 @@ export default function AdminLayout() {
     <div className="mx-auto grid min-h-screen max-w-[1700px] min-w-0 lg:grid-cols-[15rem_minmax(0,1fr)]">
       <header className="admin-sidebar relative z-20 min-w-0 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:self-start lg:flex-col lg:overflow-hidden">
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/15 px-4 py-4 lg:px-5 lg:py-6">
-          <Link to="/admin" className="inline-flex min-h-11 min-w-0 items-center gap-3 font-black focus-visible:outline-3">
-            <BrandLogo variant="admin" whiteBackdrop />
-            <span className="leading-tight">DAE2UNI <span className="block text-[.65rem] font-semibold uppercase tracking-[.12em] text-[var(--ui-muted)]">Operations</span></span>
+          <Link to="/admin" className="inline-flex min-h-11 min-w-0 items-center focus-visible:outline-3" aria-label="DAE2UNI administrator dashboard">
+            <BrandLogo variant="admin" />
           </Link>
-          <details key={location.pathname} className="group lg:hidden">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center rounded-[var(--ui-radius-sm)] border border-white/35 px-4 text-sm font-semibold focus-visible:outline-3">Admin menu</summary>
-            <nav aria-label="Administrator navigation" className="absolute inset-x-0 top-full z-30 border-b border-white/20 bg-navy p-3 shadow-[var(--ui-shadow-raised)]"><AdminLinks user={user} signOut={signOut} /></nav>
-          </details>
+          <button type="button" className="flex min-h-11 items-center rounded-[var(--ui-radius-sm)] border border-white/35 px-4 text-sm font-semibold focus-visible:outline-3 lg:hidden" aria-expanded={menuOpen} aria-controls="mobile-admin-navigation" onClick={() => setMenuOpen((open) => !open)}>Admin menu</button>
         </div>
+        {menuOpen && <nav id="mobile-admin-navigation" aria-label="Administrator navigation" className="border-b border-white/20 px-3 py-3 lg:hidden"><AdminLinks user={user} signOut={signOut} /></nav>}
         <nav aria-label="Administrator navigation" className="admin-sidebar-scroll hidden min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-5 lg:block"><AdminLinks user={user} signOut={signOut} /></nav>
         <div className="hidden shrink-0 border-t border-white/15 px-5 py-5 text-sm lg:block">
           <p className="break-words font-bold">{user?.name || 'Administrator'}</p>
-          <p className="mt-1 break-all text-xs text-[var(--ui-muted)]">{user?.email}</p>
-          <p className="mt-2 text-xs uppercase tracking-wider text-[var(--ui-muted)]">{user?.role?.replaceAll('_', ' ')}</p>
+          <p className="mt-1 break-all text-xs text-white/65">{user?.email}</p>
+          <p className="mt-2 text-xs uppercase tracking-wider text-white/65">{user?.role?.replaceAll('_', ' ')}</p>
         </div>
       </header>
       <main id="admin-main" className="min-w-0 px-4 py-7 sm:px-7 lg:px-10 lg:py-10" tabIndex={-1}><Outlet /></main>

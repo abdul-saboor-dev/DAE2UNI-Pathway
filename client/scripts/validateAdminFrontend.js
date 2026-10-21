@@ -68,7 +68,7 @@ check(list.includes('isPublicRecord(parentRecords[record.university?.id])'), 'pr
 check(dashboard.includes('AdminState') && dashboard.includes('Data readiness'), 'dashboard loading/error/readiness states')
 check(dialog.includes('showModal()') && dialog.includes('focusAfterCloseId') && dialog.includes('returnFocusRef.current'), 'native modal and focus restoration')
 check(list.includes("focusAfterCloseId={deleted ? 'admin-results' : undefined}"), 'successful deletion focuses surviving results')
-check(layout.includes('aria-label="Administrator navigation"') && layout.includes('<details'), 'accessible mobile navigation')
+check(layout.includes('aria-label="Administrator navigation"') && layout.includes('aria-expanded={menuOpen}') && layout.includes('aria-controls="mobile-admin-navigation"'), 'accessible mobile navigation')
 check(list.includes('<Pagination') && list.includes('list.retry()'), 'pagination and retry behavior')
 check(!relevant.includes('dangerouslySetInnerHTML'), 'no raw HTML rendering')
 check(!relevant.includes('console.log') && !relevant.includes('console.error'), 'no token or password logging')

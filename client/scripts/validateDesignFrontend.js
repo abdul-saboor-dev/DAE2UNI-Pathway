@@ -20,15 +20,20 @@ check(app.includes('AdminRouteGuard') && app.includes('ProtectedRoute'), 'Route 
 const main = read('src/layouts/MainLayout.jsx')
 const admin = read('src/layouts/AdminLayout.jsx')
 const brandLogo = read('src/components/BrandLogo.jsx')
+const home = read('src/pages/HomePage.jsx')
+const heroArtwork = read('src/assets/dae2uni-hero-pathway.svg')
 const html = read('index.html')
 for (const layout of [main, admin]) {
   check(layout.includes('Skip to '), 'Layout offers a keyboard skip link')
-  check(layout.includes('<details') && layout.includes('<summary'), 'Mobile navigation uses native disclosure')
+  check(layout.includes('aria-expanded={menuOpen}') && layout.includes('aria-controls='), 'Mobile navigation exposes its disclosure state')
   check(layout.includes('NavLink'), 'Active route comes from React Router navigation')
   check(layout.includes('Logout'), 'Account exit remains available')
 }
 check(admin.includes('canManageRoles(user?.role)'), 'Team navigation retains role gating')
-check(brandLogo.includes('dae2uni-pathway-logo-primary.png') && brandLogo.includes('alt="DAE2UNI Pathway"'), 'Navigation and shared brand locations use the supplied accessible logo')
+check(brandLogo.includes('dae2uni-mark.png') && brandLogo.includes('alt="DAE2UNI"'), 'Navigation and shared brand locations use the supplied accessible mark')
+check(main.includes('site-header--home-top') && main.includes('site-header--home-scrolled') && main.includes('site-header--home-menu'), 'Homepage header preserves distinct top, scrolled, and menu states')
+check(home.includes('hero-artwork-frame') && home.includes('DAE pathway from academic profile through merit and admission to university'), 'Hero artwork is grouped and accessibly described')
+check(heroArtwork.includes('viewBox="800 20 400 250"'), 'Approved pathway artwork uses a tightly framed canvas')
 for (const icon of ['favicon.ico', 'favicon-48x48.png', 'favicon-32x32.png', 'favicon-16x16.png']) check(html.includes(icon), `Document references ${icon}`)
 check(!html.includes('favicon.svg'), 'Retired favicon reference is removed')
 
@@ -55,7 +60,7 @@ equal(universityMonogram({ abbreviation: 'UIT' }), 'UIT', 'Abbreviation takes pr
 equal(getSafeExternalUrl('javascript:alert(1)'), null, 'Unsafe URL cannot become clickable')
 
 const css = read('src/index.css')
-for (const token of ['#080b14', '#0f172a', '#f8fafc', '#a5b4fc', '--ui-surface-solid:', '.glass-surface', '.panel-surface', '.record-surface', '.interactive-surface', '.display-type', '.page-title', '.site-input', ':focus-visible', 'prefers-reduced-motion']) {
+for (const token of ['#17243b', '#21314b', '#168bc0', '#38bce4', '#f5a12e', '#f5f1e9', '--ui-surface-solid:', '.glass-surface', '.panel-surface', '.record-surface', '.interactive-surface', '.display-type', '.page-title', '.site-input', ':focus-visible', 'prefers-reduced-motion']) {
   check(css.includes(token), `Design token or accessibility rule: ${token}`)
 }
 const linear = (value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
@@ -64,14 +69,15 @@ const luminance = (hex) => {
   return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
 }
 const contrast = (first, second) => (Math.max(luminance(first), luminance(second)) + 0.05) / (Math.min(luminance(first), luminance(second)) + 0.05)
-check(contrast('f8fafc', '080b14') >= 4.5, 'Primary text on midnight background meets WCAG AA')
-check(contrast('aeb9ca', '080b14') >= 4.5, 'Secondary text on midnight background meets WCAG AA')
+check(contrast('f5f1e9', '17243b') >= 4.5, 'Ivory text on midnight background meets WCAG AA')
+check(contrast('17243b', 'f5f1e9') >= 4.5, 'Midnight text on ivory background meets WCAG AA')
 check(css.includes('--academic-hover:') && css.includes('--academic-pressed:') && css.includes('--academic-disabled:'), 'Action states remain explicit')
-check(css.includes('background: var(--ui-text)') && css.includes('outline: 3px solid var(--ui-accent)'), 'Primary actions and focus use accessible semantic tokens')
+check(css.includes('grid-template-columns: minmax(0,1fr) minmax(0,1fr)') && css.includes('@keyframes pathway-float') && css.includes('.hero-artwork-frame { animation: none; }'), 'Balanced hero animation respects reduced motion')
+check(css.includes('background: var(--brand-blue)') && css.includes('outline: 3px solid var(--brand-cyan)'), 'Primary actions and focus use accessible semantic tokens')
 check(!css.includes('.bg-white,') && !css.includes('.rounded-xl, .rounded-2xl'), 'Legacy utility classes are not globally remapped')
 check(!css.includes('.paper-surface:hover'), 'Static surfaces do not imply interactivity on hover')
 check(css.includes('.interactive-surface:hover'), 'Interactive elevation requires an explicit class')
-check(read('src/pages/HomePage.jsx').includes('pathway-route') && read('src/pages/HomePage.jsx').includes('Verified admission criteria'), 'Homepage communicates the verified pathway sequence')
+check(home.includes('journey-step') && home.includes('Verified admission criteria'), 'Homepage communicates the verified pathway sequence')
 const sourceFiles = (directory) => readdirSync(resolve(import.meta.dirname, '..', directory), { withFileTypes: true }).flatMap((entry) => {
   const relativePath = `${directory}/${entry.name}`
   return entry.isDirectory() ? sourceFiles(relativePath) : entry.name.endsWith('.jsx') ? [read(relativePath)] : []
