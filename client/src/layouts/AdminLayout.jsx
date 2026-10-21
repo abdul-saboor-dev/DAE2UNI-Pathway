@@ -57,7 +57,7 @@ export default function AdminLayout() {
           <Link to="/admin" className="inline-flex min-h-11 min-w-0 items-center focus-visible:outline-3" aria-label="DAE2UNI administrator dashboard">
             <BrandLogo variant="admin" />
           </Link>
-          <button type="button" className="flex min-h-11 items-center rounded-[var(--ui-radius-sm)] border border-white/35 px-4 text-sm font-semibold focus-visible:outline-3 lg:hidden" aria-expanded={menuOpen} aria-controls="mobile-admin-navigation" onClick={() => setMenuOpen((open) => !open)}>Admin menu</button>
+          <button type="button" className="admin-menu-toggle flex min-h-11 items-center rounded-[var(--ui-radius-sm)] border border-white/35 px-4 text-sm font-semibold focus-visible:outline-3 lg:hidden" aria-expanded={menuOpen} aria-controls="mobile-admin-navigation" onClick={() => setMenuOpen((open) => !open)}>Admin menu</button>
         </div>
         {menuOpen && <nav id="mobile-admin-navigation" aria-label="Administrator navigation" className="border-b border-white/20 px-3 py-3 lg:hidden"><AdminLinks user={user} signOut={signOut} /></nav>}
         <nav aria-label="Administrator navigation" className="admin-sidebar-scroll hidden min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 py-5 lg:block"><AdminLinks user={user} signOut={signOut} /></nav>

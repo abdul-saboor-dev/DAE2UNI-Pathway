@@ -23,6 +23,7 @@ const brandLogo = read('src/components/BrandLogo.jsx')
 const home = read('src/pages/HomePage.jsx')
 const heroArtwork = read('src/assets/dae2uni-hero-pathway.svg')
 const html = read('index.html')
+const entry = read('src/main.jsx')
 for (const layout of [main, admin]) {
   check(layout.includes('Skip to '), 'Layout offers a keyboard skip link')
   check(layout.includes('aria-expanded={menuOpen}') && layout.includes('aria-controls='), 'Mobile navigation exposes its disclosure state')
@@ -36,6 +37,9 @@ check(home.includes('hero-artwork-frame') && home.includes('DAE pathway from aca
 check(heroArtwork.includes('viewBox="800 20 400 250"'), 'Approved pathway artwork uses a tightly framed canvas')
 for (const icon of ['favicon.ico', 'favicon-48x48.png', 'favicon-32x32.png', 'favicon-16x16.png']) check(html.includes(icon), `Document references ${icon}`)
 check(!html.includes('favicon.svg'), 'Retired favicon reference is removed')
+check(html.includes('class="app-loading"') && html.includes('id="initial-loading-shell"') && html.includes('.app-loading #root{visibility:hidden}'), 'Critical loading shell covers prerendered content before application styles load')
+check(html.includes('<noscript><style>') && html.includes('.app-loading #root{visibility:visible!important}'), 'Prerendered content remains available without JavaScript')
+check(entry.includes('flushSync') && entry.includes("classList.remove('app-loading')") && entry.includes("getElementById('initial-loading-shell')?.remove()"), 'Loading shell is removed after the first committed React layout without a timer')
 
 const campus = read('src/components/CampusDirectory.jsx')
 const universityCard = read('src/components/UniversityCard.jsx')

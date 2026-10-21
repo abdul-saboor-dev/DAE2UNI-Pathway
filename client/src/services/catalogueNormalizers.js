@@ -1,4 +1,5 @@
 import { getSafeExternalUrl } from '../utils/externalLinks.js'
+import { getSafeGoogleMapsUrl } from '../utils/campusMap.js'
 
 function optionalString(value) {
   return typeof value === 'string' && value.trim() ? value : undefined
@@ -74,6 +75,7 @@ function normalizeCampus(value) {
       latitude: value.latitude,
       longitude: value.longitude,
     }),
+    ...(getSafeGoogleMapsUrl(value.googleMapsUrl) && { googleMapsUrl: getSafeGoogleMapsUrl(value.googleMapsUrl) }),
     isMainCampus: value.isMainCampus === true,
     isActive: value.isActive !== false,
     image: normalizeMedia(value.image),

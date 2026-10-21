@@ -38,6 +38,7 @@ function campus(campusRecord, includeId = false) {
       latitude: campusRecord.latitude,
       longitude: campusRecord.longitude,
     }),
+    ...(campusRecord.googleMapsUrl && { googleMapsUrl: campusRecord.googleMapsUrl }),
     isMainCampus: campusRecord.isMainCampus,
     isActive: campusRecord.isActive,
     image: toSafeMedia(campusRecord.imageMedia, [480, 960, 1440]),

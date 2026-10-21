@@ -123,6 +123,8 @@ select.site-input { color-scheme: light; }
 .site-header--transparent .site-nav-link { color: #fff; }
 .site-header--transparent .site-nav-link:hover, .site-header--transparent .site-nav-link[aria-current="page"] { color: var(--brand-cyan); }
 .site-header--transparent .site-menu-toggle { border-color: rgb(255 255 255 / .55); color: #fff; }
+.site-header--transparent .action-secondary { border-color: rgb(255 255 255 / .55); color: #fff; }
+.site-header--transparent .action-secondary:hover:not(:disabled) { border-color: #fff; background: rgb(255 255 255 / .1); color: #fff; }
 .mobile-navigation { border-top: 1px solid var(--ui-border); background: var(--brand-ivory); }
 .mobile-navigation .site-nav-link { width: 100%; justify-content: flex-start; border-bottom: 1px solid var(--ui-border); padding-inline: .25rem; }
 .site-footer { border-top: 1px solid #34445d; background: var(--brand-navy); color: #c8d1dc; }
@@ -143,7 +145,7 @@ select.site-input { color-scheme: light; }
 .brand-logo__image { position: relative; z-index: 1; display: block; width: 100%; height: auto; max-width: 100%; }
 .brand-logo--navigation { width: 3.75rem; height: 3.75rem; border-radius: 50%; padding: .15rem; background: transparent; transition: background-color .2s ease; }
 .site-header--transparent .brand-logo--navigation { background: var(--brand-ivory); }
-.brand-logo--admin { width: 3.25rem; }
+.brand-logo--admin { width: 3.25rem; height: 3.25rem; border-radius: 50%; padding: .12rem; background: var(--brand-ivory); }
 
 .university-card__cover { background: var(--ui-surface-subtle); }
 .university-card__cover img { transition: transform .2s ease; }
@@ -160,6 +162,7 @@ select.site-input { color-scheme: light; }
 .admin-nav-link { display: flex; min-height: 2.75rem; align-items: center; border-left: 3px solid transparent; padding: .58rem .75rem; color: #c6d0dc; font-size: .875rem; font-weight: 650; }
 .admin-nav-link:hover { border-left-color: var(--brand-cyan); background: rgb(255 255 255 / .07); color: #fff; }
 .admin-nav-link[aria-current="page"] { border-left-color: var(--brand-amber); background: rgb(255 255 255 / .1); color: #fff; }
+.admin-menu-toggle { color: #fff; }
 .admin-workspace main { min-height: 100vh; }
 .admin-workspace :is(article, fieldset, details, dialog) { overflow-wrap: anywhere; }
 .admin-workspace fieldset { border-color: var(--ui-border); border-radius: var(--ui-radius); background: var(--ui-surface-solid); }

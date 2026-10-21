@@ -3,6 +3,16 @@ import { baseSchemaOptions, isHttpUrl } from './schemas/schemaOptions.js'
 import sourceInfoSchema from './schemas/sourceInfoSchema.js'
 import { CHARTER_AUTHORITIES, HEC_RECOGNITION_STATUSES, PHYSICAL_LOCATIONS } from '../utils/geography.js'
 
+function isSafeGoogleMapsUrl(value) {
+  if (!value) return true
+  try {
+    const url = new URL(value)
+    const host = url.hostname.toLowerCase()
+    return url.protocol === 'https:' && !url.username && !url.password &&
+      (host === 'google.com' || host.endsWith('.google.com') || host === 'maps.app.goo.gl' || host === 'goo.gl')
+  } catch { return false }
+}
+
 const campusSchema = new Schema({
   name: { type: String, required: true, trim: true, maxlength: 160 },
   city: { type: String, required: true, trim: true, maxlength: 100 },
@@ -12,6 +22,7 @@ const campusSchema = new Schema({
   address: { type: String, trim: true, maxlength: 300 },
   latitude: { type: Number, min: -90, max: 90 },
   longitude: { type: Number, min: -180, max: 180 },
+  googleMapsUrl: { type: String, trim: true, maxlength: 2048, validate: { validator: isSafeGoogleMapsUrl, message: 'Enter a valid Google Maps HTTPS URL.' } },
   isMainCampus: { type: Boolean, default: false },
   isActive: { type: Boolean, default: true },
   imageMedia: { type: Schema.Types.ObjectId, ref: 'MediaAsset' },
@@ -22,6 +33,9 @@ campusSchema.pre('validate', function validateCoordinates() {
   const hasLongitude = this.longitude !== undefined && this.longitude !== null
   if (hasLatitude !== hasLongitude) {
     this.invalidate(hasLatitude ? 'longitude' : 'latitude', 'Campus latitude and longitude must be provided together.')
+  }
+  if (hasLatitude && hasLongitude && this.googleMapsUrl) {
+    this.invalidate('googleMapsUrl', 'Use either map coordinates or a Google Maps URL, not both.')
   }
 })
 

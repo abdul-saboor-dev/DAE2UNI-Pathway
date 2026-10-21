@@ -87,6 +87,7 @@ function universityBody({ draft = false } = {}) {
       name: 'Synthetic Secondary Campus',
       city: 'Rawalpindi',
       province: 'Punjab',
+      googleMapsUrl: 'https://maps.app.goo.gl/SyntheticCampus123',
       isMainCampus: false,
       isActive: true,
     }, {
@@ -255,6 +256,22 @@ async function main() {
       source: { officialUrl: 'https://user:password@example.invalid/source' },
     },
   })
+  await expectStatus(baseUrl, '/api/admin/universities', 400, {
+    method: 'POST', token: adminToken, body: {
+      ...universityBody(),
+      campuses: universityBody().campuses.map((campus, index) => index === 0
+        ? { ...campus, latitude: 31.5, longitude: 74.3, googleMapsUrl: 'https://maps.google.com/?q=31.5,74.3' }
+        : campus),
+    },
+  })
+  await expectStatus(baseUrl, '/api/admin/universities', 400, {
+    method: 'POST', token: adminToken, body: {
+      ...universityBody(),
+      campuses: universityBody().campuses.map((campus, index) => index === 0
+        ? { ...campus, googleMapsUrl: 'https://example.invalid/not-google-maps' }
+        : campus),
+    },
+  })
 
   const universityCreated = await expectStatus(baseUrl, '/api/admin/universities', 201, {
     method: 'POST', token: adminToken, body: universityBody(),
@@ -263,6 +280,7 @@ async function main() {
   createdUniversityIds.push(university.id)
   equal(university.slug, universitySlugs[0], 'University slug should be normalized and returned.')
   check(university.campuses[0].id, 'Administrator response should expose campus identifiers.')
+  equal(university.campuses[1].googleMapsUrl, 'https://maps.app.goo.gl/SyntheticCampus123', 'Administrator response should preserve a validated Google Maps campus link.')
 
   const mediaFixtures = await MediaAsset.create([
     { provider: 'cloudinary', publicId: `${slugPrefix}/logo`, version: 1, format: 'webp', resourceType: 'image', secureUrl: `https://res.cloudinary.com/test/image/upload/v1/${slugPrefix}/logo.webp`, width: 256, height: 256, bytes: 1024, uploadIntent: new mongoose.Types.ObjectId(), uploadedBy: admin._id },
@@ -330,6 +348,7 @@ async function main() {
         name: campus.name,
         city: campus.city,
         province: campus.province,
+        ...(campus.googleMapsUrl && { googleMapsUrl: campus.googleMapsUrl }),
         isMainCampus: campus.isMainCampus,
         isActive: campus.isActive,
       })),
@@ -468,6 +487,7 @@ async function main() {
   check(publicUniversity.logo?.url, 'Public university list should expose the attached logo after an ordinary edit.')
   check(publicUniversity.cover?.url, 'Public university list should expose the attached cover after an ordinary edit.')
   check(publicUniversity.campuses[0].image?.url, 'Public university list should expose preserved campus media after an ordinary edit.')
+  equal(publicUniversity.campuses[1].googleMapsUrl, 'https://maps.app.goo.gl/SyntheticCampus123', 'Public university data should expose the validated campus map link.')
   check(!Object.hasOwn(publicUniversity, 'recordStatus'), 'Public university should omit record status.')
   check(!Object.hasOwn(publicUniversity.source, 'verificationRecord'), 'Public university should omit verification history references.')
   check(!Object.hasOwn(publicUniversity.campuses[0], 'id'), 'Public university should omit internal campus identifiers.')

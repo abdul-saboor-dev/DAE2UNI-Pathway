@@ -76,6 +76,9 @@ export function buildUniversityPayload(form, original, isNew) {
         latitude: campus.latitude,
         longitude: campus.longitude,
       }),
+      ...(!Number.isFinite(campus.latitude) && !Number.isFinite(campus.longitude) && optional(campus.googleMapsUrl) && {
+        googleMapsUrl: optional(campus.googleMapsUrl),
+      }),
       isMainCampus: Boolean(campus.isMainCampus), isActive: Boolean(campus.isActive),
     })),
     recordStatus: form.recordStatus,
