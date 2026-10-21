@@ -1,8 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="app-loading">
   <head>
     <meta charset="UTF-8" />
-    <style>html,body{margin:0;background:#f5f1e9;color:#17243b}#root{min-height:100vh}</style>
+    <style>
+      html,body{margin:0;background:#17243b;color:#fff}*{box-sizing:border-box}#root{min-height:100vh}.app-loading #root{visibility:hidden}.app-loading body{overflow:hidden}#initial-loading-shell{position:fixed;inset:0;z-index:9999;overflow:hidden;background:#17243b;font-family:"DM Sans","Segoe UI",Arial,sans-serif}.boot-header{height:76px;border-bottom:1px solid rgba(255,255,255,.12)}.boot-header-inner{width:min(calc(100% - 2rem),78rem);height:100%;margin:auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1.25rem}.boot-logo{width:60px;height:60px;border-radius:50%;background:#f5f1e9}.boot-nav{display:flex;gap:1.5rem}.boot-nav span,.boot-action,.boot-line,.boot-art{display:block;background:rgba(255,255,255,.13)}.boot-nav span{width:68px;height:10px;border-radius:5px}.boot-actions{justify-self:end;display:flex;align-items:center;gap:.75rem}.boot-action{width:76px;height:40px;border:1px solid rgba(255,255,255,.2);border-radius:10px}.boot-action:last-child{background:#168bc0}.boot-hero{width:min(calc(100% - 2rem),78rem);min-height:calc(100dvh - 76px);margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(2rem,5vw,5rem);padding:3rem 0}.boot-copy{display:grid;gap:1.25rem}.boot-line{height:18px;border-radius:8px}.boot-line--eyebrow{width:32%;height:10px;background:rgba(56,188,228,.34)}.boot-line--title{width:92%;height:clamp(42px,5vw,68px);background:rgba(255,255,255,.19)}.boot-line--body{width:78%}.boot-buttons{display:flex;gap:.75rem}.boot-buttons .boot-action{width:148px;height:46px}.boot-art{justify-self:end;width:min(95%,38rem);aspect-ratio:4/2.5;border-radius:42% 58% 48% 52%;background:linear-gradient(145deg,rgba(22,139,192,.25),rgba(245,161,46,.18))}.app-ready #initial-loading-shell{display:none}@media(max-width:767px){.boot-header-inner{grid-template-columns:1fr auto}.boot-nav{display:none}.boot-actions .boot-action:first-child{display:none}.boot-hero{min-height:calc(100dvh - 76px);grid-template-columns:1fr;align-content:center;gap:2rem;padding:2.5rem 0}.boot-line--eyebrow{width:42%}.boot-line--title{width:100%;height:52px}.boot-line--body{width:90%}.boot-buttons{display:grid}.boot-buttons .boot-action{width:100%}.boot-art{justify-self:center;width:100%;max-height:34vh}}
+    </style>
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -29,7 +31,12 @@
     <title>DAE2UNI Pathway | DAE to University Guidance in Pakistan</title>
   </head>
   <body>
+    <div id="initial-loading-shell" aria-hidden="true">
+      <div class="boot-header"><div class="boot-header-inner"><span class="boot-logo"></span><div class="boot-nav"><span></span><span></span><span></span></div><div class="boot-actions"><span class="boot-action"></span><span class="boot-action"></span></div></div></div>
+      <div class="boot-hero"><div class="boot-copy"><span class="boot-line boot-line--eyebrow"></span><span class="boot-line boot-line--title"></span><span class="boot-line boot-line--body"></span><span class="boot-line boot-line--body"></span><div class="boot-buttons"><span class="boot-action"></span><span class="boot-action"></span></div></div><span class="boot-art"></span></div>
+    </div>
     <div id="root"></div>
+    <noscript><style>#initial-loading-shell{display:none!important}.app-loading #root{visibility:visible!important}html,body{overflow:auto;background:#f5f1e9;color:#17243b}</style></noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
