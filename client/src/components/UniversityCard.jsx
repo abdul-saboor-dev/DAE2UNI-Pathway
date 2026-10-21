@@ -33,7 +33,7 @@ export default function UniversityCard({ university, imageUrl }) {
         <div className="min-w-0"><p className="metadata text-academic">{titleCase(university.institutionType) || 'University'}{university.sector ? ` · ${titleCase(university.sector)}` : ''}</p><h2 className="card-title mt-1.5 break-words text-[1.2rem] leading-snug text-navy">{university.name}</h2></div>
       </div>
       <dl className="mt-5 grid gap-4 border-t border-[var(--ui-border)] pt-4 text-sm">
-        <div><dt className="metadata">Campus coverage</dt><dd className="mt-1.5 flex flex-wrap gap-y-1 text-[var(--ui-muted-strong)]">{locations.length ? locations.map((location) => <span key={location} className="after:mx-2 after:text-[var(--ui-border-strong)] after:content-['·'] last:after:hidden">{location}</span>) : <span>{university.provinceOrTerritory || 'Campus location not listed'}</span>}</dd></div>
+        <div><dt className="metadata">Campus coverage</dt><dd className="mt-1.5 flex flex-wrap items-baseline gap-y-1 text-[var(--ui-muted-strong)]">{locations.length ? locations.map((location, index) => <span key={location} className="inline-flex items-baseline"><span>{location}</span>{index < locations.length - 1 && <span aria-hidden="true" className="mx-2 text-[var(--ui-muted)]">·</span>}</span>) : <span>{university.provinceOrTerritory || 'Campus location not listed'}</span>}</dd></div>
         <div><dt className="metadata">Evidence</dt><dd className="mt-1.5 grid gap-1 text-[var(--ui-muted-strong)]">{evidence.length ? evidence.map((item) => <span key={item}>{item}</span>) : <span>Verification evidence not yet listed</span>}</dd></div>
       </dl>
       <div className="editorial-rule mt-auto flex flex-wrap items-center justify-between gap-3 pt-5 text-sm">
