@@ -9,9 +9,11 @@ export default function ProgramCard({ program }) {
   const locations = [...new Set((program.campuses || []).map((campus) => campus.city).filter(Boolean))]
   const imageUrl = getSafeExternalUrl(program.disciplineMedia?.image?.url)
   return (
-    <article className="record-surface interactive-surface flex min-w-0 flex-col border-l-2 border-l-[var(--ui-accent)] p-5 sm:p-6">
-      {imageUrl && <img src={imageUrl} srcSet={program.disciplineMedia.image.srcSet || undefined} sizes="(min-width: 1280px) 24rem, (min-width: 768px) 50vw, 100vw" width={program.disciplineMedia.image.width} height={program.disciplineMedia.image.height} alt={`${program.disciplineMedia.discipline} discipline`} loading="lazy" decoding="async" className="mb-5 aspect-[16/8] w-full rounded-[var(--ui-radius-sm)] border border-[var(--ui-border)] object-cover" />}
-      <div className="metadata flex flex-wrap items-center gap-2 text-academic">
+    <article className="program-card record-surface interactive-surface flex h-full min-w-0 flex-col overflow-hidden">
+      <div className="aspect-video w-full overflow-hidden border-b border-[var(--ui-border)] bg-[var(--ui-surface-subtle)]">
+        {imageUrl ? <img src={imageUrl} srcSet={program.disciplineMedia.image.srcSet || undefined} sizes="(min-width: 1280px) 24rem, (min-width: 768px) 50vw, 100vw" width={program.disciplineMedia.image.width} height={program.disciplineMedia.image.height} alt={`${program.disciplineMedia.discipline} discipline`} loading="lazy" decoding="async" className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center px-6 text-center"><span className="metadata text-[var(--ui-muted)]">Discipline image not available</span></div>}
+      </div>
+      <div className="flex flex-1 flex-col p-5 sm:p-6"><div className="metadata flex flex-wrap items-center gap-2 text-academic">
         {program.credentialType && <span>{program.credentialType}</span>}
         {program.studyMode && <span className="border-l border-[var(--ui-border)] pl-2 text-[var(--ui-muted)]">{titleCase(program.studyMode)}</span>}
       </div>
@@ -25,6 +27,7 @@ export default function ProgramCard({ program }) {
       <Link to={`/programs/${encodeURIComponent(program.id)}`} className="mt-5 inline-flex min-h-11 items-center self-start font-semibold text-academic underline decoration-2 focus-visible:outline-3">
         View program <span aria-hidden="true" className="ml-2">→</span>
       </Link>
+      </div>
     </article>
   )
 }
